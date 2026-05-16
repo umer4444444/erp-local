@@ -1,0 +1,13 @@
+node_modules/
+.env
+dist/
+build/
+*.sql
+*.log
+backups/
+.DS_Store
+frontend/node_modules/
+backend/node_modules/
+frontend/dist/
+backend/dist/
+credentials_list.txt

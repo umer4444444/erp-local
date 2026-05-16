@@ -1,0 +1,32 @@
+const { DataTypes } = require('sequelize');
+const sequelize = require('../config/database');
+
+const Customer = sequelize.define('Customer', {
+  id: {
+    type: DataTypes.UUID,
+    defaultValue: DataTypes.UUIDV4,
+    primaryKey: true,
+  },
+  name: {
+    type: DataTypes.STRING,
+    allowNull: false,
+  },
+  email: {
+    type: DataTypes.STRING,
+    unique: true,
+  },
+  phone: {
+    type: DataTypes.STRING,
+  },
+  address: {
+    type: DataTypes.STRING,
+  },
+  creditBalance: {
+    type: DataTypes.DECIMAL(12, 2),
+    defaultValue: 0,
+  },
+}, {
+  timestamps: true,
+});
+
+module.exports = Customer;
