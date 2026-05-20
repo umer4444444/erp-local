@@ -47,7 +47,7 @@ const Payroll = () => {
       await payrollAPI.run(month, year);
       fetchHistory();
     } catch (err) {
-      alert('Payroll run failed');
+      alert(err.response?.data?.message || err.message || 'Payroll run failed');
     } finally {
       setProcessing(false);
     }

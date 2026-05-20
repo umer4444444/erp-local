@@ -7,8 +7,18 @@ const router = express.Router();
 router.post('/apply', auth, async (req, res) => {
   try {
     const { type, startDate, endDate, reason } = req.body;
-    const employee = await Employee.findOne({ where: { userId: req.user.id } });
-    if (!employee) return res.status(404).json({ message: 'Employee profile not found' });
+    let employee = await Employee.findOne({ where: { userId: req.user.id } });
+    if (!employee) {
+      const user = await User.findByPk(req.user.id);
+      employee = await Employee.create({
+        firstName: user.name?.split(' ')[0] || 'Staff',
+        lastName: user.name?.split(' ').slice(1).join(' ') || 'User',
+        email: user.email,
+        userId: user.id,
+        position: user.role?.toUpperCase() || 'STAFF',
+        status: 'active'
+      });
+    }
 
     // Calculate days
     const start = new Date(startDate);
@@ -35,6 +45,7 @@ router.post('/apply', auth, async (req, res) => {
 router.get('/my', auth, async (req, res) => {
   try {
     const employee = await Employee.findOne({ where: { userId: req.user.id } });
+    if (!employee) return res.json([]);
     const leaves = await Leave.findAll({ 
       where: { employeeId: employee.id },
       order: [['createdAt', 'DESC']]

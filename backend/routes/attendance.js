@@ -11,15 +11,16 @@ router.post('/clockin', auth, async (req, res) => {
     
     if (!employee) {
       // Fallback: Create a basic employee profile if it's missing for some reason
+      const user = await User.findByPk(req.user.id);
       employee = await Employee.create({
-        firstName: req.user.name?.split(' ')[0] || 'Staff',
-        lastName: req.user.name?.split(' ').slice(1).join(' ') || 'User',
-        email: req.user.email,
-        userId: req.user.id,
-        position: req.user.role?.toUpperCase() || 'STAFF',
+        firstName: user.name?.split(' ')[0] || 'Staff',
+        lastName: user.name?.split(' ').slice(1).join(' ') || 'User',
+        email: user.email,
+        userId: user.id,
+        position: user.role?.toUpperCase() || 'STAFF',
         status: 'active'
       });
-      console.log(`Auto-created missing employee profile for ${req.user.email}`);
+      console.log(`Auto-created missing employee profile for ${user.email}`);
     }
 
     // Check if already clocked in today (Strict: No clockOut for this employee)
@@ -51,12 +52,13 @@ router.post('/clockout', auth, async (req, res) => {
   try {
     let employee = await Employee.findOne({ where: { userId: req.user.id } });
     if (!employee) {
+      const user = await User.findByPk(req.user.id);
       employee = await Employee.create({
-        firstName: req.user.name?.split(' ')[0] || 'Staff',
-        lastName: req.user.name?.split(' ').slice(1).join(' ') || 'User',
-        email: req.user.email,
-        userId: req.user.id,
-        position: req.user.role?.toUpperCase() || 'STAFF',
+        firstName: user.name?.split(' ')[0] || 'Staff',
+        lastName: user.name?.split(' ').slice(1).join(' ') || 'User',
+        email: user.email,
+        userId: user.id,
+        position: user.role?.toUpperCase() || 'STAFF',
         status: 'active'
       });
     }

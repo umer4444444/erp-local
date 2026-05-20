@@ -233,7 +233,7 @@ const Landing = () => {
               </div>
               <motion.button whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}
                 onClick={() => navigate('/login')}
-                style={{ width: '100%', padding: '14px', borderRadius: 16, background: plan.popular ? '#0a84ff' : 'rgba(255,255,255,0.05)', border: plan.popular ? 'none' : '1px solid rgba(255,255,255,0.1)', color: 'white', fontWeight: 800, cursor: 'pointer', fontSize: 15, fontFamily: "'Outfit', sans-serif' " }}>
+                style={{ width: '100%', padding: '14px', borderRadius: 16, background: plan.popular ? '#0a84ff' : 'rgba(255,255,255,0.05)', border: plan.popular ? 'none' : '1px solid rgba(255,255,255,0.1)', color: 'white', fontWeight: 800, cursor: 'pointer', fontSize: 15, fontFamily: "'Outfit', sans-serif" }}>
                 {plan.price === 'Custom' ? 'Contact Sales' : 'Get Started'}
               </motion.button>
             </motion.div>

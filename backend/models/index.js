@@ -2,6 +2,7 @@ const sequelize = require('../config/database');
 const User = require('./User');
 const Category = require('./Category');
 const Product = require('./Product');
+const ProductVariation = require('./ProductVariation');
 const Customer = require('./Customer');
 const Sale = require('./Sale');
 const SaleItem = require('./SaleItem');
@@ -32,6 +33,9 @@ Product.belongsTo(Category, { foreignKey: 'categoryId' });
 
 Product.hasMany(StockLog, { foreignKey: 'productId' });
 StockLog.belongsTo(Product, { foreignKey: 'productId' });
+
+Product.hasMany(ProductVariation, { as: 'Variations', foreignKey: 'productId' });
+ProductVariation.belongsTo(Product, { foreignKey: 'productId' });
 
 User.hasMany(StockLog, { foreignKey: 'userId' });
 StockLog.belongsTo(User, { foreignKey: 'userId' });
@@ -120,6 +124,7 @@ module.exports = {
   User,
   Category,
   Product,
+  ProductVariation,
   Customer,
   Sale,
   SaleItem,

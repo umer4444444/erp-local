@@ -165,6 +165,12 @@ router.post('/', auth, roleCheck(['admin', 'hr', 'manager']), async (req, res) =
     }
     const empCode = `EMP-${String(nextNum).padStart(4, '0')}`;
 
+    let finalPosition = position;
+    if (!finalPosition && designationId) {
+      const desig = await Designation.findByPk(designationId, { transaction });
+      if (desig) finalPosition = desig.name;
+    }
+
     // Create employee record
     const employee = await Employee.create({
       empCode,
@@ -182,7 +188,7 @@ router.post('/', auth, roleCheck(['admin', 'hr', 'manager']), async (req, res) =
       payType: salaryType === 'hourly' ? 'hourly' : 'salary',
       payRate: payRate || 0,
       bankAccount,
-      position: position || '',
+      position: finalPosition || '',
       status: empStatus || 'active',
     }, { transaction });
 
@@ -200,7 +206,7 @@ router.post('/', auth, roleCheck(['admin', 'hr', 'manager']), async (req, res) =
         if (dept) deptName = dept.name.toLowerCase();
       }
       
-      const pos = (position || '').toLowerCase();
+      const pos = (finalPosition || '').toLowerCase();
       const roleStr = pos + ' ' + deptName;
 
       let role = 'cashier'; // fallback
@@ -274,6 +280,12 @@ router.put('/:id', auth, roleCheck(['admin', 'hr']), async (req, res) => {
       position, status: empStatus
     } = req.body;
 
+    let finalPosition = position;
+    if (!finalPosition && (designationId || employee.designationId)) {
+      const desig = await Designation.findByPk(designationId || employee.designationId);
+      if (desig) finalPosition = desig.name;
+    }
+
     await employee.update({
       firstName: firstName ?? employee.firstName,
       lastName: lastName ?? employee.lastName,
@@ -289,7 +301,7 @@ router.put('/:id', auth, roleCheck(['admin', 'hr']), async (req, res) => {
       payRate: payRate ?? employee.payRate,
       payType: salaryType === 'hourly' ? 'hourly' : (salaryType === 'monthly' ? 'salary' : employee.payType),
       bankAccount: bankAccount ?? employee.bankAccount,
-      position: position ?? employee.position,
+      position: finalPosition ?? employee.position,
       status: empStatus ?? employee.status,
     });
 

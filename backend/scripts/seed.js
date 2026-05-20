@@ -1,140 +1,136 @@
+const path = require('path');
+require('dotenv').config({ path: path.join(__dirname, '../.env') });
 const { sequelize, User, Category, Product, Customer, Sale, Employee, Department, Designation } = require('../models');
 const bcrypt = require('bcryptjs');
 
 const seed = async () => {
   try {
+    await sequelize.query('SET FOREIGN_KEY_CHECKS = 0');
     await sequelize.sync({ force: true }); // Reset DB
-    console.log('Database synced. Seeding...');
+    await sequelize.query('SET FOREIGN_KEY_CHECKS = 1');
+    console.log('Database synced. Seeding Construction ERP data...');
 
     // 1. Create Users for all roles
     const salt = await bcrypt.genSalt(10);
     const passwordHash = await bcrypt.hash('admin123', salt);
 
     const admin = await User.create({
-      name: 'System Admin',
-      email: 'admin@erp.com',
+      name: 'Project Director',
+      email: 'admin@lancerstech.com',
       phone: '0000000000',
       passwordHash,
       role: 'admin'
     });
 
     await User.create({
-      name: 'Store Manager',
-      email: 'manager@erp.com',
+      name: 'Site Manager',
+      email: 'manager@lancerstech.com',
       phone: '1111111111',
       passwordHash,
       role: 'manager'
     });
 
     await User.create({
-      name: 'Sales Manager',
-      email: 'sales@erp.com',
-      phone: '5555555555',
-      passwordHash,
-      role: 'sales'
-    });
-
-    await User.create({
-      name: 'Cashier One',
-      email: 'cashier@erp.com',
-      phone: '4444444444',
-      passwordHash,
-      role: 'cashier'
-    });
-
-    await User.create({
-      name: 'Inventory Lead',
-      email: 'inventory@erp.com',
+      name: 'Inventory Controller',
+      email: 'inventory@lancerstech.com',
       phone: '2222222222',
       passwordHash,
       role: 'inventory'
     });
 
     await User.create({
-      name: 'HR Head',
-      email: 'hr@erp.com',
+      name: 'HR & Payroll Lead',
+      email: 'hr@lancerstech.com',
       phone: '3333333333',
       passwordHash,
       role: 'hr'
     });
 
-    // 2. Create Categories
-    const catFood = await Category.create({ name: 'Food & Beverage', storeType: 'department', description: 'Edible products' });
-    const catElec = await Category.create({ name: 'Electronics', storeType: 'department', description: 'Tech gadgets' });
-    const catMed = await Category.create({ name: 'Medicine', storeType: 'pharmacy', description: 'Prescription drugs' });
-    const catSkin = await Category.create({ name: 'Skincare', storeType: 'pharmacy', description: 'Health & Beauty' });
+    // 2. Create Categories (Construction Focused)
+    const catStructural = await Category.create({ name: 'Structural Materials', storeType: 'department', description: 'Cement, Steel, Bricks' });
+    const catFinishing = await Category.create({ name: 'Finishing & Interior', storeType: 'department', description: 'Tiles, Paint, Flooring' });
+    const catMEP = await Category.create({ name: 'MEP (Mechanical/Elec/Plumb)', storeType: 'department', description: 'Pipes, Wires, Fittings' });
+    const catTools = await Category.create({ name: 'Tools & Safety', storeType: 'department', description: 'Power tools and PPE' });
 
-    // 3. Create Departments (Day 6)
+    // 3. Create Departments
     const depts = [
-      { name: 'Engineering', description: 'Technical and Software' },
-      { name: 'Sales', description: 'Sales and Marketing' },
-      { name: 'HR', description: 'Human Resources' },
-      { name: 'Finance', description: 'Accounts and Finance' },
-      { name: 'Operations', description: 'Fleet and Logistics' },
+      { name: 'Civil Engineering', description: 'Structural and Site works' },
+      { name: 'Architecture & Design', description: 'Planning and Interior' },
+      { name: 'Procurement', description: 'Sourcing and Supply Chain' },
+      { name: 'HR & Admin', description: 'Staff and Labor Management' },
+      { name: 'Finance', description: 'Accounts, Billing, and Bidding' },
     ];
     const createdDepts = await Department.bulkCreate(depts);
 
-    // 4. Create Designations (Day 6)
+    // 4. Create Designations
     const desigs = [
-      { name: 'Software Engineer', level: 'mid' },
-      { name: 'Sales Executive', level: 'mid' },
-      { name: 'HR Manager', level: 'manager' },
-      { name: 'Accountant', level: 'mid' },
-      { name: 'Operations Lead', level: 'lead' },
+      { name: 'Senior Civil Engineer', level: 'lead' },
+      { name: 'Site Supervisor', level: 'mid' },
+      { name: 'Procurement Officer', level: 'mid' },
+      { name: 'Quantity Surveyor', level: 'mid' },
+      { name: 'Safety Officer', level: 'mid' },
     ];
     const createdDesigs = await Designation.bulkCreate(desigs);
 
-    // 5. Create Products
-    const deptProducts = [
-      { name: 'Organic Coffee Beans', sku: 'DEPT-001', price: 25.00, costPrice: 15.00, stock: 100, categoryId: catFood.id, storeType: 'department' },
-      { name: 'Ergonomic Mouse', sku: 'DEPT-002', price: 45.00, costPrice: 20.00, stock: 50, categoryId: catElec.id, storeType: 'department' },
-      { name: 'Wireless Keyboard', sku: 'DEPT-003', price: 65.00, costPrice: 30.00, stock: 5, categoryId: catElec.id, storeType: 'department' },
-      { name: 'Dark Chocolate', sku: 'DEPT-004', price: 12.00, costPrice: 6.00, stock: 200, categoryId: catFood.id, storeType: 'department' },
-      { name: 'Green Tea Pack', sku: 'DEPT-005', price: 18.00, costPrice: 10.00, stock: 8, categoryId: catFood.id, storeType: 'department' },
-      { name: 'USB-C Hub', sku: 'DEPT-006', price: 35.00, costPrice: 18.00, stock: 25, categoryId: catElec.id, storeType: 'department' },
-      { name: 'Smart LED Bulb', sku: 'DEPT-007', price: 22.00, costPrice: 12.00, stock: 40, categoryId: catElec.id, storeType: 'department' },
-      { name: 'Whole Wheat Bread', sku: 'DEPT-008', price: 4.50, costPrice: 2.00, stock: 60, categoryId: catFood.id, storeType: 'department' },
-      { name: 'Almond Milk', sku: 'DEPT-009', price: 7.00, costPrice: 3.50, stock: 3, categoryId: catFood.id, storeType: 'department' },
-      { name: 'Noise Cancelling Headphones', sku: 'DEPT-010', price: 199.00, costPrice: 120.00, stock: 15, categoryId: catElec.id, storeType: 'department' },
+    // 5. Create Construction Products
+    const products = [
+      // Structural
+      { name: 'OPC Cement (50kg)', sku: 'STR-CEM-01', price: 1200.00, costPrice: 950.00, stock: 500, categoryId: catStructural.id, storeType: 'department' },
+      { name: 'Steel Rebar 12mm (Ton)', sku: 'STR-STL-12', price: 265000.00, costPrice: 240000.00, stock: 10, categoryId: catStructural.id, storeType: 'department' },
+      { name: 'Red Clay Bricks (1000 pcs)', sku: 'STR-BRK-01', price: 18000.00, costPrice: 15000.00, stock: 50, categoryId: catStructural.id, storeType: 'department' },
+      { name: 'Crush Stone (Manual)', sku: 'STR-CRS-01', price: 85.00, costPrice: 65.00, stock: 2000, categoryId: catStructural.id, storeType: 'department' },
+      
+      // MEP
+      { name: 'PVC Pipe 4-inch (10ft)', sku: 'MEP-PVC-04', price: 2500.00, costPrice: 1800.00, stock: 100, categoryId: catMEP.id, storeType: 'department' },
+      { name: 'Electrical Wire 3/29 (Coil)', sku: 'MEP-WRE-01', price: 8500.00, costPrice: 7200.00, stock: 30, categoryId: catMEP.id, storeType: 'department' },
+      { name: 'Copper Pipe 1/2-inch', sku: 'MEP-COP-01', price: 1200.00, costPrice: 900.00, stock: 150, categoryId: catMEP.id, storeType: 'department' },
+
+      // Finishing
+      { name: 'Matte White Paint (20L)', sku: 'FIN-PNT-WH', price: 15500.00, costPrice: 12000.00, stock: 40, categoryId: catFinishing.id, storeType: 'department' },
+      { name: 'Porcelain Tile 2x2 (Box)', sku: 'FIN-TILE-01', price: 4500.00, costPrice: 3800.00, stock: 200, categoryId: catFinishing.id, storeType: 'department' },
+      
+      // Tools & Safety
+      { name: 'Jack Hammer 15kg', sku: 'TLS-HMR-15', price: 45000.00, costPrice: 35000.00, stock: 5, categoryId: catTools.id, storeType: 'department' },
+      { name: 'Safety Helmet (Yellow)', sku: 'TLS-SAF-HLM', price: 850.00, costPrice: 450.00, stock: 100, categoryId: catTools.id, storeType: 'department' },
+      { name: 'Reflective Safety Vest', sku: 'TLS-SAF-VST', price: 450.00, costPrice: 200.00, stock: 150, categoryId: catTools.id, storeType: 'department' },
     ];
 
-    const pharmaProducts = [
-      { name: 'Paracetamol 500mg', sku: 'PHAR-001', price: 5.00, costPrice: 1.50, stock: 500, categoryId: catMed.id, storeType: 'pharmacy', expiryDate: '2027-12-01' },
-      { name: 'Amoxicillin 250mg', sku: 'PHAR-002', price: 15.00, costPrice: 4.00, stock: 200, categoryId: catMed.id, storeType: 'pharmacy', expiryDate: '2026-06-15' },
-      { name: 'Face Moisturizer', sku: 'PHAR-003', price: 28.00, costPrice: 12.00, stock: 45, categoryId: catSkin.id, storeType: 'pharmacy', expiryDate: '2028-01-20' },
-      { name: 'Sunscreen SPF 50', sku: 'PHAR-004', price: 32.00, costPrice: 15.00, stock: 6, categoryId: catSkin.id, storeType: 'pharmacy', expiryDate: '2026-08-10' },
-      { name: 'Ibuprofen 200mg', sku: 'PHAR-005', price: 8.00, costPrice: 2.00, stock: 300, categoryId: catMed.id, storeType: 'pharmacy', expiryDate: '2027-03-05' },
-      { name: 'Vitamin C 1000mg', sku: 'PHAR-006', price: 22.00, costPrice: 8.00, stock: 150, categoryId: catMed.id, storeType: 'pharmacy', expiryDate: '2028-05-12' },
-      { name: 'Antiseptic Cream', sku: 'PHAR-007', price: 12.00, costPrice: 4.50, stock: 80, categoryId: catMed.id, storeType: 'pharmacy', expiryDate: '2027-09-30' },
-      { name: 'Aloe Vera Gel', sku: 'PHAR-008', price: 14.00, costPrice: 6.00, stock: 2, categoryId: catSkin.id, storeType: 'pharmacy', expiryDate: '2026-11-22' },
-      { name: 'Hand Sanitizer', sku: 'PHAR-009', price: 6.00, costPrice: 2.00, stock: 400, categoryId: catSkin.id, storeType: 'pharmacy', expiryDate: '2028-12-31' },
-      { name: 'Cough Syrup', sku: 'PHAR-010', price: 10.00, costPrice: 3.50, stock: 90, categoryId: catMed.id, storeType: 'pharmacy', expiryDate: '2026-04-18' },
-    ];
+    await Product.bulkCreate(products);
 
-    await Product.bulkCreate([...deptProducts, ...pharmaProducts]);
+    // 6. Create Construction Clients (Customers)
+    await Customer.bulkCreate([
+      { name: 'Modern Builders Ltd', email: 'info@modernbuilders.com', phone: '021-3456789', address: 'DHA Phase 6, Karachi' },
+      { name: 'Elite Residency Project', email: 'procurement@eliteresidency.com', phone: '042-9988776', address: 'Gulberg III, Lahore' }
+    ]);
 
-    // 6. Create Customers
-    const customer = await Customer.create({
-      name: 'Jane Doe',
-      email: 'jane@example.com',
-      phone: '555-0199',
-      address: '123 Business St'
-    });
-
-    // 7. Create Employees
+    // 7. Create Site Employees
     await Employee.create({
-      empCode: 'EMP-0001',
-      firstName: 'Alice',
-      lastName: 'Smith',
-      email: 'alice@erp.com',
-      position: 'Sales Manager',
-      salary: 5500.00,
-      joiningDate: '2023-01-15',
-      departmentId: createdDepts[1].id,
-      designationId: createdDesigs[2].id,
+      empCode: 'EMP-1001',
+      firstName: 'Asif',
+      lastName: 'Khan',
+      email: 'asif.eng@lancerstech.com',
+      position: 'Senior Civil Engineer',
+      salary: 150000.00,
+      joiningDate: '2024-01-01',
+      departmentId: createdDepts[0].id,
+      designationId: createdDesigs[0].id,
+      status: 'active'
     });
 
-    console.log('Seeding complete!');
+    await Employee.create({
+      empCode: 'EMP-1002',
+      firstName: 'Sarah',
+      lastName: 'Ahmed',
+      email: 'sarah.proc@lancerstech.com',
+      position: 'Procurement Officer',
+      salary: 85000.00,
+      joiningDate: '2024-03-15',
+      departmentId: createdDepts[2].id,
+      designationId: createdDesigs[2].id,
+      status: 'active'
+    });
+
+    console.log('Construction ERP Seeding complete!');
     process.exit(0);
   } catch (err) {
     console.error('Seeding failed:', err);

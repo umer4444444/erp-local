@@ -36,6 +36,33 @@ const ShiftAudit = () => {
   const totalEarnings = auditData.reduce((sum, item) => sum + item.earned, 0);
   const totalHours = auditData.reduce((sum, item) => sum + item.hours, 0);
 
+  const exportReport = () => {
+    if (!auditData || auditData.length === 0) {
+      alert("No shift records to export.");
+      return;
+    }
+    const headers = ['Employee Name', 'Emp Code', 'Clock In', 'Clock Out', 'Hours', 'Rate', 'Earned', 'Salary Type'];
+    const rows = auditData.map(item => [
+      `"${item.employeeName || ''}"`,
+      `"${item.empCode || ''}"`,
+      `"${item.clockIn ? new Date(item.clockIn).toLocaleString() : ''}"`,
+      `"${item.clockOut ? new Date(item.clockOut).toLocaleString() : 'Active'}"`,
+      item.hours || 0,
+      item.rate || 0,
+      item.earned || 0,
+      `"${item.salaryType || ''}"`
+    ]);
+    const csvContent = [headers.join(','), ...rows.map(e => e.join(','))].join('\n');
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.setAttribute('download', `shift_audit_report_${dateRange.start}_to_${dateRange.end}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
   return (
     <div style={{ padding: 40, minHeight: '100vh', background: '#f8fafc', fontFamily: "'Outfit', sans-serif" }}>
       <header style={{ marginBottom: 40, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
@@ -60,7 +87,7 @@ const ShiftAudit = () => {
               style={{ border: 'none', padding: '8px 12px', fontSize: 13, fontWeight: 700, color: '#0f172a', outline: 'none' }} 
             />
           </div>
-          <button style={{ padding: '12px 24px', borderRadius: 16, background: '#0a84ff', color: 'white', border: 'none', fontWeight: 800, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 8 }}>
+          <button onClick={exportReport} style={{ padding: '12px 24px', borderRadius: 16, background: '#0a84ff', color: 'white', border: 'none', fontWeight: 800, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 8 }}>
             <Download size={18} /> Export Report
           </button>
         </div>

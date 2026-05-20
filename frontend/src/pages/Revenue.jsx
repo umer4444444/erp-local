@@ -27,6 +27,46 @@ const Revenue = () => {
     }
   };
 
+  const exportAnalyticsToCSV = () => {
+    if (!data) {
+      alert('No analytics data to export. Please wait for data to load.');
+      return;
+    }
+    const total = data.paymentMethods.total || 1;
+    const cashPct = ((data.paymentMethods.cash / total) * 100).toFixed(1);
+    const cardPct = ((data.paymentMethods.card / total) * 100).toFixed(1);
+    const splitPct = ((data.paymentMethods.split / total) * 100).toFixed(1);
+
+    const rows = [
+      ['Revenue Intelligence Report', ''],
+      ['Generated At', new Date().toLocaleString()],
+      ['Period', 'Last 30 Days'],
+      ['', ''],
+      ['FINANCIAL SUMMARY', ''],
+      ['Total Revenue', `$${data.totalRevenue.toLocaleString()}`],
+      ['Average Order Value', `$${data.averageOrder}`],
+      ['Operating Costs (COGS)', `$${data.totalCost.toLocaleString()}`],
+      ['Net Profit', `$${data.netProfit.toLocaleString()}`],
+      ['Projected Quarterly Revenue', `$${data.projectedRevenue.toLocaleString(undefined, { maximumFractionDigits: 0 })}`],
+      ['', ''],
+      ['PAYMENT METHOD BREAKDOWN', ''],
+      ['Method', 'Transactions', 'Percentage'],
+      ['Cash', data.paymentMethods.cash, `${cashPct}%`],
+      ['Credit Card', data.paymentMethods.card, `${cardPct}%`],
+      ['Split Payments', data.paymentMethods.split, `${splitPct}%`],
+      ['Total Transactions', data.paymentMethods.total, '100%'],
+    ];
+
+    const csvContent = rows.map(r => r.map(cell => `"${cell}"`).join(',')).join('\n');
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    link.download = `revenue_intelligence_${new Date().toISOString().slice(0,10)}.csv`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
   if (loading || !data) {
     return <div style={{ padding: 40, textAlign: 'center' }}>Loading intelligence...</div>;
   }
@@ -59,8 +99,8 @@ const Revenue = () => {
           <button onClick={fetchData} style={{ padding: '12px 24px', borderRadius: 14, background: 'white', border: '1px solid #e2e8f0', fontWeight: 800, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 8 }}>
             <RefreshCw size={18} /> Refresh
           </button>
-          <button style={{ padding: '12px 24px', borderRadius: 14, background: '#0f172a', color: 'white', border: 'none', fontWeight: 800, cursor: 'pointer' }}>
-            Generate Report
+          <button onClick={exportAnalyticsToCSV} style={{ padding: '12px 24px', borderRadius: 14, background: '#0f172a', color: 'white', border: 'none', fontWeight: 800, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 8 }}>
+            <Download size={18} /> Generate Report
           </button>
         </div>
       </header>

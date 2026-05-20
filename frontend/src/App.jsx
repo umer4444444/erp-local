@@ -81,7 +81,7 @@ function AppContent() {
               <Route path="/suppliers" element={<PrivateRoute roles={['admin', 'inventory', 'manager']}><PageTransition><Suppliers /></PageTransition></PrivateRoute>} />
               <Route path="/customers" element={<PrivateRoute><PageTransition><Customers /></PageTransition></PrivateRoute>} />
               <Route path="/expenses" element={<PrivateRoute roles={['admin', 'manager', 'expenses']}><PageTransition><Expenses /></PageTransition></PrivateRoute>} />
-              <Route path="/users" element={<PrivateRoute roles={['admin']}><PageTransition><Users /></PageTransition></PrivateRoute>} />
+              <Route path="/users" element={<PrivateRoute roles={['admin', 'manager']}><PageTransition><Users /></PageTransition></PrivateRoute>} />
               <Route path="/eod" element={<PrivateRoute><PageTransition><EODReport /></PageTransition></PrivateRoute>} />
               <Route path="*" element={<Navigate to={getDefaultRoute(user?.role)} />} />
             </Routes>
@@ -95,7 +95,7 @@ function AppContent() {
 function App() {
   return (
     <AuthProvider>
-      <Router>
+      <Router future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
         <AppContent />
       </Router>
     </AuthProvider>

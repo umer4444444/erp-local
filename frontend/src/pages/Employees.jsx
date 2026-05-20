@@ -3,6 +3,7 @@ import { employeeAPI } from '../api';
 import { UserPlus, Search, Filter, Briefcase, Mail, Phone, Calendar, DollarSign, X, ChevronRight, CheckCircle2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useLocation } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
 
 const cardStyle = {
   background: 'white', borderRadius: 20, padding: 24,
@@ -18,6 +19,7 @@ const inputStyle = {
 
 const Employees = () => {
   const location = useLocation();
+  const { user } = useAuth();
   const [employees, setEmployees] = useState([]);
   const [departments, setDepartments] = useState([]);
   const [designations, setDesignations] = useState([]);
@@ -80,7 +82,7 @@ const Employees = () => {
         setSelectedEmployee(null);
         fetchData();
       } catch (err) {
-        alert('Failed to terminate employee');
+        alert(err.response?.data?.message || err.message || 'Failed to terminate employee');
       }
     }
   };
@@ -143,7 +145,7 @@ const Employees = () => {
               <tr key={emp.id} style={{ borderBottom: '1px solid #f8fafc' }}>
                 <td style={{ padding: 16 }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                    <div style={{ width: 36, height: 36, borderRadius: 10, background: '#e2e8f0', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 800 }}>{emp.firstName[0]}</div>
+                    <div style={{ width: 36, height: 36, borderRadius: 10, background: '#e2e8f0', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 800 }}>{(emp.firstName || '')[0]}</div>
                     <div>
                       <div style={{ fontWeight: 800, fontSize: 14 }}>{emp.firstName} {emp.lastName}</div>
                       <div style={{ fontSize: 11, color: '#94a3b8' }}>{emp.empCode}</div>
@@ -262,7 +264,7 @@ const Employees = () => {
 
               <div style={{ display: 'flex', alignItems: 'center', gap: 16, marginBottom: 24 }}>
                 <div style={{ width: 64, height: 64, borderRadius: 16, background: '#e2e8f0', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 24, fontWeight: 900 }}>
-                  {selectedEmployee.firstName[0]}
+                  {(selectedEmployee.firstName || '')[0]}
                 </div>
                 <div>
                   <h3 style={{ fontSize: 20, fontWeight: 900 }}>{selectedEmployee.firstName} {selectedEmployee.lastName}</h3>
@@ -322,11 +324,13 @@ const Employees = () => {
                 </div>
               </div>
               
-              <div style={{ marginTop: 32, paddingTop: 24, borderTop: '1px solid #f1f5f9', display: 'flex', justifyContent: 'flex-end' }}>
-                <button onClick={() => handleTerminate(selectedEmployee.id)} style={{ padding: '12px 20px', borderRadius: 12, background: '#fee2e2', color: '#ef4444', fontWeight: 800, border: 'none', cursor: 'pointer' }}>
-                  Terminate Employee
-                </button>
-              </div>
+              {(user?.role === 'admin' || user?.role === 'hr') && (
+                <div style={{ marginTop: 32, paddingTop: 24, borderTop: '1px solid #f1f5f9', display: 'flex', justifyContent: 'flex-end' }}>
+                  <button onClick={() => handleTerminate(selectedEmployee.id)} style={{ padding: '12px 20px', borderRadius: 12, background: '#fee2e2', color: '#ef4444', fontWeight: 800, border: 'none', cursor: 'pointer' }}>
+                    Terminate Employee
+                  </button>
+                </div>
+              )}
             </motion.div>
           </div>
         )}

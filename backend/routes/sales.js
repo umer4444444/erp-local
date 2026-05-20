@@ -125,7 +125,7 @@ router.get('/stats', auth, async (req, res) => {
 });
 
 // Void Sale
-router.post('/:id/void', auth, roleCheck(['admin', 'manager']), async (req, res) => {
+router.post('/:id/void', auth, roleCheck(['admin', 'manager', 'hr']), async (req, res) => {
   const transaction = await sequelize.transaction();
   try {
     const { reason } = req.body;

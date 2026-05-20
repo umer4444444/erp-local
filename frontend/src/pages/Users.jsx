@@ -63,6 +63,7 @@ const Users = () => {
       case 'inventory': return { bg: '#fef3c7', color: '#d97706' };
       case 'cashier': return { bg: '#f0fdf4', color: '#16a34a' };
       case 'hr': return { bg: '#f3e8ff', color: '#9333ea' };
+      case 'expenses': return { bg: '#ffedd5', color: '#ea580c' };
       default: return { bg: '#f1f5f9', color: '#64748b' };
     }
   };
@@ -112,6 +113,7 @@ const Users = () => {
                   <option value="inventory">INVENTORY</option>
                   <option value="hr">HR</option>
                   <option value="cashier">CASHIER</option>
+                  <option value="expenses">EXPENSES</option>
                 </select>
               </div>
               
@@ -157,6 +159,7 @@ const Users = () => {
                   <option value="inventory">Inventory Lead</option>
                   <option value="hr">HR Head</option>
                   <option value="cashier">Cashier</option>
+                  <option value="expenses">Expenses Officer</option>
                 </select>
                 <input type="password" placeholder="Temporary Password" value={form.password} onChange={e => setForm({...form, password: e.target.value})} style={{ width: '100%', padding: '14px 16px', borderRadius: 16, border: '1px solid #e2e8f0', fontSize: 14, fontWeight: 600, outline: 'none' }} />
                 <button type="submit" style={{ marginTop: 16, width: '100%', padding: 16, borderRadius: 16, background: '#0f172a', color: 'white', border: 'none', fontSize: 16, fontWeight: 800, cursor: 'pointer' }}>

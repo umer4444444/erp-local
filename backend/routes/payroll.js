@@ -23,7 +23,7 @@ router.post('/run', auth, roleCheck(['admin', 'hr']), async (req, res) => {
     const endDate = new Date(year, month, 0);
 
     for (const emp of employees) {
-      const base = parseFloat(emp.baseSalary || 0);
+      const base = parseFloat(emp.salary || 0);
       const allowances = 0;
       
       const unpaidLeaves = await Leave.sum('days', {

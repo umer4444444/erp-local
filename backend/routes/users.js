@@ -5,7 +5,7 @@ const bcrypt = require('bcryptjs');
 const router = express.Router();
 
 // Get all users (Admin only)
-router.get('/', auth, roleCheck(['admin']), async (req, res) => {
+router.get('/', auth, roleCheck(['admin', 'manager']), async (req, res) => {
   try {
     const users = await User.findAll({
       attributes: { exclude: ['passwordHash'] },
@@ -18,7 +18,7 @@ router.get('/', auth, roleCheck(['admin']), async (req, res) => {
 });
 
 // Create new user (Admin only)
-router.post('/', auth, roleCheck(['admin']), async (req, res) => {
+router.post('/', auth, roleCheck(['admin', 'manager']), async (req, res) => {
   try {
     const { name, email, phone, role, password } = req.body;
     
@@ -45,7 +45,7 @@ router.post('/', auth, roleCheck(['admin']), async (req, res) => {
 });
 
 // Update user role/permissions (Admin only)
-router.put('/:id/role', auth, roleCheck(['admin']), async (req, res) => {
+router.put('/:id/role', auth, roleCheck(['admin', 'manager']), async (req, res) => {
   try {
     const { role } = req.body;
     const user = await User.findByPk(req.params.id);
@@ -64,7 +64,7 @@ router.put('/:id/role', auth, roleCheck(['admin']), async (req, res) => {
 });
 
 // Delete user (Admin only)
-router.delete('/:id', auth, roleCheck(['admin']), async (req, res) => {
+router.delete('/:id', auth, roleCheck(['admin', 'manager']), async (req, res) => {
   try {
     const user = await User.findByPk(req.params.id);
     if (!user) return res.status(404).json({ message: 'User not found' });

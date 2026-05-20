@@ -24,7 +24,7 @@ const Leaves = () => {
     try {
       const [myRes, pendingRes] = await Promise.all([
         leaveAPI.getMy(),
-        leaveAPI.getPending()
+        leaveAPI.getPending().catch(err => ({ data: [] }))
       ]);
       setLeaves(myRes.data);
       setPendingLeaves(pendingRes.data);
@@ -42,7 +42,7 @@ const Leaves = () => {
       setShowModal(false);
       fetchData();
     } catch (err) {
-      alert('Failed to apply for leave');
+      alert(err.response?.data?.message || err.message || 'Failed to apply for leave');
     }
   };
 
@@ -51,7 +51,7 @@ const Leaves = () => {
       await leaveAPI.updateStatus(id, status);
       fetchData();
     } catch (err) {
-      alert('Failed to update leave status');
+      alert(err.response?.data?.message || err.message || 'Failed to update leave status');
     }
   };
 

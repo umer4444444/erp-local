@@ -56,7 +56,10 @@ const Inventory = () => {
   };
 
   const handleEditClick = (product) => {
-    setEditingProduct({ ...product });
+    setEditingProduct({ 
+      ...product, 
+      variations: product.Variations || [] 
+    });
     setShowEditModal(true);
   };
 
@@ -138,7 +141,7 @@ const Inventory = () => {
       fetchData();
       alert(`Successfully imported ${validRows.length} items!`);
     } catch (err) {
-      alert('Failed to import items.');
+      alert(err.response?.data?.message || err.message || 'Failed to import items.');
     } finally {
       setLoading(false);
     }
@@ -152,7 +155,7 @@ const Inventory = () => {
 
   const filteredProducts = products.filter(p => {
     const matchesSearch = p.name.toLowerCase().includes(search.toLowerCase());
-    const matchesCat = categoryFilter ? (p.categoryId === parseInt(categoryFilter) || p.Category?.id === parseInt(categoryFilter)) : true;
+    const matchesCat = categoryFilter ? (p.categoryId === categoryFilter || p.Category?.id === categoryFilter) : true;
     return matchesSearch && matchesCat;
   });
 
@@ -242,7 +245,14 @@ const Inventory = () => {
                   </td>
                   <td style={{ padding: '16px 24px' }}>
                     <div style={{ fontWeight: 800, color: '#0f172a' }}>{product.name}</div>
-                    <div style={{ fontSize: 11, color: '#94a3b8', fontWeight: 700 }}>{product.sku}</div>
+                    <div style={{ fontSize: 11, color: '#94a3b8', fontWeight: 700, display: 'flex', alignItems: 'center', gap: 6 }}>
+                      {product.sku}
+                      {product.Variations?.length > 0 && (
+                        <span style={{ padding: '2px 6px', background: '#f1f5f9', color: '#64748b', borderRadius: 4, fontSize: 10 }}>
+                          {product.Variations.length} Variations
+                        </span>
+                      )}
+                    </div>
                   </td>
                   <td style={{ padding: '16px 24px' }}>
                     <span style={{ fontSize: 12, fontWeight: 700, color: '#0a84ff', background: 'rgba(10,132,255,0.08)', padding: '4px 10px', borderRadius: 8 }}>
@@ -304,6 +314,70 @@ const Inventory = () => {
                   <div>
                     <label style={{ display: 'block', fontSize: 12, fontWeight: 800, color: '#64748b', marginBottom: 8 }}>EXPIRY DATE</label>
                     <input type="date" value={editingProduct.expiryDate?.split('T')[0] || ''} onChange={e => setEditingProduct({...editingProduct, expiryDate: e.target.value})} style={{ width: '100%', padding: '14px', borderRadius: 12, border: '1px solid #e2e8f0', fontWeight: 600 }} />
+                  </div>
+                </div>
+
+                {/* Variations Section */}
+                <div style={{ borderTop: '1px solid #f1f5f9', paddingTop: 20 }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
+                    <h3 style={{ fontSize: 14, fontWeight: 900 }}>Product Variations (e.g. Grades/Sizes)</h3>
+                    <button 
+                      onClick={() => setEditingProduct({...editingProduct, variations: [...editingProduct.variations, { name: '', price: editingProduct.price, stock: 0, sku: '' }]})}
+                      style={{ padding: '6px 12px', borderRadius: 8, background: '#f1f5f9', border: 'none', fontSize: 11, fontWeight: 800, cursor: 'pointer', color: '#0a84ff' }}
+                    >
+                      + Add Variation
+                    </button>
+                  </div>
+                  
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 10, maxHeight: 200, overflowY: 'auto', paddingRight: 8 }}>
+                    {editingProduct.variations?.map((v, idx) => (
+                      <div key={idx} style={{ display: 'grid', gridTemplateColumns: '1fr 80px 70px 30px', gap: 8, alignItems: 'center', background: '#f8fafc', padding: 12, borderRadius: 12 }}>
+                        <input 
+                          placeholder="Grade/Size" 
+                          value={v.name} 
+                          onChange={e => {
+                            const newV = [...editingProduct.variations];
+                            newV[idx].name = e.target.value;
+                            setEditingProduct({...editingProduct, variations: newV});
+                          }}
+                          style={{ background: 'transparent', border: '1px solid #e2e8f0', padding: '6px 8px', borderRadius: 6, fontSize: 12, fontWeight: 600 }} 
+                        />
+                        <input 
+                          type="number" 
+                          placeholder="Price" 
+                          value={v.price} 
+                          onChange={e => {
+                            const newV = [...editingProduct.variations];
+                            newV[idx].price = e.target.value;
+                            setEditingProduct({...editingProduct, variations: newV});
+                          }}
+                          style={{ background: 'transparent', border: '1px solid #e2e8f0', padding: '6px 8px', borderRadius: 6, fontSize: 12, fontWeight: 600 }} 
+                        />
+                        <input 
+                          type="number" 
+                          placeholder="Stock" 
+                          value={v.stock} 
+                          onChange={e => {
+                            const newV = [...editingProduct.variations];
+                            newV[idx].stock = e.target.value;
+                            setEditingProduct({...editingProduct, variations: newV});
+                          }}
+                          style={{ background: 'transparent', border: '1px solid #e2e8f0', padding: '6px 8px', borderRadius: 6, fontSize: 12, fontWeight: 600 }} 
+                        />
+                        <button 
+                          onClick={() => {
+                            const newV = editingProduct.variations.filter((_, i) => i !== idx);
+                            setEditingProduct({...editingProduct, variations: newV});
+                          }}
+                          style={{ border: 'none', background: 'transparent', color: '#ef4444', cursor: 'pointer' }}
+                        >
+                          <Trash2 size={14} />
+                        </button>
+                      </div>
+                    ))}
+                    {editingProduct.variations?.length === 0 && (
+                      <div style={{ textAlign: 'center', padding: 20, color: '#94a3b8', fontSize: 12, fontWeight: 600 }}>No variations added.</div>
+                    )}
                   </div>
                 </div>
                 <button onClick={handleUpdateProduct} style={{ marginTop: 12, padding: 18, borderRadius: 16, background: '#0a84ff', color: 'white', border: 'none', fontWeight: 900, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 10, justifyContent: 'center' }}>

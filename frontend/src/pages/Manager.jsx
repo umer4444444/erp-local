@@ -5,12 +5,42 @@ import {
   BarChart3, Target, Info
 } from 'lucide-react';
 import { motion } from 'framer-motion';
+import { useNavigate } from 'react-router-dom';
 import { managerAPI, employeeAPI } from '../api';
 
 const Manager = () => {
+  const navigate = useNavigate();
   const [overview, setOverview] = useState({ revenue: 0, salesCount: 0, activeStaff: 0 });
   const [employees, setEmployees] = useState([]);
   const [loading, setLoading] = useState(true);
+
+  const exportStaffData = () => {
+    if (!employees || employees.length === 0) {
+      alert("No employee data to export");
+      return;
+    }
+    const headers = ['First Name', 'Last Name', 'Email', 'Position', 'Status', 'Salary'];
+    const csvRows = [
+      headers.join(','),
+      ...employees.map(emp => [
+        `"${emp.firstName || ''}"`,
+        `"${emp.lastName || ''}"`,
+        `"${emp.User?.email || emp.email || ''}"`,
+        `"${emp.position || ''}"`,
+        `"${emp.status || ''}"`,
+        emp.salary || 0
+      ].join(','))
+    ].join('\n');
+
+    const blob = new Blob([csvRows], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.setAttribute('download', 'staff_directory.csv');
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
 
   useEffect(() => {
     const fetchData = async () => {
@@ -62,7 +92,7 @@ const Manager = () => {
           <h1 style={{ fontSize: 32, fontWeight: 900, color: '#0f172a' }}>Executive Command Center</h1>
         </div>
         <div style={{ display: 'flex', gap: 12 }}>
-          <button style={{ padding: '12px 24px', borderRadius: 14, background: 'white', border: '1px solid #e2e8f0', fontWeight: 800, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 8 }}>
+          <button onClick={exportStaffData} style={{ padding: '12px 24px', borderRadius: 14, background: 'white', border: '1px solid #e2e8f0', fontWeight: 800, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 8 }}>
             <BarChart3 size={18} /> Export Data
           </button>
         </div>
@@ -80,7 +110,7 @@ const Manager = () => {
         <div style={{ background: 'white', borderRadius: 32, border: '1px solid rgba(0,0,0,0.05)', padding: 32 }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 32 }}>
             <h2 style={{ fontSize: 20, fontWeight: 900, color: '#0f172a' }}>Staff Directory</h2>
-            <button style={{ padding: '10px 18px', borderRadius: 12, background: '#f1f5f9', border: 'none', color: '#0f172a', fontWeight: 800, fontSize: 13, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 8 }}>
+            <button onClick={() => navigate('/users')} style={{ padding: '10px 18px', borderRadius: 12, background: '#f1f5f9', border: 'none', color: '#0f172a', fontWeight: 800, fontSize: 13, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 8 }}>
               <UserCheck size={16} /> Manage Roles
             </button>
           </div>
@@ -89,13 +119,13 @@ const Manager = () => {
             {employees.map(emp => (
               <div key={emp.id} style={{ display: 'flex', alignItems: 'center', gap: 16, padding: '14px 20px', borderRadius: 20, background: '#f8fafc', border: '1px solid transparent' }}>
                 <div style={{ width: 44, height: 44, borderRadius: '50%', background: '#0a84ff', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 800, fontSize: 16 }}>
-                  {emp.firstName[0]}{emp.lastName[0]}
+                  {(emp.firstName || '')[0]}{(emp.lastName || '')[0]}
                 </div>
                 <div style={{ flex: 1 }}>
                   <div style={{ fontWeight: 800, color: '#0f172a' }}>{emp.firstName} {emp.lastName}</div>
-                  <div style={{ fontSize: 12, color: '#64748b', fontWeight: 600 }}>{emp.position} • {emp.status}</div>
+                  <div style={{ fontSize: 12, color: '#64748b', fontWeight: 600 }}>{emp.Designation?.name || emp.position || 'Staff'} • {emp.status}</div>
                 </div>
-                <button style={{ padding: '8px 14px', borderRadius: 10, background: 'white', border: '1px solid #e2e8f0', color: '#64748b', fontWeight: 700, fontSize: 12, cursor: 'pointer' }}>
+                <button onClick={() => navigate('/employees')} style={{ padding: '8px 14px', borderRadius: 10, background: 'white', border: '1px solid #e2e8f0', color: '#64748b', fontWeight: 700, fontSize: 12, cursor: 'pointer' }}>
                   Profile
                 </button>
               </div>

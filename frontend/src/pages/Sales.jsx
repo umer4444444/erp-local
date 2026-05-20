@@ -57,6 +57,10 @@ const Sales = () => {
     }
   };
 
+  const removeFromCart = (productId) => {
+    setCart(cart.filter(item => item.productId !== productId));
+  };
+
   const subtotal = cart.reduce((sum, i) => sum + (i.price * i.quantity) - i.discountAmount, 0);
   const total = Math.max(subtotal - parseFloat(globalDiscount || 0), 0);
   const changeDue = paymentMethod === 'cash' && cashTendered ? Math.max(parseFloat(cashTendered) - total, 0) : 0;
@@ -149,8 +153,8 @@ const Sales = () => {
       </div>
 
       {/* Right Side: Cart */}
-      <div style={{ background: 'white', borderLeft: '1px solid #e2e8f0', display: 'flex', flexDirection: 'column' }}>
-        <div style={{ padding: 32, flex: 1, overflowY: 'auto' }}>
+      <div style={{ background: 'white', borderLeft: '1px solid #e2e8f0', display: 'flex', flexDirection: 'column', overflowY: 'auto' }}>
+        <div style={{ padding: 32, flex: 1, overflowY: 'auto', minHeight: 250 }}>
           <h2 style={{ fontSize: 20, fontWeight: 900, color: '#0f172a', marginBottom: 24 }}>Current Cart</h2>
           
           <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
@@ -174,7 +178,7 @@ const Sales = () => {
           </div>
         </div>
 
-        <div style={{ padding: 32, background: '#f8fafc', borderTop: '1px solid #e2e8f0' }}>
+        <div style={{ padding: 32, background: '#f8fafc', borderTop: '1px solid #e2e8f0', flexShrink: 0 }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8, color: '#64748b', fontWeight: 700 }}>
             <span>Subtotal</span>
             <span>${subtotal.toFixed(2)}</span>
