@@ -3,7 +3,7 @@ const { Attendance, Employee, WorkShift, User } = require('../models');
 const { auth, roleCheck } = require('../middleware/auth');
 const { Op } = require('sequelize');
 const router = express.Router();
-+const socket = require('../socket');
+const socket = require('../socket');
 
 // Clock In
 router.post('/clockin', auth, async (req, res) => {
