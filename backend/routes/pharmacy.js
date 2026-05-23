@@ -1,5 +1,5 @@
 const express = require('express');
-const { Drug, Prescription, PrescriptionItem, Product, User, Customer } = require('../models');
+const { Drug, Prescription, PrescriptionItem, Product, User, Customer, StockLog, sequelize } = require('../models');
 const { auth, roleCheck } = require('../middleware/auth');
 const router = express.Router();
 
@@ -81,7 +81,8 @@ router.put('/prescriptions/:id/verify', auth, roleCheck(['admin', 'pharmacist'])
           productId: product.id,
           userId: req.user.id,
           change: -item.quantity,
-          reason: 'prescription',
+          type: 'prescription',
+          notes: 'prescription fulfillment',
           reference: prescription.id
         }, { transaction });
       }

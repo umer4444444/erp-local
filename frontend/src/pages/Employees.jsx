@@ -33,7 +33,7 @@ const Employees = () => {
   const [form, setForm] = useState({
     firstName: '', lastName: '', email: '', phone: '', cnic: '',
     departmentId: '', designationId: '', joiningDate: '',
-    salaryType: 'monthly', salary: '', bankAccount: ''
+    salaryType: 'monthly', salary: '', bankAccount: '', role: ''
   });
 
   useEffect(() => {
@@ -68,7 +68,7 @@ const Employees = () => {
       await employeeAPI.create(form);
       setShowModal(false);
       setStep(1);
-      setForm({ firstName: '', lastName: '', email: '', phone: '', cnic: '', departmentId: '', designationId: '', joiningDate: '', salaryType: 'monthly', salary: '', bankAccount: '' });
+      setForm({ firstName: '', lastName: '', email: '', phone: '', cnic: '', departmentId: '', designationId: '', joiningDate: '', salaryType: 'monthly', salary: '', bankAccount: '', role: '' });
       fetchData();
     } catch (e) {
       alert(e.response?.data?.message || 'Error saving employee. Please check all fields.');
@@ -195,24 +195,27 @@ const Employees = () => {
                     <div style={{ fontSize: 13, fontWeight: 700, color: '#64748b', marginBottom: 4 }}>Select Department (determines portal access)</div>
                     <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, maxHeight: 320, overflowY: 'auto' }}>
                       {departments.map(d => {
-                        const portalMap = {
-                          'Administration': { portal: 'Admin Dashboard', role: 'admin', color: '#6366f1' },
-                          'Management': { portal: 'Manager Hub', role: 'manager', color: '#0a84ff' },
-                          'Inventory': { portal: 'Inventory Ledger', role: 'inventory', color: '#f59e0b' },
-                          'Sales': { portal: 'Sales Terminal', role: 'cashier', color: '#10b981' },
-                          'HR': { portal: 'HR & Payroll', role: 'hr', color: '#a855f7' },
-                          'HR & Payroll': { portal: 'HR & Payroll', role: 'hr', color: '#a855f7' },
-                          'Pharmacy': { portal: 'Pharmacy Module', role: 'pharmacist', color: '#ec4899' },
-                          'Revenue & Finance': { portal: 'Revenue Analytics', role: 'manager', color: '#0a84ff' },
-                          'Expenses': { portal: 'Expenses Module', role: 'expenses', color: '#ef4444' },
-                          'EOD Operations': { portal: 'EOD Report', role: 'cashier', color: '#64748b' },
+                        // Map department name to role & portal — uses keyword matching for flexibility
+                        const getDeptInfo = (name) => {
+                          const n = name.toLowerCase();
+                          if (n.includes('admin')) return { portal: 'Admin Dashboard', role: 'admin', color: '#6366f1' };
+                          if (n.includes('management')) return { portal: 'Manager Hub', role: 'manager', color: '#0a84ff' };
+                          if (n.includes('inventory') || n.includes('warehouse') || n.includes('stock') || n.includes('procurement')) return { portal: 'Inventory & Procurement', role: 'inventory', color: '#f59e0b' };
+                          if (n.includes('sales') || n.includes('pos') || n.includes('cashier')) return { portal: 'Sales Terminal', role: 'cashier', color: '#10b981' };
+                          if (n.includes('hr') || n.includes('human') || n.includes('payroll')) return { portal: 'HR & Payroll', role: 'hr', color: '#a855f7' };
+                          if (n.includes('pharmac')) return { portal: 'Pharmacy Module', role: 'pharmacist', color: '#ec4899' };
+                          if (n.includes('finance') || n.includes('revenue') || n.includes('accounting')) return { portal: 'Finance & Revenue', role: 'finance', color: '#0ea5e9' };
+                          if (n.includes('expense')) return { portal: 'Expenses Module', role: 'expenses', color: '#ef4444' };
+                          if (n.includes('eod') || n.includes('operation')) return { portal: 'Operations Hub', role: 'operations', color: '#64748b' };
+                          if (n.includes('engineer') || n.includes('civil') || n.includes('architect') || n.includes('design') || n.includes('technical')) return { portal: 'Manager Hub', role: 'manager', color: '#0a84ff' };
+                          return { portal: 'Staff Portal', role: 'staff', color: '#94a3b8' };
                         };
-                        const info = portalMap[d.name] || { portal: d.name, role: 'cashier', color: '#94a3b8' };
+                        const info = getDeptInfo(d.name);
                         const isSelected = form.departmentId === d.id;
                         return (
                           <div
                             key={d.id}
-                            onClick={() => setForm({...form, departmentId: d.id})}
+                            onClick={() => setForm({...form, departmentId: d.id, role: info.role})}
                             style={{
                               padding: '12px 14px', borderRadius: 12, cursor: 'pointer', transition: 'all 0.15s',
                               border: isSelected ? `2px solid ${info.color}` : '2px solid #e2e8f0',

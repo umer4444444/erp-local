@@ -9,18 +9,24 @@ const StockLog = sequelize.define('StockLog', {
   },
   productId: {
     type: DataTypes.UUID,
+    allowNull: true,
   },
   userId: {
     type: DataTypes.UUID,
+    allowNull: true,
   },
   change: {
     type: DataTypes.INTEGER,
   },
   type: {
-    type: DataTypes.ENUM('sale', 'restock', 'adjustment', 'return'),
+    type: DataTypes.ENUM('sale', 'restock', 'adjustment', 'return', 'void', 'prescription'),
   },
   notes: {
     type: DataTypes.STRING,
+  },
+  reference: {
+    type: DataTypes.UUID,
+    allowNull: true,
   },
 }, {
   timestamps: true,

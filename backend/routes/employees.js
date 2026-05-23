@@ -206,22 +206,23 @@ router.post('/', auth, roleCheck(['admin', 'hr', 'manager']), async (req, res) =
         if (dept) deptName = dept.name.toLowerCase();
       }
       
-      const pos = (finalPosition || '').toLowerCase();
-      const roleStr = pos + ' ' + deptName;
+      // Determine user role: prioritize explicit role, then infer from position/department
+      let role = req.body.role ? req.body.role.toLowerCase() : null;
+      if (!role) {
+        // Infer role based on position and department keywords
+        const roleStr = (finalPosition || '').toLowerCase() + ' ' + deptName;
+        if (roleStr.includes('admin') || roleStr.includes('administration')) role = 'admin';
+        else if (roleStr.includes('manager') || roleStr.includes('management')) role = 'manager';
+        else if (roleStr.includes('inventory') || roleStr.includes('warehouse') || roleStr.includes('stock')) role = 'inventory';
+        else if (roleStr.includes('hr') || roleStr.includes('human') || roleStr.includes('payroll')) role = 'hr';
+        else if (roleStr.includes('pharmac')) role = 'pharmacist';
+        else if (roleStr.includes('finance') || roleStr.includes('revenue')) role = 'finance';
+        else if (roleStr.includes('expense')) role = 'expenses';
+        else if (roleStr.includes('sales') || roleStr.includes('cashier') || roleStr.includes('pos')) role = 'cashier';
+        else if (roleStr.includes('operation')) role = 'operations';
+        else role = 'staff'; // default generic role
+      }
 
-      let role = 'cashier'; // fallback
-      if (roleStr.includes('admin') || roleStr.includes('administration')) role = 'admin';
-      else if (roleStr.includes('manager') || roleStr.includes('management')) role = 'manager';
-      else if (roleStr.includes('inventory') || roleStr.includes('warehouse') || roleStr.includes('stock')) role = 'inventory';
-      else if (roleStr.includes('hr') || roleStr.includes('human') || roleStr.includes('payroll')) role = 'hr';
-      else if (roleStr.includes('pharmac')) role = 'pharmacist';
-      else if (roleStr.includes('finance') || roleStr.includes('revenue')) role = 'manager';
-      else if (roleStr.includes('expense')) role = 'expenses';
-      else if (roleStr.includes('eod')) role = 'cashier';
-      else if (roleStr.includes('sales') || roleStr.includes('cashier') || roleStr.includes('pos')) role = 'cashier';
-      else if (roleStr.includes('operation')) role = 'cashier'; // EOD Operations
-
-      // Ensure phone is unique — if already taken, generate a unique internal placeholder
       let userPhone = phone;
       if (userPhone) {
         const phoneExists = await User.findOne({ where: { phone: userPhone }, transaction });

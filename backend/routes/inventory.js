@@ -120,7 +120,8 @@ router.post('/restock', auth, roleCheck(['admin', 'inventory', 'manager']), asyn
       productId,
       userId: req.user.id,
       change: quantity,
-      reason: reason || 'restock'
+      type: 'restock',
+      notes: reason || 'restock'
     }, { transaction });
     
     await transaction.commit();

@@ -1,6 +1,7 @@
 const express = require('express');
 const { Leave, LeaveBalance, Employee, User } = require('../models');
 const { auth, roleCheck } = require('../middleware/auth');
+const socket = require('../socket');
 const router = express.Router();
 
 // Apply for leave

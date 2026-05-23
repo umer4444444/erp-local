@@ -13,6 +13,31 @@ const Customers = () => {
   const [showModal, setShowModal] = useState(false);
   const [loading, setLoading] = useState(true);
   const [newCustomer, setNewCustomer] = useState({ name: '', email: '', phone: '', address: '' });
+  // State for edit/delete and history modal
+  const [selectedCustomer, setSelectedCustomer] = useState(null);
+  const [showHistoryModal, setShowHistoryModal] = useState(false);
+  const [history, setHistory] = useState([]);
+  const [historyLoading, setHistoryLoading] = useState(false);
+
+  const handleOptions = async (customer) => {
+    const action = window.prompt('Enter "edit" to edit or "delete" to delete the customer');
+    if (!action) return;
+    if (action.toLowerCase() === 'edit') {
+      setNewCustomer({ name: customer.name, email: customer.email, phone: customer.phone, address: customer.address });
+      setShowModal(true);
+    } else if (action.toLowerCase() === 'delete') {
+      if (window.confirm(`Are you sure you want to delete ${customer.name}?`)) {
+        try {
+          await customerAPI.delete(customer.id);
+          fetchCustomers();
+        } catch (err) {
+          alert('Failed to delete customer');
+        }
+      }
+    }
+  };
+
+
 
   const fetchCustomers = async () => {
     try {
@@ -42,6 +67,19 @@ const Customers = () => {
       alert('Failed to add customer');
     }
   };
+
+  const fetchHistory = async (customerId) => {
+    setHistoryLoading(true);
+    try {
+      const res = await customerAPI.getHistory(customerId);
+      setHistory(res.data);
+    } catch (err) {
+      console.error('Failed to fetch history', err);
+    } finally {
+      setHistoryLoading(false);
+    }
+  };
+
 
   const filtered = customers.filter(c => 
     c.name.toLowerCase().includes(search.toLowerCase()) || 
@@ -92,7 +130,7 @@ const Customers = () => {
                 <div style={{ width: 56, height: 56, borderRadius: 18, background: '#f1f5f9', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#0a84ff', fontWeight: 900, fontSize: 20 }}>
                   {c.name[0]}
                 </div>
-                <button style={{ border: 'none', background: 'transparent', color: '#94a3b8', cursor: 'pointer' }}><MoreVertical size={20} /></button>
+                <button onClick={() => handleOptions(c)} style={{ border: 'none', background: 'transparent', color: '#94a3b8', cursor: 'pointer' }}><MoreVertical size={20} /></button>
               </div>
 
               <div style={{ marginBottom: 24 }}>
@@ -118,7 +156,11 @@ const Customers = () => {
 
               <div style={{ marginTop: 24, paddingTop: 20, borderTop: '1px solid #f1f5f9', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <div style={{ fontSize: 12, fontWeight: 800, color: '#10b981', background: '#f0fdf4', padding: '4px 10px', borderRadius: 8 }}>Active Client</div>
-                <button style={{ color: '#0a84ff', border: 'none', background: 'transparent', fontWeight: 800, fontSize: 13, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 4 }}>
+                <button onClick={async () => {
+                  setSelectedCustomer(c);
+                  await fetchHistory(c.id);
+                  setShowHistoryModal(true);
+                }} style={{ color: '#0a84ff', border: 'none', background: 'transparent', fontWeight: 800, fontSize: 13, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 4 }}>
                   History <ArrowUpRight size={14} />
                 </button>
               </div>
@@ -161,6 +203,37 @@ const Customers = () => {
             </motion.div>
           </div>
         )}
+            {/* History Modal */}
+      {showHistoryModal && selectedCustomer && (
+        <AnimatePresence>
+          <div style={{ position: 'fixed', inset: 0, zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 24 }}>
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setShowHistoryModal(false)} style={{ position: 'absolute', inset: 0, background: 'rgba(15,23,42,0.6)', backdropFilter: 'blur(8px)' }} />
+            <motion.div initial={{ scale: 0.9, y: 40 }} animate={{ scale: 1, y: 0 }} exit={{ scale: 0.9, y: 40 }} style={{ background: 'white', borderRadius: 32, width: '90%', maxWidth: 500, position: 'relative', padding: 40, boxShadow: '0 40px 100px rgba(0,0,0,0.2)' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 32 }}>
+                <h2 style={{ fontSize: 24, fontWeight: 900 }}>History for {selectedCustomer.name}</h2>
+                <button onClick={() => setShowHistoryModal(false)} style={{ border: 'none', background: 'transparent', cursor: 'pointer' }}><X size={24} /></button>
+              </div>
+              {historyLoading ? (
+                <p>Loading...</p>
+              ) : (
+                <div style={{ maxHeight: '60vh', overflowY: 'auto' }}>
+                  {history.length === 0 ? (
+                    <p>No history available.</p>
+                  ) : (
+                    <ul style={{ listStyle: 'none', padding: 0 }}>
+                      {history.map((item, idx) => (
+                        <li key={idx} style={{ padding: '12px 0', borderBottom: '1px solid #e5e7eb' }}>
+                          <pre style={{ margin: 0, whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>{JSON.stringify(item, null, 2)}</pre>
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                </div>
+              )}
+            </motion.div>
+          </div>
+        </AnimatePresence>
+      )}
       </AnimatePresence>
     </div>
   );

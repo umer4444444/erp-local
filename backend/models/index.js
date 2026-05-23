@@ -37,15 +37,14 @@ StockLog.belongsTo(Product, { foreignKey: 'productId' });
 Product.hasMany(ProductVariation, { as: 'Variations', foreignKey: 'productId' });
 ProductVariation.belongsTo(Product, { foreignKey: 'productId' });
 
-User.hasMany(StockLog, { foreignKey: 'userId' });
+User.hasMany(StockLog, { foreignKey: 'userId', onDelete: 'CASCADE', onUpdate: 'CASCADE' });
 StockLog.belongsTo(User, { foreignKey: 'userId' });
 
 // Sales Associations
 Customer.hasMany(Sale, { foreignKey: 'customerId' });
 Sale.belongsTo(Customer, { foreignKey: 'customerId' });
 
-User.hasMany(Sale, { foreignKey: 'userId' });
-Sale.belongsTo(User, { foreignKey: 'userId' });
+
 
 Sale.hasMany(SaleItem, { as: 'Items', foreignKey: 'saleId' });
 SaleItem.belongsTo(Sale, { foreignKey: 'saleId' });
@@ -56,6 +55,10 @@ SaleItem.belongsTo(Product, { foreignKey: 'productId' });
 // User/SalesSession Associations
 User.hasMany(SalesSession, { foreignKey: 'userId' });
 SalesSession.belongsTo(User, { foreignKey: 'userId' });
+User.hasMany(Sale, { foreignKey: 'userId', constraints: false });
+Sale.belongsTo(User, { foreignKey: 'userId', constraints: false });
+
+
 
 // Ride & Bid Associations
 User.hasMany(Ride, { as: 'RiderRides', foreignKey: 'riderId' });

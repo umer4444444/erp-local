@@ -35,6 +35,7 @@ export const customerAPI = {
   getCustomers: () => API.get('/customers'),
   search: (q) => API.get('/customers/search', { params: { q } }),
   create: (data) => API.post('/customers', data),
+  delete: (id) => API.delete(`/customers/${id}`),
   getHistory: (id) => API.get(`/customers/${id}/history`),
 };
 

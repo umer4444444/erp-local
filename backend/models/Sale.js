@@ -12,6 +12,8 @@ const Sale = sequelize.define('Sale', {
   },
   userId: {
     type: DataTypes.UUID,
+    allowNull: true,
+    defaultValue: null,
   },
   totalAmount: {
     type: DataTypes.DECIMAL(12, 2),

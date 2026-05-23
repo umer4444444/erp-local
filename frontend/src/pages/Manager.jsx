@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { io } from 'socket.io-client';
 import { 
   Shield, Users, Activity, TrendingUp, DollarSign, 
   ArrowUpRight, Clock, UserCheck, ShieldCheck, Zap,
@@ -43,6 +44,10 @@ const Manager = () => {
   };
 
   useEffect(() => {
+    const socket = io('http://localhost:5000'); // connect to backend socket server
+    socket.on('staffEngagementUpdated', data => {
+      setOverview(prev => ({ ...prev, activeStaff: data.activeStaff }));
+    });
     const fetchData = async () => {
       try {
         const [ovRes, empRes] = await Promise.all([
@@ -57,10 +62,12 @@ const Manager = () => {
         setLoading(false);
       }
     };
-
     fetchData();
-    const interval = setInterval(fetchData, 3000); // Live polling every 3 seconds
-    return () => clearInterval(interval);
+    const interval = setInterval(fetchData, 3000);
+    return () => {
+      clearInterval(interval);
+      socket.disconnect();
+    };
   }, []);
 
   const StatBox = ({ title, value, sub, icon, rgb }) => (

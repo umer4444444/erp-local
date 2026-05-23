@@ -14,18 +14,19 @@ const Sidebar = () => {
     { name: 'Inventory',     icon: <Package size={18} />,          path: '/inventory', roles: ['admin', 'inventory', 'manager'] },
     { name: 'Sales POS',     icon: <ShoppingCart size={18} />,     path: '/sales',     roles: ['admin', 'cashier', 'manager'] },
     { name: 'Sales History', icon: <DollarSign size={18} />,       path: '/sales/history', roles: ['admin', 'cashier', 'manager'] },
-    { name: 'Revenue',       icon: <DollarSign size={18} />,       path: '/revenue',   roles: ['admin', 'manager'] },
-    { name: 'Expenses',      icon: <TrendingDown size={18} />,     path: '/expenses',  roles: ['admin', 'manager', 'expenses'] },
+    { name: 'Revenue',       icon: <DollarSign size={18} />,       path: '/revenue',   roles: ['admin', 'manager', 'finance'] },
+    { name: 'Expenses',      icon: <TrendingDown size={18} />,     path: '/expenses',  roles: ['admin', 'manager', 'expenses', 'finance'] },
     { name: 'Customers',     icon: <Users size={18} />,            path: '/customers', roles: ['admin', 'cashier', 'manager'] },
     { name: 'Employees',     icon: <Briefcase size={18} />,        path: '/employees', roles: ['admin', 'hr', 'manager'] },
-    { name: 'Attendance',    icon: <Clock size={18} />,            path: '/attendance', roles: ['admin', 'manager', 'cashier', 'hr', 'inventory'] },
+    { name: 'Attendance',    icon: <Clock size={18} />,            path: '/attendance', roles: ['admin', 'manager', 'cashier', 'hr', 'inventory', 'finance', 'staff', 'operations', 'pharmacist', 'expenses'] },
     { name: 'Shift Audit',   icon: <Briefcase size={18} />,        path: '/shift-audit', roles: ['admin', 'hr'] },
-    { name: 'Leave Requests',icon: <Calendar size={18} />,         path: '/leaves',    roles: ['admin', 'manager', 'cashier', 'hr', 'inventory'] },
+    { name: 'Leave Requests',icon: <Calendar size={18} />,         path: '/leaves',    roles: ['admin', 'manager', 'cashier', 'hr', 'inventory', 'finance', 'staff', 'operations', 'pharmacist', 'expenses'] },
     { name: 'Payroll',       icon: <DollarSign size={18} />,       path: '/payroll',   roles: ['admin', 'hr'] },
     { name: 'Pharmacy',      icon: <Pill size={18} />,             path: '/pharmacy',  roles: ['admin', 'pharmacist', 'manager'] },
     { name: 'Suppliers',     icon: <Truck size={18} />,            path: '/suppliers', roles: ['admin', 'inventory', 'manager'] },
     { name: 'Users',         icon: <User size={18} />,             path: '/users',     roles: ['admin'] },
     { name: 'HR Portal',     icon: <Shield size={18} />,           path: '/hr',        roles: ['admin', 'hr'] },
+    { name: 'EOD Report',    icon: <Briefcase size={18} />,        path: '/eod',       roles: ['admin', 'manager', 'cashier', 'operations'] },
   ];
 
   const filtered = menuItems.filter(i => i.roles.includes(role));

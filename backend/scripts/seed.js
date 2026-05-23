@@ -12,13 +12,14 @@ const seed = async () => {
 
     // 1. Create Users for all roles
     const salt = await bcrypt.genSalt(10);
-    const passwordHash = await bcrypt.hash('admin123', salt);
+    const adminHash = await bcrypt.hash('admin123', salt);
+    const defaultHash = await bcrypt.hash('staff123', salt);
 
     const admin = await User.create({
       name: 'Project Director',
       email: 'admin@lancerstech.com',
       phone: '0000000000',
-      passwordHash,
+      passwordHash: adminHash,
       role: 'admin'
     });
 
@@ -26,7 +27,7 @@ const seed = async () => {
       name: 'Site Manager',
       email: 'manager@lancerstech.com',
       phone: '1111111111',
-      passwordHash,
+      passwordHash: defaultHash,
       role: 'manager'
     });
 
@@ -34,7 +35,7 @@ const seed = async () => {
       name: 'Inventory Controller',
       email: 'inventory@lancerstech.com',
       phone: '2222222222',
-      passwordHash,
+      passwordHash: defaultHash,
       role: 'inventory'
     });
 
@@ -42,7 +43,7 @@ const seed = async () => {
       name: 'HR & Payroll Lead',
       email: 'hr@lancerstech.com',
       phone: '3333333333',
-      passwordHash,
+      passwordHash: defaultHash,
       role: 'hr'
     });
 

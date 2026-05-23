@@ -1,5 +1,5 @@
 const express = require('express');
-const { Sale, SalesSession } = require('../models');
+const { Sale, SalesSession, Employee, Department, Designation, User } = require('../models');
 const { auth, roleCheck } = require('../middleware/auth');
 const { Op } = require('sequelize');
 const router = express.Router();
@@ -26,6 +26,22 @@ router.get('/overview', auth, roleCheck(['admin', 'manager']), async (req, res) 
       salesCount: salesToday || 0,
       activeStaff: activeSessions || 0
     });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
+router.get('/employees', auth, roleCheck(['admin', 'manager']), async (req, res) => {
+  try {
+    const employees = await Employee.findAll({
+      include: [
+        { model: User, attributes: ['id', 'name', 'email', 'role'] },
+        { model: Department, attributes: ['id', 'name'] },
+        { model: Designation, attributes: ['id', 'name'] }
+      ],
+      order: [['createdAt', 'DESC']]
+    });
+    res.json(employees);
   } catch (err) {
     res.status(500).json({ message: err.message });
   }

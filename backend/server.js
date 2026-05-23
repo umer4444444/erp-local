@@ -1,18 +1,14 @@
 const express = require('express');
 const http = require('http');
-const socketIo = require('socket.io');
+const socket = require('./socket');
 const cors = require('cors');
 require('dotenv').config();
 const { sequelize } = require('./models');
 
 const app = express();
 const server = http.createServer(app);
-const io = socketIo(server, {
-  cors: {
-    origin: "*",
-    methods: ["GET", "POST"]
-  }
-});
+const io = socket.init(server);
+// Socket.io CORS handled in socket.init
 
 // Middleware
 app.use(cors());
@@ -22,6 +18,7 @@ app.use(express.json());
 app.use('/api/sales', require('./routes/sales'));
 app.use('/api/customers', require('./routes/customers'));
 app.use('/api/auth', require('./routes/auth'));
+
 app.use('/api/inventory', require('./routes/inventory'));
 app.use('/api/hr', require('./routes/hr'));
 app.use('/api/users', require('./routes/users'));
@@ -53,12 +50,14 @@ io.on('connection', (socket) => {
 const PORT = process.env.PORT || 5000;
 
 // Sync Database and Start Server
-sequelize.sync({ alter: true }) // updates schema incrementally in dev
+sequelize
+  .query('SET FOREIGN_KEY_CHECKS = 0')
+  .then(() => sequelize.sync({ alter: true }))
+  .then(() => sequelize.query('ALTER TABLE Sales DROP FOREIGN KEY sales_ibfk_2').catch(() => console.log('FK already dropped')))
+  .then(() => sequelize.query('SET FOREIGN_KEY_CHECKS = 1'))
   .then(() => {
     console.log('Database connected and synced.');
-    server.listen(PORT, () => {
-      console.log(`Server running on port ${PORT}`);
-    });
+    server.listen(PORT, () => console.log(`Server running on port ${PORT}`));
   })
   .catch(err => {
     console.error('Unable to connect to the database:', err);

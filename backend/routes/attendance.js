@@ -3,6 +3,7 @@ const { Attendance, Employee, WorkShift, User } = require('../models');
 const { auth, roleCheck } = require('../middleware/auth');
 const { Op } = require('sequelize');
 const router = express.Router();
++const socket = require('../socket');
 
 // Clock In
 router.post('/clockin', auth, async (req, res) => {
@@ -41,6 +42,11 @@ router.post('/clockin', auth, async (req, res) => {
       status: 'present'
     });
 
+    // Emit real‑time staff engagement update
+    const activeCount = await Attendance.count({ where: { clockOut: null } });
+    const io = socket.getIo();
+    if (io) io.emit('staffEngagementUpdated', { activeStaff: activeCount });
+
     res.status(201).json(attendance);
   } catch (err) {
     res.status(500).json({ message: err.message });
@@ -70,6 +76,12 @@ router.post('/clockout', auth, async (req, res) => {
     if (!attendance) return res.status(404).json({ message: 'No active clock-in found' });
 
     await attendance.update({ clockOut: new Date() });
+
+    // Emit real‑time staff engagement update after clock‑out
+    const activeCount = await Attendance.count({ where: { clockOut: null } });
+    const io = socket.getIo();
+    if (io) io.emit('staffEngagementUpdated', { activeStaff: activeCount });
+
     res.json(attendance);
   } catch (err) {
     res.status(500).json({ message: err.message });
@@ -99,6 +111,10 @@ router.get('/active', auth, async (req, res) => {
       where: { clockOut: null },
       include: [{ model: Employee, include: [User] }]
     });
+
+    // Emit update for manager dashboards (optional – keeps client in sync)
+    const io = socket.getIo();
+    if (io) io.emit('staffEngagementUpdated', { activeStaff: active.length });
     res.json(active);
   } catch (err) {
     res.status(500).json({ message: err.message });

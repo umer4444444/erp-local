@@ -257,8 +257,14 @@ const Sales = () => {
       {/* Receipt Modal (Invoice) */}
       {receipt && (
         <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20 }}>
-          <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} style={{ background: 'white', width: '100%', maxWidth: 450, padding: 32, borderRadius: 32, maxHeight: '90vh', display: 'flex', flexDirection: 'column' }}>
-            
+          <motion.div 
+            initial={{ scale: 0.9, opacity: 0 }} 
+            animate={{ scale: 1, opacity: 1 }} 
+            style={{ background: 'white', width: '100%', maxWidth: 450, padding: 32, borderRadius: 32, maxHeight: '90vh', display: 'flex', flexDirection: 'column', position: 'relative' }}
+          >
+            <button onClick={() => setReceipt(null)} style={{ position: 'absolute', top: 12, right: 12, background: 'transparent', border: 'none', cursor: 'pointer' }}>
+              <X size={20} color="#64748b" />
+            </button>
             <div id="printable-invoice" style={{ flex: 1, overflowY: 'auto', paddingRight: 10 }}>
               <div style={{ textAlign: 'center', marginBottom: 24 }}>
                 <h2 style={{ fontSize: 28, fontWeight: 900, color: '#0f172a', margin: 0 }}>ENTERPRISE ERP</h2>

@@ -44,6 +44,41 @@ const Dashboard = ({ user }) => {
   const [activeAttendance, setActiveAttendance] = useState(null);
   const [loading, setLoading] = useState(true);
 
+  // Helper to fetch today's stats on button click
+  const fetchTodayStats = async () => {
+    try {
+      const res = await salesAPI.getTodayStats();
+      // Simple feedback – you can replace with a UI toast
+      alert(`Today's sales: ${res.data.count || 0}, Revenue: $${res.data.revenue || 0}`);
+    } catch (err) {
+      console.error('Failed to fetch today stats', err);
+      alert('Unable to retrieve today statistics');
+    }
+  };
+
+  // Helper to download a simple CSV report
+  const handleDownloadReport = async () => {
+    try {
+      const res = await salesAPI.getEOD(); // assume endpoint returns an array of records
+      const rows = res.data || [];
+      const csvContent =
+        'data:text/csv;charset=utf-8,' +
+        ['ID,Date,Amount,Employee']
+          .concat(rows.map(r => `${r.id},${r.date},${r.amount},${r.employeeName}`))
+          .join('\n');
+      const encodedUri = encodeURI(csvContent);
+      const link = document.createElement('a');
+      link.setAttribute('href', encodedUri);
+      link.setAttribute('download', 'eod_report.csv');
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    } catch (err) {
+      console.error('Report download failed', err);
+      alert('Unable to generate report');
+    }
+  };
+
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -172,10 +207,10 @@ const Dashboard = ({ user }) => {
           <p style={{ color: '#64748b', marginTop: 4, fontWeight: 500 }}>Here's what's happening with your business today.</p>
         </div>
         <div style={{ display: 'flex', gap: 12 }}>
-          <button style={{ padding: '12px 20px', borderRadius: 14, border: '1px solid #e2e8f0', background: 'white', fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 8 }}>
+          <button style={{ padding: '12px 20px', borderRadius: 14, border: '1px solid #e2e8f0', background: 'white', fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 8 }} onClick={() => { fetchTodayStats(); }}>
             <Calendar size={18} /> Today
           </button>
-          <button style={{ padding: '12px 20px', borderRadius: 14, background: '#0f172a', color: 'white', fontWeight: 700, border: 'none', cursor: 'pointer' }}>
+          <button style={{ padding: '12px 20px', borderRadius: 14, background: '#0f172a', color: 'white', fontWeight: 700, border: 'none', cursor: 'pointer' }} onClick={handleDownloadReport}>
             Download Report
           </button>
         </div>

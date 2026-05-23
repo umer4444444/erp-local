@@ -70,19 +70,19 @@ function AppContent() {
               <Route path="/inventory" element={<PrivateRoute roles={['admin', 'inventory', 'manager']}><PageTransition><Inventory user={user} /></PageTransition></PrivateRoute>} />
               <Route path="/sales" element={<PrivateRoute roles={['admin', 'cashier', 'manager']}><PageTransition><Sales /></PageTransition></PrivateRoute>} />
               <Route path="/sales/history" element={<PrivateRoute roles={['admin', 'cashier', 'manager']}><PageTransition><SalesHistory /></PageTransition></PrivateRoute>} />
-              <Route path="/revenue" element={<PrivateRoute roles={['admin', 'manager']}><PageTransition><Revenue /></PageTransition></PrivateRoute>} />
+              <Route path="/revenue" element={<PrivateRoute roles={['admin', 'manager', 'finance']}><PageTransition><Revenue /></PageTransition></PrivateRoute>} />
               <Route path="/hr" element={<PrivateRoute roles={['admin', 'hr']}><PageTransition><HR /></PageTransition></PrivateRoute>} />
               <Route path="/employees" element={<PrivateRoute roles={['admin', 'hr', 'manager']}><PageTransition><Employees /></PageTransition></PrivateRoute>} />
-              <Route path="/attendance" element={<PrivateRoute roles={['admin', 'manager', 'cashier', 'hr', 'inventory']}><PageTransition><Attendance /></PageTransition></PrivateRoute>} />
+              <Route path="/attendance" element={<PrivateRoute roles={['admin', 'manager', 'cashier', 'hr', 'inventory', 'finance', 'staff', 'operations', 'pharmacist', 'expenses']}><PageTransition><Attendance /></PageTransition></PrivateRoute>} />
               <Route path="/shift-audit" element={<PrivateRoute roles={['admin', 'hr']}><PageTransition><ShiftAudit /></PageTransition></PrivateRoute>} />
-              <Route path="/leaves" element={<PrivateRoute roles={['admin', 'manager', 'cashier', 'hr', 'inventory']}><PageTransition><Leaves /></PageTransition></PrivateRoute>} />
+              <Route path="/leaves" element={<PrivateRoute roles={['admin', 'manager', 'cashier', 'hr', 'inventory', 'finance', 'staff', 'operations', 'pharmacist', 'expenses']}><PageTransition><Leaves /></PageTransition></PrivateRoute>} />
               <Route path="/payroll" element={<PrivateRoute roles={['admin', 'hr']}><PageTransition><Payroll /></PageTransition></PrivateRoute>} />
               <Route path="/pharmacy" element={<PrivateRoute roles={['admin', 'pharmacist', 'manager']}><PageTransition><Pharmacy /></PageTransition></PrivateRoute>} />
               <Route path="/suppliers" element={<PrivateRoute roles={['admin', 'inventory', 'manager']}><PageTransition><Suppliers /></PageTransition></PrivateRoute>} />
               <Route path="/customers" element={<PrivateRoute><PageTransition><Customers /></PageTransition></PrivateRoute>} />
               <Route path="/expenses" element={<PrivateRoute roles={['admin', 'manager', 'expenses']}><PageTransition><Expenses /></PageTransition></PrivateRoute>} />
               <Route path="/users" element={<PrivateRoute roles={['admin', 'manager']}><PageTransition><Users /></PageTransition></PrivateRoute>} />
-              <Route path="/eod" element={<PrivateRoute><PageTransition><EODReport /></PageTransition></PrivateRoute>} />
+              <Route path="/eod" element={<PrivateRoute roles={['admin', 'manager', 'cashier', 'operations']}><PageTransition><EODReport /></PageTransition></PrivateRoute>} />
               <Route path="*" element={<Navigate to={getDefaultRoute(user?.role)} />} />
             </Routes>
           </AnimatePresence>

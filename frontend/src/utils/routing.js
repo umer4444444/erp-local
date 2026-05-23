@@ -7,6 +7,9 @@ export const getDefaultRoute = (role) => {
     case 'inventory': return '/inventory';
     case 'pharmacist': return '/pharmacy';
     case 'expenses': return '/expenses';
-    default: return '/login';
+    case 'finance': return '/revenue';
+    case 'operations': return '/eod';
+    case 'staff': return '/attendance';
+    default: return '/attendance';
   }
 };

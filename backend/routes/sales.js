@@ -29,6 +29,39 @@ router.get('/history', auth, async (req, res) => {
   }
 });
 
+router.get('/held', auth, async (req, res) => {
+  try {
+    const heldSales = await Sale.findAll({
+      where: { status: 'held' },
+      include: [{ model: SaleItem, as: 'Items', include: [Product] }, Customer],
+      order: [['createdAt', 'DESC']]
+    });
+    res.json(heldSales);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
+router.post('/discount', auth, async (req, res) => {
+  try {
+    const { code } = req.body;
+    const normalized = (code || '').toString().trim().toUpperCase();
+    const promoCodes = {
+      SAVE10: 10,
+      SAVE15: 15,
+      SUMMER20: 20
+    };
+
+    if (!normalized || !Object.prototype.hasOwnProperty.call(promoCodes, normalized)) {
+      return res.status(404).json({ message: 'Invalid promo code' });
+    }
+
+    res.json({ code: normalized, percent: promoCodes[normalized], message: `Promo code ${normalized} applied.` });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
 // Create Sale (Advanced)
 router.post('/', auth, async (req, res) => {
   const transaction = await sequelize.transaction();
@@ -69,7 +102,8 @@ router.post('/', auth, async (req, res) => {
         productId: item.productId,
         userId: req.user.id,
         change: -item.quantity,
-        reason: 'sale',
+        type: 'sale',
+        notes: 'sale',
         reference: sale.id
       }, { transaction });
     }
@@ -146,7 +180,8 @@ router.post('/:id/void', auth, roleCheck(['admin', 'manager', 'hr']), async (req
           productId: product.id,
           userId: req.user.id,
           change: item.quantity,
-          reason: 'void',
+          type: 'void',
+          notes: reason,
           reference: sale.id
         }, { transaction });
       }
