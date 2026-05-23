@@ -3,6 +3,10 @@ const jwt = require('jsonwebtoken');
 const { User } = require('../models');
 
 const auth = async (req, res, next) => {
+  // Allow unauthenticated access to public API routes
+  if (req.path.startsWith('/api/public')) {
+    return next();
+  }
   const authHeader = req.header('Authorization') || req.header('authorization');
   const token = authHeader?.split(' ')[1]?.trim();
 
