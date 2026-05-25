@@ -13,6 +13,22 @@ API.interceptors.request.use((config) => {
   return config;
 });
 
+// Handle 401 Unauthorized errors globally
+API.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (error.response && error.response.status === 401) {
+      // Avoid redirect loops if login itself fails with 401
+      if (!error.config.url.includes('/auth/login')) {
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
+        window.location.href = '/login';
+      }
+    }
+    return Promise.reject(error);
+  }
+);
+
 export const authAPI = {
   login: (data) => API.post('/auth/login', data),
   register: (data) => API.post('/auth/register', data),
