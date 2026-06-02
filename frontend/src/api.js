@@ -53,6 +53,8 @@ export const customerAPI = {
   create: (data) => API.post('/customers', data),
   delete: (id) => API.delete(`/customers/${id}`),
   getHistory: (id) => API.get(`/customers/${id}/history`),
+  payOutstanding: (id, data) => API.post(`/customers/${id}/pay-outstanding`, data),
+  getLoyaltyTransactions: (id) => API.get(`/customers/${id}/loyalty`),
 };
 
 export const inventoryAPI = {
@@ -62,6 +64,11 @@ export const inventoryAPI = {
   getAlerts: () => API.get('/inventory/alerts'),
   restock: (data) => API.post('/inventory/restock', data),
   getCategories: () => API.get('/inventory/categories'),
+  adjustStock: (data) => API.post('/inventory/adjust', data),
+  getMovementLogs: (params) => API.get('/inventory/logs', { params }),
+  importCSV: (data) => API.post('/inventory/import', data),
+  getPredictive: () => API.get('/inventory/predictive'),
+  getAutoDiscount: () => API.get('/inventory/auto-discount'),
 };
 
 export const hrAPI = {
@@ -78,8 +85,12 @@ export const shiftAPI = {
 };
 
 export const managerAPI = {
-  getOverview: () => API.get('/manager/overview'),
-  getEmployees: () => API.get('/manager/employees'),
+  getOverview:     () => API.get('/manager/overview'),
+  getEmployees:    () => API.get('/manager/employees'),
+  getSalesToday:   () => API.get('/manager/sales-today'),
+  getPendingLeaves:() => API.get('/manager/leaves/pending'),
+  updateLeave:     (id, data) => API.put(`/manager/leaves/${id}`, data),
+  getActiveStaff:  () => API.get('/manager/staff/active'),
 };
 
 // New Day 6 API
@@ -98,10 +109,11 @@ export const usersAPI = {
   create: (data) => API.post('/users', data),
   updateRole: (id, role) => API.put(`/users/${id}/role`, { role }),
   delete: (id) => API.delete(`/users/${id}`),
+  toggleActive: (id) => API.put(`/users/${id}/toggle-active`),
 };
 
 export const attendanceAPI = {
-  clockIn: () => API.post('/attendance/clockin'),
+  clockIn: (data) => API.post('/attendance/clockin', data),
   clockOut: () => API.post('/attendance/clockout'),
   getToday: () => API.get('/attendance/today'),
   getActive: () => API.get('/attendance/active'),
@@ -142,8 +154,40 @@ export const pharmacyAPI = {
 export const supplierAPI = {
   getAll: () => API.get('/suppliers'),
   add: (data) => API.post('/suppliers', data),
+  update: (id, data) => API.put(`/suppliers/${id}`, data),
   createOrder: (data) => API.post('/suppliers/orders', data),
   getOrders: () => API.get('/suppliers/orders'),
+  receiveOrder: (id, data) => API.put(`/suppliers/orders/${id}/receive`, data),
+};
+
+export const adminAPI = {
+  getDashboardStats: () => API.get('/admin/dashboard'),
+  getAuditLogs: (params) => API.get('/admin/audit-logs', { params }),
+  getSettings: () => API.get('/admin/settings'),
+  updateSettings: (data) => API.put('/admin/settings', data),
+};
+
+export const ridesAPI = {
+  getAll: () => API.get('/rides'),
+  create: (data) => API.post('/rides', data),
+  getDrivers: () => API.get('/rides/drivers'),
+  assign: (id, driverId) => API.put(`/rides/${id}/assign`, { driverId }),
+  updateStatus: (id, status) => API.put(`/rides/${id}/status`, { status }),
+};
+
+export const reportsAPI = {
+  getRevenue: (params) => API.get('/reports/revenue', { params }),
+  getPnL: (params) => API.get('/reports/pnl', { params }),
+  getTopProducts: (limit) => API.get('/reports/topproducts', { params: { limit } }),
+  getSalesperson: () => API.get('/reports/salesperson'),
+  getDaily: () => API.get('/reports/daily'),
+  getCustomerReport: (id) => API.get(`/reports/customer/${id}`),
+};
+
+export const advanceAPI = {
+  request: (data) => API.post('/payroll/advance/request', data),
+  getPending: () => API.get('/payroll/advance/pending'),
+  approve: (id, status) => API.put(`/payroll/advance/${id}/approve`, { status }),
 };
 
 export default API;

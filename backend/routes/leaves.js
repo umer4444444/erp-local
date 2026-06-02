@@ -99,4 +99,29 @@ router.put('/:id/status', auth, roleCheck(['admin', 'manager', 'hr']), async (re
   }
 });
 
+// Get employee's leave history (HR/Admin/Manager only)
+router.get('/employee/:id', auth, roleCheck(['admin', 'manager', 'hr']), async (req, res) => {
+  try {
+    const leaves = await Leave.findAll({
+      where: { employeeId: req.params.id },
+      order: [['createdAt', 'DESC']]
+    });
+    res.json(leaves);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
+// Get employee's leave balance
+router.get('/balance/:id', auth, async (req, res) => {
+  try {
+    const balance = await LeaveBalance.findAll({
+      where: { employeeId: req.params.id }
+    });
+    res.json(balance);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
 module.exports = router;

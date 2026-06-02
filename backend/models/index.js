@@ -26,6 +26,11 @@ const Prescription = require('./Prescription');
 const PrescriptionItem = require('./PrescriptionItem');
 const Supplier = require('./Supplier');
 const PurchaseOrder = require('./PurchaseOrder');
+const AuditLog = require('./AuditLog');
+const LoyaltyTransaction = require('./LoyaltyTransaction');
+const POItem = require('./POItem');
+const SalaryAdvance = require('./SalaryAdvance');
+const DocumentVault = require('./DocumentVault');
 
 // Inventory Associations
 Category.hasMany(Product, { foreignKey: 'categoryId' });
@@ -122,6 +127,28 @@ PrescriptionItem.belongsTo(Drug, { foreignKey: 'drugId' });
 Supplier.hasMany(PurchaseOrder, { foreignKey: 'supplierId' });
 PurchaseOrder.belongsTo(Supplier, { foreignKey: 'supplierId' });
 
+// AuditLog Associations
+User.hasMany(AuditLog, { foreignKey: 'userId' });
+AuditLog.belongsTo(User, { foreignKey: 'userId' });
+
+// Customer Loyalty Associations
+Customer.hasMany(LoyaltyTransaction, { foreignKey: 'customerId' });
+LoyaltyTransaction.belongsTo(Customer, { foreignKey: 'customerId' });
+Sale.hasMany(LoyaltyTransaction, { foreignKey: 'saleId' });
+LoyaltyTransaction.belongsTo(Sale, { foreignKey: 'saleId' });
+
+// POItem Associations
+PurchaseOrder.hasMany(POItem, { as: 'Items', foreignKey: 'purchaseOrderId', onDelete: 'CASCADE' });
+POItem.belongsTo(PurchaseOrder, { foreignKey: 'purchaseOrderId' });
+Product.hasMany(POItem, { foreignKey: 'productId' });
+POItem.belongsTo(Product, { foreignKey: 'productId' });
+
+// SalaryAdvance & DocumentVault Associations
+Employee.hasMany(SalaryAdvance, { foreignKey: 'employeeId' });
+SalaryAdvance.belongsTo(Employee, { foreignKey: 'employeeId' });
+Employee.hasMany(DocumentVault, { foreignKey: 'employeeId' });
+DocumentVault.belongsTo(Employee, { foreignKey: 'employeeId' });
+
 module.exports = {
   sequelize,
   User,
@@ -150,5 +177,10 @@ module.exports = {
   Prescription,
   PrescriptionItem,
   Supplier,
-  PurchaseOrder
+  PurchaseOrder,
+  AuditLog,
+  LoyaltyTransaction,
+  POItem,
+  SalaryAdvance,
+  DocumentVault
 };

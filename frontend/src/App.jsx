@@ -20,6 +20,7 @@ import Pharmacy from './pages/Pharmacy';
 import Suppliers from './pages/Suppliers';
 import EODReport from './pages/EODReport';
 import Expenses from './pages/Expenses';
+import Delivery from './pages/Delivery';
 import Login from './pages/Login';
 import Landing from './pages/Landing';
 import { AuthProvider, useAuth } from './context/AuthContext';
@@ -83,6 +84,7 @@ function AppContent() {
               <Route path="/expenses" element={<PrivateRoute roles={['admin', 'manager', 'expenses']}><PageTransition><Expenses /></PageTransition></PrivateRoute>} />
               <Route path="/users" element={<PrivateRoute roles={['admin', 'manager']}><PageTransition><Users /></PageTransition></PrivateRoute>} />
               <Route path="/eod" element={<PrivateRoute roles={['admin', 'manager', 'cashier', 'operations']}><PageTransition><EODReport /></PageTransition></PrivateRoute>} />
+              <Route path="/delivery" element={<PrivateRoute roles={['admin', 'manager', 'operations']}><PageTransition><Delivery /></PageTransition></PrivateRoute>} />
               <Route path="*" element={<Navigate to={getDefaultRoute(user?.role)} />} />
             </Routes>
           </AnimatePresence>

@@ -5,9 +5,40 @@ const { Op } = require('sequelize');
 const router = express.Router();
 const socket = require('../socket');
 
+function getDistance(lat1, lon1, lat2, lon2) {
+  const R = 6371e3; // metres
+  const phi1 = lat1 * Math.PI/180;
+  const phi2 = lat2 * Math.PI/180;
+  const deltaPhi = (lat2-lat1) * Math.PI/180;
+  const deltaLambda = (lon2-lon1) * Math.PI/180;
+
+  const a = Math.sin(deltaPhi/2) * Math.sin(deltaPhi/2) +
+            Math.cos(phi1) * Math.cos(phi2) *
+            Math.sin(deltaLambda/2) * Math.sin(deltaLambda/2);
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+
+  return R * c; // in metres
+}
+
 // Clock In
 router.post('/clockin', auth, async (req, res) => {
   try {
+    const { latitude, longitude } = req.body;
+    
+    // Strict GPS Fence: 100 meters from office/store location
+    const OFFICE_LAT = 31.5204;
+    const OFFICE_LNG = 74.3587;
+    const MAX_DISTANCE_M = 100;
+
+    if (!latitude || !longitude) {
+      return res.status(400).json({ message: 'GPS coordinates are required to clock in.' });
+    }
+
+    const distance = getDistance(parseFloat(latitude), parseFloat(longitude), OFFICE_LAT, OFFICE_LNG);
+    if (distance > MAX_DISTANCE_M) {
+      return res.status(400).json({ message: `You are not within the 100-meter office geofence. Distance: ${distance.toFixed(0)}m` });
+    }
+
     let employee = await Employee.findOne({ where: { userId: req.user.id } });
     
     if (!employee) {
@@ -36,10 +67,50 @@ router.post('/clockin', auth, async (req, res) => {
       return res.status(400).json({ message: 'Already clocked in' });
     }
 
+    // Calculate late minutes
+    let lateMinutes = 0;
+    let status = 'present';
+    const now = new Date();
+    
+    // Find employee's shift
+    let shift = null;
+    if (employee.workShiftId) {
+      shift = await WorkShift.findByPk(employee.workShiftId);
+    } else {
+      shift = await WorkShift.findOne(); // Fallback to first shift
+    }
+    
+    if (shift) {
+      const [sh, sm, ss] = shift.startTime.split(':').map(Number);
+      const shiftStartTimeToday = new Date();
+      shiftStartTimeToday.setHours(sh, sm, ss || 0, 0);
+      
+      if (now > shiftStartTimeToday) {
+        const diffMs = now - shiftStartTimeToday;
+        lateMinutes = Math.floor(diffMs / (1000 * 60));
+        if (lateMinutes > 0) {
+          status = 'late';
+        }
+      }
+    } else {
+      // Default to 9:00 AM start
+      const shiftStartTimeToday = new Date();
+      shiftStartTimeToday.setHours(9, 0, 0, 0);
+      if (now > shiftStartTimeToday) {
+        const diffMs = now - shiftStartTimeToday;
+        lateMinutes = Math.floor(diffMs / (1000 * 60));
+        if (lateMinutes > 0) {
+          status = 'late';
+        }
+      }
+    }
+
     const attendance = await Attendance.create({
       employeeId: employee.id,
-      clockIn: new Date(),
-      status: 'present'
+      clockIn: now,
+      status,
+      lateMinutes,
+      workShiftId: shift ? shift.id : null
     });
 
     // Emit real‑time staff engagement update

@@ -1,6 +1,7 @@
 const express = require('express');
-const { Product, ProductVariation, Category, StockLog, sequelize } = require('../models');
+const { Product, ProductVariation, Category, StockLog, sequelize, PurchaseOrder, POItem, Supplier } = require('../models');
 const { auth, roleCheck } = require('../middleware/auth');
+const audit = require('../middleware/audit');
 const router = express.Router();
 
 // Get all products
@@ -108,7 +109,7 @@ router.get('/alerts', auth, async (req, res) => {
 });
 
 // Restock
-router.post('/restock', auth, roleCheck(['admin', 'inventory', 'manager']), async (req, res) => {
+router.post('/restock', auth, roleCheck(['admin', 'inventory', 'manager']), audit('inventory'), async (req, res) => {
   const transaction = await sequelize.transaction();
   try {
     const { productId, quantity, reason } = req.body;
@@ -129,6 +130,211 @@ router.post('/restock', auth, roleCheck(['admin', 'inventory', 'manager']), asyn
   } catch (err) {
     await transaction.rollback();
     res.status(400).json({ message: err.message });
+  }
+});
+
+// Manual Stock Adjustment
+router.post('/adjust', auth, roleCheck(['admin', 'inventory', 'manager']), audit('inventory'), async (req, res) => {
+  const transaction = await sequelize.transaction();
+  try {
+    const { productId, quantity, reason } = req.body;
+    const product = await Product.findByPk(productId, { transaction });
+    if (!product) throw new Error('Product not found');
+
+    const newStock = Math.max(product.stock + parseInt(quantity), 0);
+    const difference = newStock - product.stock;
+
+    await product.update({ stock: newStock }, { transaction });
+    await StockLog.create({
+      productId,
+      userId: req.user.id,
+      change: difference,
+      type: 'adjustment',
+      notes: reason || 'manual adjustment'
+    }, { transaction });
+
+    await transaction.commit();
+    res.json({ message: 'Stock adjusted successfully', stock: product.stock });
+  } catch (err) {
+    await transaction.rollback();
+    res.status(400).json({ message: err.message });
+  }
+});
+
+// Get Stock logs
+router.get('/logs', auth, async (req, res) => {
+  try {
+    const logs = await StockLog.findAll({
+      include: [Product, User],
+      order: [['createdAt', 'DESC']]
+    });
+    res.json(logs);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
+// Bulk Import Products (CSV parsing support on backend)
+router.post('/import', auth, roleCheck(['admin', 'inventory', 'manager']), audit('inventory'), async (req, res) => {
+  const transaction = await sequelize.transaction();
+  try {
+    const { items } = req.body;
+    if (!items || !Array.isArray(items)) {
+      return res.status(400).json({ message: 'Invalid items array' });
+    }
+
+    const imported = [];
+    for (const item of items) {
+      const prod = await Product.create({
+        name: item.name,
+        sku: item.sku || `SKU-${Math.random().toString(36).substr(2, 5).toUpperCase()}`,
+        price: parseFloat(item.price || 0),
+        costPrice: parseFloat(item.costPrice || 0),
+        stock: parseInt(item.stock || 0),
+        categoryId: item.categoryId || null,
+        expiryDate: item.expiryDate || null,
+        storeType: item.storeType || 'department'
+      }, { transaction });
+      imported.push(prod);
+    }
+    await transaction.commit();
+    res.json({ message: `Successfully imported ${imported.length} products`, products: imported });
+  } catch (err) {
+    await transaction.rollback();
+    res.status(400).json({ message: err.message });
+  }
+});
+
+// Get all products raw for CSV export
+router.get('/export', auth, roleCheck(['admin', 'inventory', 'manager']), async (req, res) => {
+  try {
+    const products = await Product.findAll({ include: [Category] });
+    res.json(products);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
+// Predictive restock analysis
+router.get('/predictive', auth, async (req, res) => {
+  try {
+    const products = await Product.findAll();
+    
+    const suggestions = products.map(p => {
+      const dailySalesRate = p.stock < 15 ? 2.5 : 1.2;
+      const daysLeft = Math.ceil(p.stock / dailySalesRate);
+      const orderNeeded = daysLeft <= 4;
+      
+      return {
+        id: p.id,
+        name: p.name,
+        stock: p.stock,
+        dailySalesRate,
+        daysLeft,
+        orderNeeded,
+        suggestedQty: orderNeeded ? 50 : 0
+      };
+    });
+    
+    res.json(suggestions);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
+// Auto-generate Purchase Orders based on predictive suggestions
+router.post('/auto-po', auth, roleCheck(['admin', 'inventory', 'manager']), audit('inventory'), async (req, res) => {
+  const transaction = await sequelize.transaction();
+  try {
+    const products = await Product.findAll({ transaction });
+    const suggestions = products.map(p => {
+      const dailySalesRate = p.stock < 15 ? 2.5 : 1.2;
+      const daysLeft = Math.ceil(p.stock / dailySalesRate);
+      const orderNeeded = daysLeft <= 4;
+      return { product: p, dailySalesRate, daysLeft, orderNeeded, suggestedQty: orderNeeded ? 50 : 0 };
+    }).filter(s => s.orderNeeded);
+
+    if (suggestions.length === 0) {
+      await transaction.rollback();
+      return res.status(200).json({ message: 'No items require ordering' });
+    }
+
+    // Group suggestions by supplier — attempt to match supplier by product.storeType -> supplier.category
+    const suppliers = await Supplier.findAll({ transaction });
+    const bySupplier = {};
+
+    for (const s of suggestions) {
+      const prod = s.product;
+      let chosen = suppliers.find(sp => sp.category && prod.storeType && sp.category.toLowerCase() === prod.storeType.toLowerCase());
+      if (!chosen) chosen = suppliers[0]; // fallback to first supplier
+      if (!chosen) throw new Error('No suppliers found to assign Purchase Orders');
+
+      if (!bySupplier[chosen.id]) bySupplier[chosen.id] = { supplier: chosen, items: [] };
+      bySupplier[chosen.id].items.push({ product: prod, qty: s.suggestedQty, unitCost: parseFloat(prod.costPrice || 0) });
+    }
+
+    const createdOrders = [];
+    for (const supId of Object.keys(bySupplier)) {
+      const group = bySupplier[supId];
+      const totalAmount = group.items.reduce((sum, it) => sum + (it.qty * it.unitCost), 0);
+
+      const order = await PurchaseOrder.create({
+        supplierId: group.supplier.id,
+        totalAmount: totalAmount.toFixed(2),
+        notes: 'Auto-generated PO from predictive restock',
+        status: 'pending'
+      }, { transaction });
+
+      for (const it of group.items) {
+        await POItem.create({
+          purchaseOrderId: order.id,
+          productId: it.product.id,
+          quantity: it.qty,
+          unitCost: it.unitCost
+        }, { transaction });
+      }
+
+      createdOrders.push(order);
+    }
+
+    await transaction.commit();
+    res.status(201).json({ message: 'Purchase Orders created', orders: createdOrders });
+  } catch (err) {
+    await transaction.rollback();
+    res.status(500).json({ message: err.message });
+  }
+});
+
+// Get Auto-discount expiring list
+router.get('/auto-discount', auth, async (req, res) => {
+  try {
+    const { Op } = require('sequelize');
+    const today = new Date();
+    const fiveDaysFromNow = new Date();
+    fiveDaysFromNow.setDate(fiveDaysFromNow.getDate() + 5);
+
+    const expiring = await Product.findAll({
+      where: {
+        expiryDate: {
+          [Op.between]: [today, fiveDaysFromNow]
+        }
+      }
+    });
+
+    const discounted = expiring.map(p => {
+      const promoPrice = parseFloat((p.price * 0.5).toFixed(2));
+      return {
+        id: p.id,
+        name: p.name,
+        originalPrice: p.price,
+        promoPrice,
+        daysToExpiry: Math.ceil((new Date(p.expiryDate) - today) / (1000 * 60 * 60 * 24))
+      };
+    });
+
+    res.json(discounted);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
   }
 });
 

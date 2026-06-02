@@ -1,5 +1,5 @@
 import React from 'react';
-import { LayoutDashboard, Package, ShoppingCart, Users, Briefcase, LogOut, User, Zap, DollarSign, Shield, Clock, Calendar, Pill, Truck, TrendingDown } from 'lucide-react';
+import { LayoutDashboard, Package, ShoppingCart, Users, Briefcase, LogOut, User, Zap, DollarSign, Shield, Clock, Calendar, Pill, Truck, TrendingDown, Navigation } from 'lucide-react';
 import { NavLink } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { motion } from 'framer-motion';
@@ -24,6 +24,7 @@ const Sidebar = () => {
     { name: 'Payroll',       icon: <DollarSign size={18} />,       path: '/payroll',   roles: ['admin', 'hr'] },
     { name: 'Pharmacy',      icon: <Pill size={18} />,             path: '/pharmacy',  roles: ['admin', 'pharmacist', 'manager'] },
     { name: 'Suppliers',     icon: <Truck size={18} />,            path: '/suppliers', roles: ['admin', 'inventory', 'manager'] },
+    { name: 'Delivery',      icon: <Navigation size={18} />,       path: '/delivery',  roles: ['admin', 'manager', 'operations'] },
     { name: 'Users',         icon: <User size={18} />,             path: '/users',     roles: ['admin'] },
     { name: 'HR Portal',     icon: <Shield size={18} />,           path: '/hr',        roles: ['admin', 'hr'] },
     { name: 'EOD Report',    icon: <Briefcase size={18} />,        path: '/eod',       roles: ['admin', 'manager', 'cashier', 'operations'] },

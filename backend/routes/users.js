@@ -2,6 +2,7 @@ const express = require('express');
 const { User, Employee } = require('../models');
 const { auth, roleCheck } = require('../middleware/auth');
 const bcrypt = require('bcryptjs');
+const audit = require('../middleware/audit');
 const router = express.Router();
 
 // Get all users (Admin only)
@@ -63,8 +64,26 @@ router.put('/:id/role', auth, roleCheck(['admin', 'manager']), async (req, res) 
   }
 });
 
+// Toggle User status (Active / Inactive)
+router.put('/:id/status', auth, roleCheck(['admin', 'manager']), audit('users'), async (req, res) => {
+  try {
+    const { isActive } = req.body;
+    const user = await User.findByPk(req.params.id);
+    if (!user) return res.status(404).json({ message: 'User not found' });
+
+    if (user.role === 'admin' && !isActive) {
+      return res.status(403).json({ message: 'Cannot deactivate super admin' });
+    }
+
+    await user.update({ isActive });
+    res.json({ message: 'User status updated successfully', user: { id: user.id, isActive: user.isActive } });
+  } catch (err) {
+    res.status(400).json({ message: err.message });
+  }
+});
+
 // Delete user (Admin only)
-router.delete('/:id', auth, roleCheck(['admin', 'manager']), async (req, res) => {
+router.delete('/:id', auth, roleCheck(['admin', 'manager']), audit('users'), async (req, res) => {
   try {
     const user = await User.findByPk(req.params.id);
     if (!user) return res.status(404).json({ message: 'User not found' });

@@ -1,0 +1,43 @@
+const { DataTypes } = require('sequelize');
+const sequelize = require('../config/database');
+
+const AuditLog = sequelize.define('AuditLog', {
+  id: {
+    type: DataTypes.UUID,
+    defaultValue: DataTypes.UUIDV4,
+    primaryKey: true,
+  },
+  userId: {
+    type: DataTypes.UUID,
+    allowNull: true,
+  },
+  action: {
+    type: DataTypes.STRING,
+    allowNull: false, // POST, PUT, DELETE, etc.
+  },
+  module: {
+    type: DataTypes.STRING,
+    allowNull: false, // sales, inventory, payroll, etc.
+  },
+  recordId: {
+    type: DataTypes.STRING,
+    allowNull: true,
+  },
+  oldValue: {
+    type: DataTypes.TEXT,
+    allowNull: true,
+  },
+  newValue: {
+    type: DataTypes.TEXT,
+    allowNull: true,
+  },
+  ip: {
+    type: DataTypes.STRING,
+    allowNull: true,
+  },
+}, {
+  timestamps: true,
+  updatedAt: false, // Audit logs are insert-only
+});
+
+module.exports = AuditLog;

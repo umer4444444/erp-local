@@ -1,11 +1,59 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { 
   ShoppingCart, Package, Plus, Trash, CreditCard, Banknote, Search, 
-  ArrowRight, Zap, Target, X, Printer, Minus, UserPlus, History, DollarSign
+  ArrowRight, Zap, Target, X, Printer, Minus, UserPlus, History, DollarSign,
+  Star, User, Gift, ChevronDown, AlertCircle, Wifi, WifiOff
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { salesAPI, inventoryAPI, customerAPI, shiftAPI } from '../api';
+
+// IndexedDB helpers for offline queue
+const DB_NAME = 'erp_offline';
+const DB_VERSION = 1;
+const STORE_NAME = 'pending_sales';
+
+const openDB = () => new Promise((resolve, reject) => {
+  const req = indexedDB.open(DB_NAME, DB_VERSION);
+  req.onupgradeneeded = e => e.target.result.createObjectStore(STORE_NAME, { keyPath: 'localId', autoIncrement: true });
+  req.onsuccess = e => resolve(e.target.result);
+  req.onerror = () => reject(req.error);
+});
+
+const queueOfflineSale = async (saleData) => {
+  const db = await openDB();
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction(STORE_NAME, 'readwrite');
+    tx.objectStore(STORE_NAME).add({ ...saleData, queuedAt: Date.now() });
+    tx.oncomplete = resolve;
+    tx.onerror = () => reject(tx.error);
+  });
+};
+
+const getPendingSales = async () => {
+  const db = await openDB();
+  return new Promise((resolve) => {
+    const tx = db.transaction(STORE_NAME, 'readonly');
+    const req = tx.objectStore(STORE_NAME).getAll();
+    req.onsuccess = () => resolve(req.result);
+  });
+};
+
+const clearPendingSale = async (localId) => {
+  const db = await openDB();
+  return new Promise((resolve) => {
+    const tx = db.transaction(STORE_NAME, 'readwrite');
+    tx.objectStore(STORE_NAME).delete(localId);
+    tx.oncomplete = resolve;
+  });
+};
+
+const TIER_CONFIG = {
+  Bronze: { color: '#cd7f32', bg: '#fdf6ec', min: 0 },
+  Silver: { color: '#94a3b8', bg: '#f1f5f9', min: 500 },
+  Gold:   { color: '#f59e0b', bg: '#fffbeb', min: 1500 },
+  Platinum: { color: '#8b5cf6', bg: '#f5f3ff', min: 5000 },
+};
 
 const Sales = () => {
   const navigate = useNavigate();
@@ -13,6 +61,8 @@ const Sales = () => {
   const [cart, setCart] = useState([]);
   const [search, setSearch] = useState('');
   const [customerSearch, setCustomerSearch] = useState('');
+  const [customerResults, setCustomerResults] = useState([]);
+  const [showCustomerDropdown, setShowCustomerDropdown] = useState(false);
   const [customers, setCustomers] = useState([]);
   const [selectedCustomer, setSelectedCustomer] = useState(null);
   const [paymentMethod, setPaymentMethod] = useState('cash');
@@ -21,14 +71,51 @@ const Sales = () => {
   const [globalDiscount, setGlobalDiscount] = useState('');
   const [cashTendered, setCashTendered] = useState('');
   const [splitAmount, setSplitAmount] = useState({ cash: 0, card: 0 });
+  const [redeemPoints, setRedeemPoints] = useState(false);
+  const [isOnline, setIsOnline] = useState(navigator.onLine);
+  const [pendingCount, setPendingCount] = useState(0);
+  const [syncingOffline, setSyncingOffline] = useState(false);
 
   const searchRef = useRef();
+  const customerSearchRef = useRef();
+
+  // Online/offline detection
+  useEffect(() => {
+    const onOnline = () => { setIsOnline(true); syncOfflineQueue(); };
+    const onOffline = () => setIsOnline(false);
+    window.addEventListener('online', onOnline);
+    window.addEventListener('offline', onOffline);
+    checkPendingCount();
+    return () => {
+      window.removeEventListener('online', onOnline);
+      window.removeEventListener('offline', onOffline);
+    };
+  }, []);
+
+  const checkPendingCount = async () => {
+    const pending = await getPendingSales();
+    setPendingCount(pending.length);
+  };
+
+  const syncOfflineQueue = async () => {
+    const pending = await getPendingSales();
+    if (!pending.length) return;
+    setSyncingOffline(true);
+    for (const sale of pending) {
+      try {
+        const { localId, queuedAt, ...saleData } = sale;
+        await salesAPI.createSale(saleData);
+        await clearPendingSale(localId);
+      } catch (e) { /* skip failed */ }
+    }
+    setSyncingOffline(false);
+    checkPendingCount();
+  };
 
   useEffect(() => {
-    const fetchProducts = () => inventoryAPI.getProducts().then(res => setProducts(res.data));
+    const fetchProducts = () => inventoryAPI.getProducts().then(res => setProducts(res.data)).catch(() => {});
     fetchProducts();
-    const interval = setInterval(fetchProducts, 3000); // Live stock sync every 3s
-
+    const interval = setInterval(fetchProducts, 3000);
     window.addEventListener('keydown', handleGlobalKey);
     return () => {
       window.removeEventListener('keydown', handleGlobalKey);
@@ -39,6 +126,32 @@ const Sales = () => {
   const handleGlobalKey = (e) => {
     if (e.key === 'F2') searchRef.current?.focus();
     if (e.key === 'F8') handleCheckout();
+  };
+
+  // Customer search with debounce
+  useEffect(() => {
+    if (!customerSearch.trim()) { setCustomerResults([]); return; }
+    const t = setTimeout(async () => {
+      try {
+        const res = await customerAPI.search(customerSearch);
+        setCustomerResults(res.data.slice(0, 6));
+        setShowCustomerDropdown(true);
+      } catch {}
+    }, 300);
+    return () => clearTimeout(t);
+  }, [customerSearch]);
+
+  const selectCustomer = (c) => {
+    setSelectedCustomer(c);
+    setCustomerSearch(c.name);
+    setShowCustomerDropdown(false);
+    setCustomerResults([]);
+  };
+
+  const clearCustomer = () => {
+    setSelectedCustomer(null);
+    setCustomerSearch('');
+    setRedeemPoints(false);
   };
 
   const addToCart = (product) => {
@@ -61,36 +174,76 @@ const Sales = () => {
     setCart(cart.filter(item => item.productId !== productId));
   };
 
+  const updateQty = (productId, delta) => {
+    setCart(cart.map(i => {
+      if (i.productId !== productId) return i;
+      const newQty = i.quantity + delta;
+      if (newQty <= 0) return null;
+      return { ...i, quantity: newQty };
+    }).filter(Boolean));
+  };
+
   const subtotal = cart.reduce((sum, i) => sum + (i.price * i.quantity) - i.discountAmount, 0);
-  const total = Math.max(subtotal - parseFloat(globalDiscount || 0), 0);
+  
+  // Loyalty redemption: 100 pts = $1
+  const loyaltyPoints = selectedCustomer?.loyaltyPoints || 0;
+  const maxRedeem = Math.min(loyaltyPoints / 100, subtotal * 0.2); // max 20% off via points
+  const loyaltyDiscount = redeemPoints ? maxRedeem : 0;
+  
+  const total = Math.max(subtotal - parseFloat(globalDiscount || 0) - loyaltyDiscount, 0);
   const changeDue = paymentMethod === 'cash' && cashTendered ? Math.max(parseFloat(cashTendered) - total, 0) : 0;
 
   const handleCheckout = async () => {
     if (cart.length === 0) return alert('Cart is empty');
     setProcessing(true);
+    const saleData = {
+      items: cart,
+      customerId: selectedCustomer?.id,
+      totalAmount: subtotal,
+      discount: parseFloat(globalDiscount || 0) + loyaltyDiscount,
+      grandTotal: total,
+      paymentMethod,
+      cashAmount: paymentMethod === 'split' ? splitAmount.cash : (paymentMethod === 'cash' ? total : 0),
+      cardAmount: paymentMethod === 'split' ? splitAmount.card : (paymentMethod === 'card' ? total : 0),
+      redeemPoints: redeemPoints,
+      pointsRedeemed: redeemPoints ? Math.floor(maxRedeem * 100) : 0,
+    };
+
     try {
-      const saleData = {
-        items: cart,
-        customerId: selectedCustomer?.id,
-        totalAmount: subtotal,
-        discount: parseFloat(globalDiscount || 0),
-        grandTotal: total,
-        paymentMethod,
-        cashAmount: paymentMethod === 'split' ? splitAmount.cash : (paymentMethod === 'cash' ? total : 0),
-        cardAmount: paymentMethod === 'split' ? splitAmount.card : (paymentMethod === 'card' ? total : 0),
-      };
-      const res = await salesAPI.createSale(saleData);
-      setReceipt({ ...res.data, items: [...cart], changeDue, cashTendered: cashTendered || total });
+      if (!isOnline) {
+        await queueOfflineSale(saleData);
+        checkPendingCount();
+        setReceipt({ ...saleData, id: 'OFFLINE-' + Date.now(), createdAt: new Date().toISOString(), items: [...cart], changeDue, cashTendered: cashTendered || total, offline: true });
+      } else {
+        const res = await salesAPI.createSale(saleData);
+        setReceipt({ ...res.data, items: [...cart], changeDue, cashTendered: cashTendered || total });
+      }
       setCart([]);
       setSelectedCustomer(null);
       setGlobalDiscount('');
       setCashTendered('');
       setPaymentMethod('cash');
+      setCustomerSearch('');
+      setRedeemPoints(false);
     } catch (err) {
       alert(err.response?.data?.message || 'Checkout failed');
     } finally {
       setProcessing(false);
     }
+  };
+
+  const getTierInfo = (points) => {
+    if (points >= 5000) return TIER_CONFIG.Platinum;
+    if (points >= 1500) return TIER_CONFIG.Gold;
+    if (points >= 500) return TIER_CONFIG.Silver;
+    return TIER_CONFIG.Bronze;
+  };
+
+  const getTierName = (points) => {
+    if (points >= 5000) return 'Platinum';
+    if (points >= 1500) return 'Gold';
+    if (points >= 500) return 'Silver';
+    return 'Bronze';
   };
 
   const ProductCard = ({ product }) => (
@@ -101,7 +254,9 @@ const Sales = () => {
       style={{
         background: 'white', borderRadius: 20, padding: 20, cursor: 'pointer',
         border: '1px solid rgba(0,0,0,0.04)', boxShadow: '0 4px 12px rgba(0,0,0,0.02)',
-        display: 'flex', flexDirection: 'column', gap: 12
+        display: 'flex', flexDirection: 'column', gap: 12,
+        opacity: product.stock <= 0 ? 0.5 : 1,
+        pointerEvents: product.stock <= 0 ? 'none' : 'auto'
       }}
     >
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start' }}>
@@ -109,7 +264,7 @@ const Sales = () => {
           <Package size={22} />
         </div>
         <div style={{ background: product.stock < 10 ? '#fff1f2' : '#f0fdf4', color: product.stock < 10 ? '#e11d48' : '#16a34a', fontSize: 11, fontWeight: 800, padding: '4px 8px', borderRadius: 6 }}>
-          {product.stock} in stock
+          {product.stock <= 0 ? 'Out of Stock' : `${product.stock} in stock`}
         </div>
       </div>
       <div>
@@ -121,12 +276,23 @@ const Sales = () => {
   );
 
   return (
-    <div style={{ display: 'grid', gridTemplateColumns: '1fr 400px', height: '100vh', background: '#f1f5f9', overflow: 'hidden' }}>
+    <div style={{ display: 'grid', gridTemplateColumns: '1fr 420px', height: '100vh', background: '#f1f5f9', overflow: 'hidden' }}>
       {/* Left Side: Product Grid */}
       <div style={{ padding: 40, overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: 32 }}>
         <header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <div>
-            <h1 style={{ fontSize: 28, fontWeight: 900, color: '#0f172a' }}>Sales Terminal</h1>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+              <h1 style={{ fontSize: 28, fontWeight: 900, color: '#0f172a' }}>Sales Terminal</h1>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '4px 10px', borderRadius: 20, background: isOnline ? '#dcfce7' : '#fee2e2', color: isOnline ? '#16a34a' : '#ef4444', fontSize: 11, fontWeight: 800 }}>
+                {isOnline ? <Wifi size={12} /> : <WifiOff size={12} />}
+                {isOnline ? 'ONLINE' : 'OFFLINE'}
+              </div>
+              {pendingCount > 0 && (
+                <button onClick={syncOfflineQueue} disabled={!isOnline || syncingOffline} style={{ padding: '4px 10px', borderRadius: 20, background: '#fef3c7', color: '#d97706', fontSize: 11, fontWeight: 800, border: 'none', cursor: 'pointer' }}>
+                  {syncingOffline ? 'Syncing...' : `${pendingCount} pending`}
+                </button>
+              )}
+            </div>
             <p style={{ color: '#64748b', fontWeight: 600 }}>Process orders and manage transactions.</p>
           </div>
           <div style={{ display: 'flex', gap: 12 }}>
@@ -154,133 +320,218 @@ const Sales = () => {
 
       {/* Right Side: Cart */}
       <div style={{ background: 'white', borderLeft: '1px solid #e2e8f0', display: 'flex', flexDirection: 'column', overflowY: 'auto' }}>
-        <div style={{ padding: 32, flex: 1, overflowY: 'auto', minHeight: 250 }}>
-          <h2 style={{ fontSize: 20, fontWeight: 900, color: '#0f172a', marginBottom: 24 }}>Current Cart</h2>
+        <div style={{ padding: '24px 28px', borderBottom: '1px solid #f1f5f9' }}>
+          <h2 style={{ fontSize: 18, fontWeight: 900, color: '#0f172a', marginBottom: 16 }}>Current Cart</h2>
           
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+          {/* Customer Picker */}
+          <div style={{ position: 'relative' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '10px 14px', borderRadius: 12, border: `1px solid ${selectedCustomer ? '#0a84ff' : '#e2e8f0'}`, background: selectedCustomer ? '#eff6ff' : 'white' }}>
+              <User size={16} color={selectedCustomer ? '#0a84ff' : '#94a3b8'} />
+              {selectedCustomer ? (
+                <div style={{ flex: 1, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <div>
+                    <div style={{ fontSize: 13, fontWeight: 800, color: '#0f172a' }}>{selectedCustomer.name}</div>
+                    <div style={{ fontSize: 11, color: '#0a84ff', fontWeight: 700, display: 'flex', alignItems: 'center', gap: 4 }}>
+                      <Star size={10} fill="#f59e0b" color="#f59e0b" /> {selectedCustomer.loyaltyPoints || 0} pts · {getTierName(selectedCustomer.loyaltyPoints || 0)}
+                    </div>
+                  </div>
+                  <button onClick={clearCustomer} style={{ border: 'none', background: 'transparent', cursor: 'pointer', color: '#94a3b8' }}><X size={14} /></button>
+                </div>
+              ) : (
+                <input
+                  ref={customerSearchRef}
+                  value={customerSearch}
+                  onChange={e => { setCustomerSearch(e.target.value); setShowCustomerDropdown(true); }}
+                  placeholder="Search customer..."
+                  style={{ flex: 1, border: 'none', outline: 'none', fontSize: 13, fontWeight: 600, background: 'transparent' }}
+                />
+              )}
+            </div>
+            <AnimatePresence>
+              {showCustomerDropdown && customerResults.length > 0 && !selectedCustomer && (
+                <motion.div initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}
+                  style={{ position: 'absolute', top: '100%', left: 0, right: 0, background: 'white', border: '1px solid #e2e8f0', borderRadius: 12, boxShadow: '0 8px 24px rgba(0,0,0,0.1)', zIndex: 100, overflow: 'hidden', marginTop: 4 }}>
+                  {customerResults.map(c => {
+                    const tier = getTierInfo(c.loyaltyPoints || 0);
+                    return (
+                      <div key={c.id} onClick={() => selectCustomer(c)}
+                        style={{ padding: '12px 16px', cursor: 'pointer', display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid #f8fafc' }}
+                        onMouseEnter={e => e.currentTarget.style.background = '#f8fafc'}
+                        onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
+                      >
+                        <div>
+                          <div style={{ fontSize: 13, fontWeight: 800, color: '#0f172a' }}>{c.name}</div>
+                          <div style={{ fontSize: 11, color: '#64748b', fontWeight: 600 }}>{c.phone}</div>
+                        </div>
+                        <div style={{ padding: '3px 8px', borderRadius: 6, background: tier.bg, color: tier.color, fontSize: 10, fontWeight: 800 }}>
+                          {getTierName(c.loyaltyPoints || 0)} · {c.loyaltyPoints || 0}pts
+                        </div>
+                      </div>
+                    );
+                  })}
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
+
+          {/* Loyalty Redemption Toggle */}
+          {selectedCustomer && (selectedCustomer.loyaltyPoints || 0) >= 100 && (
+            <div style={{ marginTop: 10, display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '10px 14px', borderRadius: 12, background: '#fffbeb', border: '1px solid #fde68a' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                <Gift size={14} color="#d97706" />
+                <span style={{ fontSize: 12, fontWeight: 700, color: '#92400e' }}>Redeem {Math.floor(maxRedeem * 100)} pts → -${maxRedeem.toFixed(2)}</span>
+              </div>
+              <button onClick={() => setRedeemPoints(!redeemPoints)} style={{ padding: '4px 12px', borderRadius: 8, border: 'none', cursor: 'pointer', fontWeight: 800, fontSize: 11, background: redeemPoints ? '#d97706' : '#e2e8f0', color: redeemPoints ? 'white' : '#64748b' }}>
+                {redeemPoints ? 'Applied ✓' : 'Apply'}
+              </button>
+            </div>
+          )}
+        </div>
+
+        {/* Cart Items */}
+        <div style={{ flex: 1, padding: '16px 28px', overflowY: 'auto' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
             <AnimatePresence>
               {cart.map(item => (
                 <motion.div 
                   layout key={item.productId} initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, scale: 0.9 }}
-                  style={{ display: 'flex', gap: 16, alignItems: 'center' }}
+                  style={{ display: 'flex', gap: 12, alignItems: 'center', padding: '10px 0', borderBottom: '1px solid #f8fafc' }}
                 >
                   <div style={{ flex: 1 }}>
-                    <div style={{ fontSize: 14, fontWeight: 800, color: '#0f172a' }}>{item.name}</div>
-                    <div style={{ fontSize: 12, color: '#64748b', fontWeight: 600 }}>${item.price} × {item.quantity}</div>
+                    <div style={{ fontSize: 13, fontWeight: 800, color: '#0f172a' }}>{item.name}</div>
+                    <div style={{ fontSize: 11, color: '#64748b', fontWeight: 600 }}>${item.price} each</div>
                   </div>
-                  <div style={{ fontSize: 16, fontWeight: 900, color: '#0f172a' }}>${(item.price * item.quantity).toFixed(2)}</div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                    <button onClick={() => updateQty(item.productId, -1)} style={{ width: 26, height: 26, borderRadius: 8, border: '1px solid #e2e8f0', background: 'white', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><Minus size={12} /></button>
+                    <span style={{ fontSize: 14, fontWeight: 900, minWidth: 20, textAlign: 'center' }}>{item.quantity}</span>
+                    <button onClick={() => updateQty(item.productId, 1)} style={{ width: 26, height: 26, borderRadius: 8, border: '1px solid #e2e8f0', background: 'white', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><Plus size={12} /></button>
+                  </div>
+                  <div style={{ fontSize: 14, fontWeight: 900, color: '#0f172a', minWidth: 60, textAlign: 'right' }}>${(item.price * item.quantity).toFixed(2)}</div>
                   <button onClick={() => removeFromCart(item.productId)} style={{ border: 'none', background: 'transparent', color: '#ef4444', cursor: 'pointer' }}>
-                    <Trash size={18} />
+                    <Trash size={16} />
                   </button>
                 </motion.div>
               ))}
             </AnimatePresence>
+            {cart.length === 0 && (
+              <div style={{ textAlign: 'center', padding: 40, color: '#94a3b8' }}>
+                <ShoppingCart size={32} style={{ margin: '0 auto 12px', opacity: 0.3 }} />
+                <div style={{ fontWeight: 700 }}>Cart is empty</div>
+              </div>
+            )}
           </div>
         </div>
 
-        <div style={{ padding: 32, background: '#f8fafc', borderTop: '1px solid #e2e8f0', flexShrink: 0 }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8, color: '#64748b', fontWeight: 700 }}>
-            <span>Subtotal</span>
-            <span>${subtotal.toFixed(2)}</span>
+        {/* Totals & Payment */}
+        <div style={{ padding: '20px 28px', background: '#f8fafc', borderTop: '1px solid #e2e8f0', flexShrink: 0 }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 6, color: '#64748b', fontWeight: 700, fontSize: 13 }}>
+            <span>Subtotal</span><span>${subtotal.toFixed(2)}</span>
           </div>
           
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
-            <span style={{ color: '#64748b', fontWeight: 700 }}>Discount ($)</span>
-            <input 
-              type="number" 
-              min="0"
-              value={globalDiscount} 
-              onChange={e => setGlobalDiscount(e.target.value)} 
-              style={{ width: 100, padding: '8px 12px', borderRadius: 8, border: '1px solid #e2e8f0', textAlign: 'right', fontWeight: 700 }} 
-            />
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
+            <span style={{ color: '#64748b', fontWeight: 700, fontSize: 13 }}>Discount ($)</span>
+            <input type="number" min="0" value={globalDiscount} onChange={e => setGlobalDiscount(e.target.value)} 
+              style={{ width: 80, padding: '6px 10px', borderRadius: 8, border: '1px solid #e2e8f0', textAlign: 'right', fontWeight: 700, fontSize: 13 }} />
           </div>
 
-          <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 24 }}>
-            <span style={{ fontSize: 18, fontWeight: 900, color: '#0f172a' }}>Grand Total</span>
-            <span style={{ fontSize: 28, fontWeight: 900, color: '#0a84ff' }}>${total.toFixed(2)}</span>
+          {redeemPoints && loyaltyDiscount > 0 && (
+            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 6, color: '#d97706', fontWeight: 700, fontSize: 13 }}>
+              <span>Loyalty Redemption</span><span>-${loyaltyDiscount.toFixed(2)}</span>
+            </div>
+          )}
+
+          <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 16, paddingTop: 10, borderTop: '2px solid #e2e8f0' }}>
+            <span style={{ fontSize: 16, fontWeight: 900, color: '#0f172a' }}>Grand Total</span>
+            <span style={{ fontSize: 24, fontWeight: 900, color: '#0a84ff' }}>${total.toFixed(2)}</span>
           </div>
 
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 12, marginBottom: 24 }}>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 8, marginBottom: 16 }}>
             {['cash', 'card', 'split'].map(method => (
-              <button 
-                key={method}
-                onClick={() => setPaymentMethod(method)}
-                style={{
-                  padding: '12px', borderRadius: 12, fontWeight: 800, fontSize: 12, cursor: 'pointer',
-                  border: '2px solid', textTransform: 'capitalize',
+              <button key={method} onClick={() => setPaymentMethod(method)}
+                style={{ padding: '10px', borderRadius: 10, fontWeight: 800, fontSize: 11, cursor: 'pointer', border: '2px solid', textTransform: 'capitalize',
                   borderColor: paymentMethod === method ? '#0a84ff' : 'transparent',
                   background: paymentMethod === method ? '#eff6ff' : 'white',
-                  color: paymentMethod === method ? '#0a84ff' : '#64748b'
-                }}
-              >
+                  color: paymentMethod === method ? '#0a84ff' : '#64748b' }}>
                 {method}
               </button>
             ))}
           </div>
 
           {paymentMethod === 'cash' && (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 12, marginBottom: 24 }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBottom: 14 }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <span style={{ color: '#64748b', fontWeight: 700 }}>Cash Tendered ($)</span>
-                <input 
-                  type="number" 
-                  min="0"
-                  value={cashTendered} 
-                  onChange={e => setCashTendered(e.target.value)} 
-                  style={{ width: 120, padding: '10px 12px', borderRadius: 10, border: '1px solid #0a84ff', textAlign: 'right', fontWeight: 800, fontSize: 16 }} 
-                  placeholder="0.00"
-                />
+                <span style={{ color: '#64748b', fontWeight: 700, fontSize: 13 }}>Cash Tendered ($)</span>
+                <input type="number" min="0" value={cashTendered} onChange={e => setCashTendered(e.target.value)} 
+                  style={{ width: 110, padding: '8px 10px', borderRadius: 8, border: '1px solid #0a84ff', textAlign: 'right', fontWeight: 800, fontSize: 14 }} placeholder="0.00" />
               </div>
               {cashTendered && parseFloat(cashTendered) >= total && (
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: '#dcfce7', padding: 12, borderRadius: 10 }}>
-                  <span style={{ color: '#16a34a', fontWeight: 800 }}>Change Due</span>
-                  <span style={{ color: '#16a34a', fontWeight: 900, fontSize: 18 }}>${changeDue.toFixed(2)}</span>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: '#dcfce7', padding: 10, borderRadius: 10 }}>
+                  <span style={{ color: '#16a34a', fontWeight: 800, fontSize: 13 }}>Change Due</span>
+                  <span style={{ color: '#16a34a', fontWeight: 900, fontSize: 16 }}>${changeDue.toFixed(2)}</span>
                 </div>
               )}
+            </div>
+          )}
+
+          {paymentMethod === 'split' && (
+            <div style={{ display: 'flex', gap: 8, marginBottom: 14 }}>
+              <div style={{ flex: 1 }}>
+                <label style={{ fontSize: 11, fontWeight: 800, color: '#64748b', display: 'block', marginBottom: 4 }}>CASH</label>
+                <input type="number" value={splitAmount.cash} onChange={e => setSplitAmount({...splitAmount, cash: parseFloat(e.target.value) || 0})}
+                  style={{ width: '100%', padding: '8px', borderRadius: 8, border: '1px solid #e2e8f0', fontWeight: 700 }} />
+              </div>
+              <div style={{ flex: 1 }}>
+                <label style={{ fontSize: 11, fontWeight: 800, color: '#64748b', display: 'block', marginBottom: 4 }}>CARD</label>
+                <input type="number" value={splitAmount.card} onChange={e => setSplitAmount({...splitAmount, card: parseFloat(e.target.value) || 0})}
+                  style={{ width: '100%', padding: '8px', borderRadius: 8, border: '1px solid #e2e8f0', fontWeight: 700 }} />
+              </div>
             </div>
           )}
 
           <button 
             disabled={processing || cart.length === 0}
             onClick={handleCheckout}
-            style={{
-              width: '100%', padding: '20px', borderRadius: 20, background: '#0f172a', color: 'white',
-              fontSize: 18, fontWeight: 900, border: 'none', cursor: 'pointer', opacity: processing ? 0.7 : 1,
-              display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 12
-            }}
-          >
-            {processing ? 'Processing...' : 'Complete Payment'} <ArrowRight size={22} />
+            style={{ width: '100%', padding: '16px', borderRadius: 16, background: '#0f172a', color: 'white',
+              fontSize: 16, fontWeight: 900, border: 'none', cursor: 'pointer', opacity: processing ? 0.7 : 1,
+              display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10 }}>
+            {processing ? 'Processing...' : `Complete Payment`} <ArrowRight size={18} />
           </button>
         </div>
       </div>
 
-      {/* Receipt Modal (Invoice) */}
+      {/* Receipt Modal */}
       {receipt && (
         <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20 }}>
-          <motion.div 
-            initial={{ scale: 0.9, opacity: 0 }} 
-            animate={{ scale: 1, opacity: 1 }} 
-            style={{ background: 'white', width: '100%', maxWidth: 450, padding: 32, borderRadius: 32, maxHeight: '90vh', display: 'flex', flexDirection: 'column', position: 'relative' }}
-          >
+          <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} 
+            style={{ background: 'white', width: '100%', maxWidth: 450, padding: 32, borderRadius: 32, maxHeight: '90vh', display: 'flex', flexDirection: 'column', position: 'relative' }}>
             <button onClick={() => setReceipt(null)} style={{ position: 'absolute', top: 12, right: 12, background: 'transparent', border: 'none', cursor: 'pointer' }}>
               <X size={20} color="#64748b" />
             </button>
-            <div id="printable-invoice" style={{ flex: 1, overflowY: 'auto', paddingRight: 10 }}>
+            {receipt.offline && (
+              <div style={{ background: '#fef3c7', padding: 10, borderRadius: 10, marginBottom: 16, display: 'flex', alignItems: 'center', gap: 8, fontSize: 13, fontWeight: 700, color: '#92400e' }}>
+                <WifiOff size={14} /> Saved offline — will sync when connection restored
+              </div>
+            )}
+            <div id="printable-invoice" style={{ flex: 1, overflowY: 'auto', paddingRight: 8 }}>
               <div style={{ textAlign: 'center', marginBottom: 24 }}>
                 <h2 style={{ fontSize: 28, fontWeight: 900, color: '#0f172a', margin: 0 }}>ENTERPRISE ERP</h2>
                 <p style={{ color: '#64748b', fontWeight: 600, fontSize: 13, margin: '4px 0 0 0' }}>Official Sales Invoice</p>
                 <div style={{ marginTop: 12, fontSize: 12, color: '#94a3b8', fontWeight: 500 }}>
-                  Txn: {receipt.id.split('-')[0].toUpperCase()}<br/>
+                  Txn: {receipt.id?.split('-')[0]?.toUpperCase()}<br/>
                   Date: {new Date(receipt.createdAt).toLocaleString()}
                 </div>
               </div>
               
-              <div style={{ borderTop: '2px dashed #e2e8f0', borderBottom: '2px dashed #e2e8f0', padding: '16px 0', margin: '16px 0', display: 'flex', flexDirection: 'column', gap: 12 }}>
-                {receipt.items && receipt.items.map((item, idx) => (
+              {receipt.customerId && (
+                <div style={{ marginBottom: 12, padding: '8px 16px', background: '#f8fafc', borderRadius: 10, fontSize: 12, fontWeight: 700, color: '#64748b', display: 'flex', alignItems: 'center', gap: 6 }}>
+                  <User size={12} /> Customer sale recorded
+                </div>
+              )}
+
+              <div style={{ borderTop: '2px dashed #e2e8f0', borderBottom: '2px dashed #e2e8f0', padding: '16px 0', margin: '16px 0', display: 'flex', flexDirection: 'column', gap: 10 }}>
+                {receipt.items?.map((item, idx) => (
                   <div key={idx} style={{ display: 'flex', justifyContent: 'space-between', fontSize: 14 }}>
-                    <div style={{ fontWeight: 600, color: '#0f172a' }}>
-                      {item.quantity}x {item.name}
-                    </div>
+                    <div style={{ fontWeight: 600, color: '#0f172a' }}>{item.quantity}x {item.name}</div>
                     <div style={{ fontWeight: 700 }}>${(item.price * item.quantity).toFixed(2)}</div>
                   </div>
                 ))}
@@ -288,18 +539,15 @@ const Sales = () => {
 
               <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBottom: 24 }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 14, color: '#64748b', fontWeight: 600 }}>
-                  <span>Subtotal</span>
-                  <span>${receipt.totalAmount}</span>
+                  <span>Subtotal</span><span>${receipt.totalAmount}</span>
                 </div>
                 {parseFloat(receipt.discount) > 0 && (
                   <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 14, color: '#ef4444', fontWeight: 700 }}>
-                    <span>Discount</span>
-                    <span>-${receipt.discount}</span>
+                    <span>Discount</span><span>-${parseFloat(receipt.discount).toFixed(2)}</span>
                   </div>
                 )}
                 <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 18, color: '#0f172a', fontWeight: 900, marginTop: 8, paddingTop: 8, borderTop: '1px solid #f1f5f9' }}>
-                  <span>Grand Total</span>
-                  <span>${receipt.grandTotal}</span>
+                  <span>Grand Total</span><span>${receipt.grandTotal}</span>
                 </div>
               </div>
 
@@ -321,32 +569,15 @@ const Sales = () => {
                   </>
                 )}
               </div>
-              <div style={{ textAlign: 'center', marginTop: 32, color: '#94a3b8', fontSize: 12, fontWeight: 600 }}>
-                Thank you for your business!
-              </div>
+              <div style={{ textAlign: 'center', marginTop: 24, color: '#94a3b8', fontSize: 12, fontWeight: 600 }}>Thank you for your business!</div>
             </div>
 
-            <div style={{ display: 'flex', gap: 12, marginTop: 24 }}>
-              <button 
-                onClick={() => {
-                  const printWindow = window.open('', '_blank');
-                  printWindow.document.write(`
-                    <html>
-                      <head>
-                        <title>Invoice - ${receipt.id.split('-')[0].toUpperCase()}</title>
-                        <style>
-                          body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; padding: 40px; max-width: 400px; margin: 0 auto; color: #0f172a; }
-                        </style>
-                      </head>
-                      <body onload="window.print(); window.close();">
-                        ${document.getElementById('printable-invoice').innerHTML}
-                      </body>
-                    </html>
-                  `);
-                  printWindow.document.close();
-                }} 
-                style={{ flex: 1, padding: 14, borderRadius: 16, background: '#f1f5f9', border: 'none', fontWeight: 800, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}
-              >
+            <div style={{ display: 'flex', gap: 12, marginTop: 20 }}>
+              <button onClick={() => {
+                const printWindow = window.open('', '_blank');
+                printWindow.document.write(`<html><head><title>Invoice</title><style>body{font-family:sans-serif;padding:40px;max-width:400px;margin:0 auto}</style></head><body onload="window.print();window.close();">${document.getElementById('printable-invoice').innerHTML}</body></html>`);
+                printWindow.document.close();
+              }} style={{ flex: 1, padding: 14, borderRadius: 16, background: '#f1f5f9', border: 'none', fontWeight: 800, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
                 <Printer size={18} /> Print Invoice
               </button>
               <button onClick={() => setReceipt(null)} style={{ flex: 1, padding: 14, borderRadius: 16, background: '#0a84ff', color: 'white', border: 'none', fontWeight: 800, cursor: 'pointer' }}>

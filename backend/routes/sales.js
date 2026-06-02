@@ -197,6 +197,45 @@ router.post('/:id/void', auth, roleCheck(['admin', 'manager', 'hr']), async (req
   }
 });
 
+// Refund Sale
+router.post('/:id/refund', auth, roleCheck(['admin', 'manager', 'hr']), async (req, res) => {
+  const transaction = await sequelize.transaction();
+  try {
+    const { reason } = req.body;
+    const sale = await Sale.findByPk(req.params.id, {
+      include: [{ model: SaleItem, as: 'Items' }],
+      transaction
+    });
+
+    if (!sale) return res.status(404).json({ message: 'Sale not found' });
+    if (sale.status === 'refunded') return res.status(400).json({ message: 'Sale already refunded' });
+
+    // Restore stock
+    for (const item of sale.Items) {
+      const product = await Product.findByPk(item.productId, { transaction });
+      if (product) {
+        await product.update({ stock: product.stock + item.quantity }, { transaction });
+        await StockLog.create({
+          productId: product.id,
+          userId: req.user.id,
+          change: item.quantity,
+          type: 'refund',
+          notes: reason || 'refund',
+          reference: sale.id
+        }, { transaction });
+      }
+    }
+
+    await sale.update({ status: 'refunded', voidReason: reason }, { transaction });
+
+    await transaction.commit();
+    res.json({ message: 'Sale refunded and stock restored' });
+  } catch (err) {
+    await transaction.rollback();
+    res.status(500).json({ message: err.message });
+  }
+});
+
 // EOD Logic
 router.get('/eod', auth, async (req, res) => {
   try {

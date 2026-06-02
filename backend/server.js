@@ -2,24 +2,71 @@ const express = require('express');
 const http = require('http');
 const socket = require('./socket');
 const cors = require('cors');
+const helmet = require('helmet');
+const rateLimit = require('express-rate-limit');
 require('dotenv').config();
 const { sequelize } = require('./models');
 
 const app = express();
 const server = http.createServer(app);
-const io = socket.init(server);
-// Socket.io CORS handled in socket.init
 
-// Middleware
-app.use(cors());
+// Disable Powered-By header
+app.disable('x-powered-by');
+
+// Security headers via Helmet (with script evaluation relaxed for local setup)
+app.use(helmet({
+  contentSecurityPolicy: false,
+}));
+
+// CORS Configuration
+const corsOptions = {
+  origin: process.env.FRONTEND_URL || 'http://localhost:5173',
+  credentials: true
+};
+app.use(cors(corsOptions));
+
+// Socket.io initialization with credentials and security CORS
+const io = socket.init(server);
+
 app.use(express.json());
+
+// Global XSS Sanitization Middleware
+function sanitizeHtml(str) {
+  if (typeof str !== 'string') return str;
+  return str.replace(/<script[^>]*>([\s\S]*?)<\/script>/gi, '')
+            .replace(/on\w+="[^"]*"/gi, '')
+            .replace(/on\w+='[^']*'/gi, '')
+            .replace(/javascript:[^"']*/gi, '');
+}
+function sanitizeObject(obj) {
+  if (!obj) return obj;
+  for (let key in obj) {
+    if (typeof obj[key] === 'string') {
+      obj[key] = sanitizeHtml(obj[key]);
+    } else if (typeof obj[key] === 'object') {
+      sanitizeObject(obj[key]);
+    }
+  }
+}
+app.use((req, res, next) => {
+  if (req.body) sanitizeObject(req.body);
+  if (req.query) sanitizeObject(req.query);
+  next();
+});
+
+// Rate Limiting (Brute force protection)
+const loginLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 100, // Limit each IP to 100 requests per window
+  message: { message: 'Too many login attempts from this IP, please try again after 15 minutes.' }
+});
+app.use('/api/auth/login', loginLimiter);
 
 // Routes
 app.use('/api/public', require('./routes/public'));
 app.use('/api/sales', require('./routes/sales'));
 app.use('/api/customers', require('./routes/customers'));
 app.use('/api/auth', require('./routes/auth'));
-
 app.use('/api/inventory', require('./routes/inventory'));
 app.use('/api/hr', require('./routes/hr'));
 app.use('/api/users', require('./routes/users'));
@@ -33,6 +80,8 @@ app.use('/api/payroll', require('./routes/payroll'));
 app.use('/api/expenses', require('./routes/expenses'));
 app.use('/api/pharmacy', require('./routes/pharmacy'));
 app.use('/api/suppliers', require('./routes/suppliers'));
+app.use('/api/rides', require('./routes/rides'));
+app.use('/api/reports', require('./routes/reports'));
 
 // Basic route
 app.get('/', (req, res) => {
@@ -51,9 +100,10 @@ io.on('connection', (socket) => {
 const PORT = process.env.PORT || 5000;
 
 // Sync Database and Start Server
+const isProduction = process.env.NODE_ENV === 'production';
 sequelize
   .query('SET FOREIGN_KEY_CHECKS = 0')
-  .then(() => sequelize.sync({ alter: true }))
+  .then(() => sequelize.sync())
   .then(() => sequelize.query('ALTER TABLE Sales DROP FOREIGN KEY sales_ibfk_2').catch(() => console.log('FK already dropped')))
   .then(() => sequelize.query('SET FOREIGN_KEY_CHECKS = 1'))
   .then(() => {

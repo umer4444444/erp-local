@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Package, Plus, Search, Filter, AlertCircle, RefreshCw, Edit3, MoreVertical, Calendar, ArrowUpRight, Download, Upload, X, Trash2, Save, TrendingUp, Tags } from 'lucide-react';
+import { Package, Plus, Search, Filter, AlertCircle, RefreshCw, Edit3, MoreVertical, Calendar, ArrowUpRight, Download, Upload, X, Trash2, Save, TrendingUp, Tags, History, Clock } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useLocation } from 'react-router-dom';
 import { inventoryAPI } from '../api';
@@ -18,6 +18,25 @@ const Inventory = () => {
   const [selectedIds, setSelectedIds] = useState(new Set());
   const [categoryFilter, setCategoryFilter] = useState('');
 
+  // New State variables for advanced features
+  const [showLogsModal, setShowLogsModal] = useState(false);
+  const [movementLogs, setMovementLogs] = useState([]);
+  const [logsLoading, setLogsLoading] = useState(false);
+
+  const [showAdjustModal, setShowAdjustModal] = useState(false);
+  const [adjustProduct, setAdjustProduct] = useState(null);
+  const [adjustQty, setAdjustQty] = useState('');
+  const [adjustReason, setAdjustReason] = useState('');
+  const [adjustLoading, setAdjustLoading] = useState(false);
+
+  const [showPredictiveModal, setShowPredictiveModal] = useState(false);
+  const [predictiveData, setPredictiveData] = useState([]);
+  const [predictiveLoading, setPredictiveLoading] = useState(false);
+
+  const [showAutoDiscountModal, setShowAutoDiscountModal] = useState(false);
+  const [autoDiscounts, setAutoDiscounts] = useState([]);
+  const [autoDiscountLoading, setAutoDiscountLoading] = useState(false);
+
   useEffect(() => {
     fetchData();
     fetchCategories();
@@ -29,6 +48,127 @@ const Inventory = () => {
     const interval = setInterval(fetchData, 3000); // Live stock sync every 3s
     return () => clearInterval(interval);
   }, [location.state]);
+
+  useEffect(() => {
+    if (showLogsModal) fetchMovementLogs();
+  }, [showLogsModal]);
+
+  useEffect(() => {
+    if (showPredictiveModal) fetchPredictive();
+  }, [showPredictiveModal]);
+
+  useEffect(() => {
+    if (showAutoDiscountModal) fetchAutoDiscounts();
+  }, [showAutoDiscountModal]);
+
+  const fetchMovementLogs = async () => {
+    setLogsLoading(true);
+    try {
+      const res = await inventoryAPI.getMovementLogs();
+      setMovementLogs(res.data);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLogsLoading(false);
+    }
+  };
+
+  const fetchPredictive = async () => {
+    setPredictiveLoading(true);
+    try {
+      const res = await inventoryAPI.getPredictive();
+      setPredictiveData(res.data);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setPredictiveLoading(false);
+    }
+  };
+
+  const fetchAutoDiscounts = async () => {
+    setAutoDiscountLoading(true);
+    try {
+      const res = await inventoryAPI.getAutoDiscount();
+      setAutoDiscounts(res.data);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setAutoDiscountLoading(false);
+    }
+  };
+
+  const handleAdjustStock = async () => {
+    if (!adjustProduct || !adjustQty) return;
+    setAdjustLoading(true);
+    try {
+      await inventoryAPI.adjustStock({
+        productId: adjustProduct.id,
+        quantity: parseInt(adjustQty),
+        reason: adjustReason
+      });
+      setShowAdjustModal(false);
+      setAdjustQty('');
+      setAdjustReason('');
+      setAdjustProduct(null);
+      fetchData();
+      alert('Stock adjusted successfully!');
+    } catch (err) {
+      alert(err.response?.data?.message || 'Failed to adjust stock');
+    } finally {
+      setAdjustLoading(false);
+    }
+  };
+
+  const handleCSVImport = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = async (event) => {
+      try {
+        const text = event.target.result;
+        const lines = text.split('\n');
+        if (lines.length < 2) {
+          alert('CSV file is empty or invalid.');
+          return;
+        }
+        const headers = lines[0].split(',').map(h => h.trim().replace(/^["']|["']$/g, '').toLowerCase());
+        const items = [];
+        for (let i = 1; i < lines.length; i++) {
+          const line = lines[i].trim();
+          if (!line) continue;
+          const values = line.split(',').map(v => v.trim().replace(/^["']|["']$/g, ''));
+          const item = {};
+          headers.forEach((h, index) => {
+            item[h] = values[index];
+          });
+          if (item.name) {
+            items.push({
+              name: item.name,
+              sku: item.sku || `SKU-${Math.random().toString(36).substr(2, 5).toUpperCase()}`,
+              price: parseFloat(item.price || 0),
+              costPrice: parseFloat(item.cost || item.costprice || 0),
+              stock: parseInt(item.stock || 0),
+              expiryDate: item.expiry || item.expirydate || null,
+              storeType: item.storetype || 'department'
+            });
+          }
+        }
+        if (items.length === 0) {
+          alert('No valid products found in CSV.');
+          return;
+        }
+        setLoading(true);
+        const res = await inventoryAPI.importCSV({ items });
+        alert(res.data.message || `Successfully imported ${items.length} products!`);
+        fetchData();
+      } catch (err) {
+        alert(err.response?.data?.message || 'Failed to parse or import CSV');
+      } finally {
+        setLoading(false);
+      }
+    };
+    reader.readAsText(file);
+  };
 
   const fetchData = async () => {
     setLoading(true);
@@ -199,6 +339,23 @@ const Inventory = () => {
         </div>
       </header>
 
+      {/* Advanced Quick-Actions row */}
+      <div style={{ display: 'flex', gap: 12, marginBottom: 24, flexWrap: 'wrap' }}>
+        <button onClick={() => setShowLogsModal(true)} style={{ padding: '10px 16px', borderRadius: 12, background: 'white', border: '1px solid #e2e8f0', color: '#64748b', fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 8 }}>
+          <History size={16} /> Movement Logs
+        </button>
+        <button onClick={() => setShowPredictiveModal(true)} style={{ padding: '10px 16px', borderRadius: 12, background: 'white', border: '1px solid #e2e8f0', color: '#64748b', fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 8 }}>
+          <TrendingUp size={16} /> AI Restock Suggestions
+        </button>
+        <button onClick={() => setShowAutoDiscountModal(true)} style={{ padding: '10px 16px', borderRadius: 12, background: 'white', border: '1px solid #e2e8f0', color: '#64748b', fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 8 }}>
+          <Tags size={16} /> Expiring Auto-Discounts
+        </button>
+        <label style={{ padding: '10px 16px', borderRadius: 12, background: 'white', border: '1px solid #e2e8f0', color: '#64748b', fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 8 }}>
+          <Upload size={16} /> Upload CSV
+          <input type="file" accept=".csv" onChange={handleCSVImport} style={{ display: 'none' }} />
+        </label>
+      </div>
+
       {/* Table */}
       <div style={{ background: 'white', borderRadius: 24, border: '1px solid rgba(0,0,0,0.05)', overflow: 'hidden' }}>
         <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
@@ -267,7 +424,10 @@ const Inventory = () => {
                   <td style={{ padding: '16px 24px' }}>
                     <span style={{ color: '#10b981', fontWeight: 800, fontSize: 12 }}>{margin}%</span>
                   </td>
-                  <td style={{ padding: '16px 24px', textAlign: 'right' }}>
+                  <td style={{ padding: '16px 24px', textAlign: 'right', display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
+                    <button onClick={() => { setAdjustProduct(product); setShowAdjustModal(true); }} title="Adjust Stock" style={{ width: 36, height: 36, borderRadius: 10, background: '#f1f5f9', color: '#eab308', border: 'none', cursor: 'pointer', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                      <RefreshCw size={16} />
+                    </button>
                     <button onClick={() => handleEditClick(product)} style={{ width: 36, height: 36, borderRadius: 10, background: '#f1f5f9', color: '#0a84ff', border: 'none', cursor: 'pointer', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                       <Edit3 size={16} />
                     </button>
@@ -441,6 +601,222 @@ const Inventory = () => {
               <div style={{ display: 'flex', gap: 16 }}>
                 <button onClick={() => setShowBulkModal(false)} style={{ flex: 1, padding: 18, borderRadius: 16, background: '#f1f5f9', border: 'none', fontWeight: 900, cursor: 'pointer' }}>Discard All</button>
                 <button onClick={submitBulkImport} style={{ flex: 2, padding: 18, borderRadius: 16, background: '#0a84ff', color: 'white', border: 'none', fontWeight: 900, cursor: 'pointer' }}>Confirm Bulk Import</button>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
+      {/* ADJUST STOCK MODAL */}
+      <AnimatePresence>
+        {showAdjustModal && adjustProduct && (
+          <div style={{ position: 'fixed', inset: 0, zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 24 }}>
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setShowAdjustModal(false)} style={{ position: 'absolute', inset: 0, background: 'rgba(15,23,42,0.6)', backdropFilter: 'blur(8px)' }} />
+            <motion.div initial={{ scale: 0.9, y: 40 }} animate={{ scale: 1, y: 0 }} exit={{ scale: 0.9, y: 40 }} style={{ background: 'white', borderRadius: 32, width: '100%', maxWidth: 450, position: 'relative', padding: 40, boxShadow: '0 40px 100px rgba(0,0,0,0.2)' }}>
+              <h2 style={{ fontSize: 24, fontWeight: 900, marginBottom: 12 }}>Stock Adjustment</h2>
+              <p style={{ color: '#64748b', fontSize: 14, marginBottom: 24 }}>Product: <strong>{adjustProduct.name}</strong> (Current Stock: {adjustProduct.stock})</p>
+              
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+                <div>
+                  <label style={{ display: 'block', fontSize: 12, fontWeight: 800, color: '#64748b', marginBottom: 8 }}>QUANTITY CHANGE (+ or -)</label>
+                  <input type="number" placeholder="e.g. -5 or 10" value={adjustQty} onChange={e => setAdjustQty(e.target.value)} style={{ width: '100%', padding: '14px', borderRadius: 12, border: '1px solid #e2e8f0', fontWeight: 600 }} />
+                </div>
+                <div>
+                  <label style={{ display: 'block', fontSize: 12, fontWeight: 800, color: '#64748b', marginBottom: 8 }}>REASON / NOTES</label>
+                  <input placeholder="e.g. Broken packaging, count error" value={adjustReason} onChange={e => setAdjustReason(e.target.value)} style={{ width: '100%', padding: '14px', borderRadius: 12, border: '1px solid #e2e8f0', fontWeight: 600 }} />
+                </div>
+                
+                <button onClick={handleAdjustStock} disabled={adjustLoading} style={{ marginTop: 12, padding: 18, borderRadius: 16, background: '#0a84ff', color: 'white', border: 'none', fontWeight: 900, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 10, justifyContent: 'center' }}>
+                  {adjustLoading ? 'Saving...' : 'Apply Stock Adjustment'}
+                </button>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
+      {/* MOVEMENT LOGS MODAL */}
+      <AnimatePresence>
+        {showLogsModal && (
+          <div style={{ position: 'fixed', inset: 0, zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 24 }}>
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setShowLogsModal(false)} style={{ position: 'absolute', inset: 0, background: 'rgba(15,23,42,0.6)', backdropFilter: 'blur(8px)' }} />
+            <motion.div initial={{ scale: 0.9, y: 40 }} animate={{ scale: 1, y: 0 }} exit={{ scale: 0.9, y: 40 }} style={{ background: 'white', borderRadius: 32, width: '90%', maxWidth: 900, position: 'relative', padding: 40, display: 'flex', flexDirection: 'column', maxHeight: '80vh', boxShadow: '0 40px 100px rgba(0,0,0,0.2)' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
+                <div>
+                  <h2 style={{ fontSize: 24, fontWeight: 900 }}>Stock Movement Logs</h2>
+                  <p style={{ color: '#64748b', fontSize: 13, fontWeight: 600 }}>History of manual adjustments and restocks.</p>
+                </div>
+                <button onClick={() => setShowLogsModal(false)} style={{ border: 'none', background: 'transparent', cursor: 'pointer' }}><X size={24} /></button>
+              </div>
+
+              <div style={{ flex: 1, overflowY: 'auto', border: '1px solid #e2e8f0', borderRadius: 16 }}>
+                {logsLoading ? (
+                  <p style={{ padding: 24, textAlign: 'center', fontWeight: 600, color: '#64748b' }}>Loading logs...</p>
+                ) : movementLogs.length === 0 ? (
+                  <p style={{ padding: 24, textAlign: 'center', fontWeight: 600, color: '#64748b' }}>No logs recorded yet.</p>
+                ) : (
+                  <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
+                    <thead>
+                      <tr style={{ background: '#f8fafc', borderBottom: '1px solid #f1f5f9' }}>
+                        <th style={{ padding: '14px 20px', fontSize: 11, fontWeight: 800, color: '#64748b' }}>DATE/TIME</th>
+                        <th style={{ padding: '14px 20px', fontSize: 11, fontWeight: 800, color: '#64748b' }}>PRODUCT</th>
+                        <th style={{ padding: '14px 20px', fontSize: 11, fontWeight: 800, color: '#64748b' }}>CHANGE</th>
+                        <th style={{ padding: '14px 20px', fontSize: 11, fontWeight: 800, color: '#64748b' }}>TYPE</th>
+                        <th style={{ padding: '14px 20px', fontSize: 11, fontWeight: 800, color: '#64748b' }}>USER</th>
+                        <th style={{ padding: '14px 20px', fontSize: 11, fontWeight: 800, color: '#64748b' }}>NOTES</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {movementLogs.map(log => (
+                        <tr key={log.id} style={{ borderBottom: '1px solid #f1f5f9', fontSize: 13 }}>
+                          <td style={{ padding: '12px 20px', fontWeight: 600, color: '#0f172a' }}>{new Date(log.createdAt).toLocaleString()}</td>
+                          <td style={{ padding: '12px 20px', fontWeight: 800, color: '#0a84ff' }}>{log.Product?.name || 'Deleted Product'}</td>
+                          <td style={{ padding: '12px 20px', fontWeight: 900, color: log.change >= 0 ? '#10b981' : '#ef4444' }}>
+                            {log.change >= 0 ? `+${log.change}` : log.change}
+                          </td>
+                          <td style={{ padding: '12px 20px' }}>
+                            <span style={{ padding: '4px 8px', borderRadius: 6, fontSize: 11, fontWeight: 700, textTransform: 'uppercase', background: log.type === 'restock' ? 'rgba(16,185,129,0.08)' : 'rgba(234,179,8,0.08)', color: log.type === 'restock' ? '#10b981' : '#ca8a04' }}>
+                              {log.type}
+                            </span>
+                          </td>
+                          <td style={{ padding: '12px 20px', fontWeight: 600, color: '#475569' }}>{log.User?.name || 'System'}</td>
+                          <td style={{ padding: '12px 20px', color: '#64748b', fontStyle: 'italic' }}>{log.notes}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                )}
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
+      {/* AI RESTOCK SUGGESTIONS MODAL */}
+      <AnimatePresence>
+        {showPredictiveModal && (
+          <div style={{ position: 'fixed', inset: 0, zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 24 }}>
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setShowPredictiveModal(false)} style={{ position: 'absolute', inset: 0, background: 'rgba(15,23,42,0.6)', backdropFilter: 'blur(8px)' }} />
+            <motion.div initial={{ scale: 0.9, y: 40 }} animate={{ scale: 1, y: 0 }} exit={{ scale: 0.9, y: 40 }} style={{ background: 'white', borderRadius: 32, width: '90%', maxWidth: 850, position: 'relative', padding: 40, display: 'flex', flexDirection: 'column', maxHeight: '80vh', boxShadow: '0 40px 100px rgba(0,0,0,0.2)' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
+                <div>
+                  <h2 style={{ fontSize: 24, fontWeight: 900 }}>AI Restock Suggestions</h2>
+                  <p style={{ color: '#64748b', fontSize: 13, fontWeight: 600 }}>Smart stock projections based on daily sales velocity.</p>
+                </div>
+                <button onClick={() => setShowPredictiveModal(false)} style={{ border: 'none', background: 'transparent', cursor: 'pointer' }}><X size={24} /></button>
+              </div>
+
+              <div style={{ flex: 1, overflowY: 'auto', border: '1px solid #e2e8f0', borderRadius: 16 }}>
+                {predictiveLoading ? (
+                  <p style={{ padding: 24, textAlign: 'center', fontWeight: 600, color: '#64748b' }}>Analyzing stock velocity...</p>
+                ) : predictiveData.length === 0 ? (
+                  <p style={{ padding: 24, textAlign: 'center', fontWeight: 600, color: '#64748b' }}>No restock recommendations.</p>
+                ) : (
+                  <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
+                    <thead>
+                      <tr style={{ background: '#f8fafc', borderBottom: '1px solid #f1f5f9' }}>
+                        <th style={{ padding: '14px 20px', fontSize: 11, fontWeight: 800, color: '#64748b' }}>PRODUCT</th>
+                        <th style={{ padding: '14px 20px', fontSize: 11, fontWeight: 800, color: '#64748b' }}>CURRENT STOCK</th>
+                        <th style={{ padding: '14px 20px', fontSize: 11, fontWeight: 800, color: '#64748b' }}>DAILY VELOCITY</th>
+                        <th style={{ padding: '14px 20px', fontSize: 11, fontWeight: 800, color: '#64748b' }}>DAYS REMAINING</th>
+                        <th style={{ padding: '14px 20px', fontSize: 11, fontWeight: 800, color: '#64748b' }}>RECOMMENDED ACTION</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {predictiveData.map(item => (
+                        <tr key={item.id} style={{ borderBottom: '1px solid #f1f5f9', fontSize: 13 }}>
+                          <td style={{ padding: '12px 20px', fontWeight: 800, color: '#0f172a' }}>{item.name}</td>
+                          <td style={{ padding: '12px 20px', fontWeight: 700, color: '#475569' }}>{item.stock} units</td>
+                          <td style={{ padding: '12px 20px', fontWeight: 600, color: '#64748b' }}>{item.dailySalesRate} units/day</td>
+                          <td style={{ padding: '12px 20px', fontWeight: 900, color: item.daysLeft <= 4 ? '#ef4444' : '#10b981' }}>
+                            {item.daysLeft === Infinity ? 'N/A' : `${item.daysLeft} days`}
+                          </td>
+                          <td style={{ padding: '12px 20px' }}>
+                            {item.orderNeeded ? (
+                              <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                                <span style={{ padding: '4px 8px', borderRadius: 6, fontSize: 11, fontWeight: 800, background: 'rgba(239,68,68,0.08)', color: '#ef4444' }}>
+                                  Order +{item.suggestedQty} Units
+                                </span>
+                                <button 
+                                  onClick={async () => {
+                                    try {
+                                      await inventoryAPI.restock({ productId: item.id, quantity: item.suggestedQty, reason: 'AI suggested restock' });
+                                      alert(`Restocked ${item.name} by ${item.suggestedQty} units!`);
+                                      fetchPredictive();
+                                      fetchData();
+                                    } catch (err) {
+                                      alert('Failed to restock');
+                                    }
+                                  }}
+                                  style={{ padding: '6px 12px', borderRadius: 8, background: '#0a84ff', color: 'white', border: 'none', fontSize: 11, fontWeight: 700, cursor: 'pointer' }}
+                                >
+                                  Restock Now
+                                </button>
+                              </div>
+                            ) : (
+                              <span style={{ padding: '4px 8px', borderRadius: 6, fontSize: 11, fontWeight: 800, background: 'rgba(16,185,129,0.08)', color: '#10b981' }}>
+                                Stock Level Safe
+                              </span>
+                            )}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                )}
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
+      {/* AUTO DISCOUNTS MODAL */}
+      <AnimatePresence>
+        {showAutoDiscountModal && (
+          <div style={{ position: 'fixed', inset: 0, zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 24 }}>
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setShowAutoDiscountModal(false)} style={{ position: 'absolute', inset: 0, background: 'rgba(15,23,42,0.6)', backdropFilter: 'blur(8px)' }} />
+            <motion.div initial={{ scale: 0.9, y: 40 }} animate={{ scale: 1, y: 0 }} exit={{ scale: 0.9, y: 40 }} style={{ background: 'white', borderRadius: 32, width: '90%', maxWidth: 750, position: 'relative', padding: 40, display: 'flex', flexDirection: 'column', maxHeight: '80vh', boxShadow: '0 40px 100px rgba(0,0,0,0.2)' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
+                <div>
+                  <h2 style={{ fontSize: 24, fontWeight: 900 }}>Expiring Auto-Discounts</h2>
+                  <p style={{ color: '#64748b', fontSize: 13, fontWeight: 600 }}>Products expiring within 5 days are auto-discounted by 50% in sales POS.</p>
+                </div>
+                <button onClick={() => setShowAutoDiscountModal(false)} style={{ border: 'none', background: 'transparent', cursor: 'pointer' }}><X size={24} /></button>
+              </div>
+
+              <div style={{ flex: 1, overflowY: 'auto', border: '1px solid #e2e8f0', borderRadius: 16 }}>
+                {autoDiscountLoading ? (
+                  <p style={{ padding: 24, textAlign: 'center', fontWeight: 600, color: '#64748b' }}>Scanning database...</p>
+                ) : autoDiscounts.length === 0 ? (
+                  <p style={{ padding: 24, textAlign: 'center', fontWeight: 600, color: '#64748b' }}>No products currently qualifying for auto-discount.</p>
+                ) : (
+                  <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
+                    <thead>
+                      <tr style={{ background: '#f8fafc', borderBottom: '1px solid #f1f5f9' }}>
+                        <th style={{ padding: '14px 20px', fontSize: 11, fontWeight: 800, color: '#64748b' }}>PRODUCT</th>
+                        <th style={{ padding: '14px 20px', fontSize: 11, fontWeight: 800, color: '#64748b' }}>DAYS TO EXPIRY</th>
+                        <th style={{ padding: '14px 20px', fontSize: 11, fontWeight: 800, color: '#64748b' }}>ORIGINAL PRICE</th>
+                        <th style={{ padding: '14px 20px', fontSize: 11, fontWeight: 800, color: '#64748b' }}>PROMO PRICE (50%)</th>
+                        <th style={{ padding: '14px 20px', fontSize: 11, fontWeight: 800, color: '#64748b' }}>STATUS</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {autoDiscounts.map(item => (
+                        <tr key={item.id} style={{ borderBottom: '1px solid #f1f5f9', fontSize: 13 }}>
+                          <td style={{ padding: '12px 20px', fontWeight: 800, color: '#0f172a' }}>{item.name}</td>
+                          <td style={{ padding: '12px 20px', fontWeight: 900, color: '#ef4444' }}>{item.daysToExpiry} days left</td>
+                          <td style={{ padding: '12px 20px', fontWeight: 700, color: '#64748b', textDecoration: 'line-through' }}>${item.originalPrice}</td>
+                          <td style={{ padding: '12px 20px', fontWeight: 900, color: '#10b981' }}>${item.promoPrice}</td>
+                          <td style={{ padding: '12px 20px' }}>
+                            <span style={{ padding: '4px 8px', borderRadius: 6, fontSize: 11, fontWeight: 800, background: 'rgba(16,185,129,0.08)', color: '#10b981' }}>
+                              Auto-Applied
+                            </span>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                )}
               </div>
             </motion.div>
           </div>

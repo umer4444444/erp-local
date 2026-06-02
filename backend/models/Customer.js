@@ -25,6 +25,14 @@ const Customer = sequelize.define('Customer', {
     type: DataTypes.DECIMAL(12, 2),
     defaultValue: 0,
   },
+  loyaltyPoints: {
+    type: DataTypes.INTEGER,
+    defaultValue: 0,
+  },
+  tier: {
+    type: DataTypes.ENUM('Bronze', 'Silver', 'Gold', 'VIP'),
+    defaultValue: 'Bronze',
+  },
 }, {
   timestamps: true,
 });

@@ -44,7 +44,9 @@ const Manager = () => {
   };
 
   useEffect(() => {
-    const socket = io('http://localhost:5003'); // connect to backend socket server
+    const socket = io('http://localhost:5003', {
+      auth: { token: localStorage.getItem('token') }
+    }); // connect to backend socket server
     socket.on('staffEngagementUpdated', data => {
       setOverview(prev => ({ ...prev, activeStaff: data.activeStaff }));
     });
