@@ -1,10 +1,11 @@
+const { v7: uuidv7 } = require('uuid');
 const { DataTypes } = require('sequelize');
 const sequelize = require('../config/database');
 
 const Employee = sequelize.define('Employee', {
   id: {
     type: DataTypes.UUID,
-    defaultValue: DataTypes.UUIDV4,
+    defaultValue: uuidv7,
     primaryKey: true,
   },
   empCode: {
@@ -29,8 +30,19 @@ const Employee = sequelize.define('Employee', {
     type: DataTypes.STRING,
     unique: true,
     allowNull: false,
+    validate: { isEmail: true, notEmpty: true }
   },
   cnic: {
+    type: DataTypes.STRING,
+    validate: {
+      isCnic(value) {
+        if (value && !/^\d{5}-\d{7}-\d{1}$/.test(value)) {
+          throw new Error('CNIC must be in the format XXXXX-XXXXXXX-X');
+        }
+      }
+    }
+  },
+  address: {
     type: DataTypes.STRING,
   },
   phone: {
@@ -49,6 +61,7 @@ const Employee = sequelize.define('Employee', {
   },
   salary: {
     type: DataTypes.DECIMAL(12, 2),
+    validate: { min: { args: [0], msg: 'Salary cannot be negative' } }
   },
   salaryType: {
     type: DataTypes.ENUM('monthly', 'hourly'),

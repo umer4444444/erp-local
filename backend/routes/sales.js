@@ -1,5 +1,5 @@
 const express = require('express');
-const { Sale, SaleItem, Product, Customer, StockLog, SalesSession, sequelize } = require('../models');
+const { Sale, SaleItem, Product, Customer, StockLog, SalesSession, User, sequelize } = require('../models');
 const { auth, roleCheck } = require('../middleware/auth');
 const { Op } = require('sequelize');
 const router = express.Router();
@@ -18,7 +18,7 @@ router.get('/history', auth, async (req, res) => {
     }
     const sales = await Sale.findAndCountAll({
       where,
-      include: [{ model: SaleItem, as: 'Items', include: [Product] }, Customer],
+      include: [{ model: SaleItem, as: 'Items', include: [Product] }, Customer, User],
       limit: parseInt(limit),
       offset: parseInt(offset),
       order: [['createdAt', 'DESC']]

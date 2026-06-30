@@ -1,10 +1,11 @@
+const { v7: uuidv7 } = require('uuid');
 const { DataTypes } = require('sequelize');
 const sequelize = require('../config/database');
 
 const Designation = sequelize.define('Designation', {
   id: {
     type: DataTypes.UUID,
-    defaultValue: DataTypes.UUIDV4,
+    defaultValue: uuidv7,
     primaryKey: true,
   },
   name: {
@@ -15,6 +16,10 @@ const Designation = sequelize.define('Designation', {
   level: {
     type: DataTypes.ENUM('junior', 'mid', 'senior', 'lead', 'manager', 'director'),
     defaultValue: 'mid',
+  },
+  departmentId: {
+    type: DataTypes.UUID,
+    allowNull: true,
   },
 }, {
   timestamps: true,

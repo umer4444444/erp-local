@@ -41,7 +41,7 @@ const Delivery = () => {
   const fetchData = async () => {
     try {
       const [ridesRes, driversRes] = await Promise.all([
-        API.get('/rides'),
+        API.get('/rides/all'),
         API.get('/rides/drivers'),
       ]);
       setRides(ridesRes.data || []);
@@ -376,7 +376,7 @@ const Delivery = () => {
                     style={{ width: '100%', padding: '13px 16px', borderRadius: 12, border: '1px solid #e2e8f0', fontWeight: 700, background: 'white' }}>
                     <option value="normal">Normal</option>
                     <option value="urgent">🔴 Urgent</option>
-                    <option value="express">⚡ Express</option>
+                    <option value="high">⚡ Express</option>
                   </select>
                 </div>
                 <button onClick={handleCreateRide} disabled={creating}

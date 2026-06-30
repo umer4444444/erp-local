@@ -55,6 +55,35 @@ const TIER_CONFIG = {
   Platinum: { color: '#8b5cf6', bg: '#f5f3ff', min: 5000 },
 };
 
+const ProductCard = React.memo(({ product, onAdd }) => (
+  <motion.div 
+    whileHover={{ y: -5, boxShadow: '0 12px 30px rgba(0,0,0,0.08)' }}
+    whileTap={{ scale: 0.98 }}
+    onClick={() => onAdd(product)}
+    style={{
+      background: 'white', borderRadius: 20, padding: 20, cursor: 'pointer',
+      border: '1px solid rgba(0,0,0,0.04)', boxShadow: '0 4px 12px rgba(0,0,0,0.02)',
+      display: 'flex', flexDirection: 'column', gap: 12,
+      opacity: product.stock <= 0 ? 0.5 : 1,
+      pointerEvents: product.stock <= 0 ? 'none' : 'auto'
+    }}
+  >
+    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start' }}>
+      <div style={{ width: 44, height: 44, borderRadius: 12, background: '#f1f5f9', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#64748b' }}>
+        <Package size={22} />
+      </div>
+      <div style={{ background: product.stock < 10 ? '#fff1f2' : '#f0fdf4', color: product.stock < 10 ? '#e11d48' : '#16a34a', fontSize: 11, fontWeight: 800, padding: '4px 8px', borderRadius: 6 }}>
+        {product.stock <= 0 ? 'Out of Stock' : `${product.stock} in stock`}
+      </div>
+    </div>
+    <div>
+      <div style={{ fontSize: 15, fontWeight: 800, color: '#0f172a' }}>{product.name}</div>
+      <div style={{ fontSize: 12, color: '#94a3b8', fontWeight: 600 }}>{product.sku || 'No SKU'}</div>
+    </div>
+    <div style={{ fontSize: 20, fontWeight: 900, color: '#0a84ff' }}>${product.price}</div>
+  </motion.div>
+));
+
 const Sales = () => {
   const navigate = useNavigate();
   const [products, setProducts] = useState([]);
@@ -115,7 +144,7 @@ const Sales = () => {
   useEffect(() => {
     const fetchProducts = () => inventoryAPI.getProducts().then(res => setProducts(res.data)).catch(() => {});
     fetchProducts();
-    const interval = setInterval(fetchProducts, 3000);
+    const interval = setInterval(fetchProducts, 30000);
     window.addEventListener('keydown', handleGlobalKey);
     return () => {
       window.removeEventListener('keydown', handleGlobalKey);
@@ -154,34 +183,48 @@ const Sales = () => {
     setRedeemPoints(false);
   };
 
-  const addToCart = (product) => {
-    const existing = cart.find(i => i.productId === product.id);
-    if (existing) {
-      setCart(cart.map(i => i.productId === product.id ? { ...i, quantity: i.quantity + 1 } : i));
-    } else {
-      setCart([...cart, { 
-        productId: product.id, 
-        name: product.name, 
-        price: parseFloat(product.price), 
-        quantity: 1, 
-        stock: product.stock,
-        discountAmount: 0 
-      }]);
+  const addToCart = useCallback((product) => {
+    if (product.stock <= 0) {
+      alert("Item is out of stock!");
+      return;
     }
-  };
+    setCart(prev => {
+      const existing = prev.find(i => i.productId === product.id);
+      if (existing) {
+        if (existing.quantity >= product.stock) {
+          alert(`Cannot add more. Only ${product.stock} in stock.`);
+          return prev;
+        }
+        return prev.map(i => i.productId === product.id ? { ...i, quantity: i.quantity + 1 } : i);
+      } else {
+        return [...prev, { 
+          productId: product.id, 
+          name: product.name, 
+          price: parseFloat(product.price), 
+          quantity: 1, 
+          stock: product.stock,
+          discountAmount: 0 
+        }];
+      }
+    });
+  }, []);
 
-  const removeFromCart = (productId) => {
-    setCart(cart.filter(item => item.productId !== productId));
-  };
+  const removeFromCart = useCallback((productId) => {
+    setCart(prev => prev.filter(item => item.productId !== productId));
+  }, []);
 
-  const updateQty = (productId, delta) => {
-    setCart(cart.map(i => {
+  const updateQty = useCallback((productId, delta) => {
+    setCart(prev => prev.map(i => {
       if (i.productId !== productId) return i;
       const newQty = i.quantity + delta;
       if (newQty <= 0) return null;
+      if (newQty > i.stock) {
+        alert(`Cannot exceed available stock of ${i.stock}.`);
+        return i;
+      }
       return { ...i, quantity: newQty };
     }).filter(Boolean));
-  };
+  }, []);
 
   const subtotal = cart.reduce((sum, i) => sum + (i.price * i.quantity) - i.discountAmount, 0);
   
@@ -246,34 +289,7 @@ const Sales = () => {
     return 'Bronze';
   };
 
-  const ProductCard = ({ product }) => (
-    <motion.div 
-      whileHover={{ y: -5, boxShadow: '0 12px 30px rgba(0,0,0,0.08)' }}
-      whileTap={{ scale: 0.98 }}
-      onClick={() => addToCart(product)}
-      style={{
-        background: 'white', borderRadius: 20, padding: 20, cursor: 'pointer',
-        border: '1px solid rgba(0,0,0,0.04)', boxShadow: '0 4px 12px rgba(0,0,0,0.02)',
-        display: 'flex', flexDirection: 'column', gap: 12,
-        opacity: product.stock <= 0 ? 0.5 : 1,
-        pointerEvents: product.stock <= 0 ? 'none' : 'auto'
-      }}
-    >
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start' }}>
-        <div style={{ width: 44, height: 44, borderRadius: 12, background: '#f1f5f9', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#64748b' }}>
-          <Package size={22} />
-        </div>
-        <div style={{ background: product.stock < 10 ? '#fff1f2' : '#f0fdf4', color: product.stock < 10 ? '#e11d48' : '#16a34a', fontSize: 11, fontWeight: 800, padding: '4px 8px', borderRadius: 6 }}>
-          {product.stock <= 0 ? 'Out of Stock' : `${product.stock} in stock`}
-        </div>
-      </div>
-      <div>
-        <div style={{ fontSize: 15, fontWeight: 800, color: '#0f172a' }}>{product.name}</div>
-        <div style={{ fontSize: 12, color: '#94a3b8', fontWeight: 600 }}>{product.sku || 'No SKU'}</div>
-      </div>
-      <div style={{ fontSize: 20, fontWeight: 900, color: '#0a84ff' }}>${product.price}</div>
-    </motion.div>
-  );
+
 
   return (
     <div style={{ display: 'grid', gridTemplateColumns: '1fr 420px', height: '100vh', background: '#f1f5f9', overflow: 'hidden' }}>
@@ -312,9 +328,16 @@ const Sales = () => {
         </header>
 
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: 24 }}>
-          {products.filter(p => p.name.toLowerCase().includes(search.toLowerCase())).map(p => (
-            <ProductCard key={p.id} product={p} />
-          ))}
+          {products
+            .filter(p => {
+              const term = search.toLowerCase();
+              return p.name.toLowerCase().includes(term) || (p.sku && p.sku.toLowerCase().includes(term));
+            })
+            .slice(0, 36)
+            .map(p => (
+              <ProductCard key={p.id} product={p} onAdd={addToCart} />
+            ))
+          }
         </div>
       </div>
 
@@ -529,10 +552,18 @@ const Sales = () => {
               )}
 
               <div style={{ borderTop: '2px dashed #e2e8f0', borderBottom: '2px dashed #e2e8f0', padding: '16px 0', margin: '16px 0', display: 'flex', flexDirection: 'column', gap: 10 }}>
+                <div style={{ display: 'grid', gridTemplateColumns: '2.5fr 1fr 1fr 1fr', gap: 8, fontSize: 12, fontWeight: 800, color: '#64748b', paddingBottom: 6, borderBottom: '1px solid #e2e8f0' }}>
+                  <span>Item</span>
+                  <span style={{ textAlign: 'center' }}>Qty</span>
+                  <span style={{ textAlign: 'right' }}>Unit</span>
+                  <span style={{ textAlign: 'right' }}>Total</span>
+                </div>
                 {receipt.items?.map((item, idx) => (
-                  <div key={idx} style={{ display: 'flex', justifyContent: 'space-between', fontSize: 14 }}>
-                    <div style={{ fontWeight: 600, color: '#0f172a' }}>{item.quantity}x {item.name}</div>
-                    <div style={{ fontWeight: 700 }}>${(item.price * item.quantity).toFixed(2)}</div>
+                  <div key={idx} style={{ display: 'grid', gridTemplateColumns: '2.5fr 1fr 1fr 1fr', gap: 8, fontSize: 13, alignItems: 'center' }}>
+                    <span style={{ fontWeight: 600, color: '#0f172a', wordBreak: 'break-all' }}>{item.name}</span>
+                    <span style={{ textAlign: 'center', fontWeight: 800, color: '#0f172a' }}>{item.quantity}</span>
+                    <span style={{ textAlign: 'right', color: '#64748b' }}>${parseFloat(item.price || 0).toFixed(2)}</span>
+                    <span style={{ textAlign: 'right', fontWeight: 800, color: '#0f172a' }}>${(item.price * item.quantity).toFixed(2)}</span>
                   </div>
                 ))}
               </div>
@@ -574,9 +605,12 @@ const Sales = () => {
 
             <div style={{ display: 'flex', gap: 12, marginTop: 20 }}>
               <button onClick={() => {
-                const printWindow = window.open('', '_blank');
-                printWindow.document.write(`<html><head><title>Invoice</title><style>body{font-family:sans-serif;padding:40px;max-width:400px;margin:0 auto}</style></head><body onload="window.print();window.close();">${document.getElementById('printable-invoice').innerHTML}</body></html>`);
-                printWindow.document.close();
+                const printContent = document.getElementById('printable-invoice').innerHTML;
+                const iframe = document.createElement('iframe');
+                document.body.appendChild(iframe);
+                iframe.style.display = 'none';
+                iframe.contentDocument.write(`<html><head><title>Invoice</title><style>body{font-family:sans-serif;padding:40px;max-width:400px;margin:0 auto}</style></head><body onload="window.print(); setTimeout(() => window.parent.document.body.removeChild(window.frameElement), 100);">${printContent}</body></html>`);
+                iframe.contentDocument.close();
               }} style={{ flex: 1, padding: 14, borderRadius: 16, background: '#f1f5f9', border: 'none', fontWeight: 800, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
                 <Printer size={18} /> Print Invoice
               </button>

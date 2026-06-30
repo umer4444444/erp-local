@@ -68,6 +68,7 @@ export const inventoryAPI = {
   getMovementLogs: (params) => API.get('/inventory/logs', { params }),
   importCSV: (data) => API.post('/inventory/import', data),
   getPredictive: () => API.get('/inventory/predictive'),
+  autoGeneratePO: () => API.post('/inventory/auto-po'),
   getAutoDiscount: () => API.get('/inventory/auto-discount'),
 };
 
@@ -118,14 +119,18 @@ export const attendanceAPI = {
   getToday: () => API.get('/attendance/today'),
   getActive: () => API.get('/attendance/active'),
   getMyActive: () => API.get('/attendance/my-active'),
+  getMyHistory: (page = 1) => API.get('/attendance/my-history', { params: { page, limit: 30 } }),
   getAudit: (params) => API.get('/attendance/audit', { params }),
 };
 
 export const leaveAPI = {
   apply: (data) => API.post('/leaves/apply', data),
   getMy: () => API.get('/leaves/my'),
+  getMyBalance: () => API.get('/leaves/my-balance'),
   getPending: () => API.get('/leaves/pending'),
   updateStatus: (id, status, reason) => API.put(`/leaves/${id}/status`, { status, rejectionReason: reason }),
+  getByEmployee: (id) => API.get(`/leaves/employee/${id}`),
+  getBalanceByEmployee: (id) => API.get(`/leaves/balance/${id}`),
 };
 
 export const payrollAPI = {
@@ -133,6 +138,7 @@ export const payrollAPI = {
   getHistory: () => API.get('/payroll/history'),
   getPayslips: (runId) => API.get(`/payroll/runs/${runId}/payslips`),
   updatePayslip: (id, data) => API.put(`/payroll/payslips/${id}`, data),
+  finalizeRun: (runId) => API.put(`/payroll/runs/${runId}/finalize`),
 };
 
 export const expenseAPI = {
@@ -186,7 +192,8 @@ export const reportsAPI = {
 
 export const advanceAPI = {
   request: (data) => API.post('/payroll/advance/request', data),
-  getPending: () => API.get('/payroll/advance/pending'),
+  getMy: () => API.get('/payroll/advance/my'),
+  getAll: () => API.get('/payroll/advance/pending'),
   approve: (id, status) => API.put(`/payroll/advance/${id}/approve`, { status }),
 };
 

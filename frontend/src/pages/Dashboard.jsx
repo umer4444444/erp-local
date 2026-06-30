@@ -56,28 +56,38 @@ const Dashboard = ({ user }) => {
     }
   };
 
-  // Helper to download a simple CSV report
-  const handleDownloadReport = async () => {
-    try {
-      const res = await salesAPI.getEOD(); // assume endpoint returns an array of records
-      const rows = res.data || [];
-      const csvContent =
-        'data:text/csv;charset=utf-8,' +
-        ['ID,Date,Amount,Employee']
-          .concat(rows.map(r => `${r.id},${r.date},${r.amount},${r.employeeName}`))
-          .join('\n');
-      const encodedUri = encodeURI(csvContent);
-      const link = document.createElement('a');
-      link.setAttribute('href', encodedUri);
-      link.setAttribute('download', 'eod_report.csv');
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-    } catch (err) {
-      console.error('Report download failed', err);
-      alert('Unable to generate report');
+  // Helper to download a CSV report using Blob
+const handleDownloadReport = async () => {
+  try {
+    // Fetch sales history with a large limit
+    const res = await salesAPI.getHistory({ limit: 1000, page: 1 });
+    const rows = (res.data && res.data.rows) ? res.data.rows : (Array.isArray(res.data) ? res.data : []);
+    if (!Array.isArray(rows) || rows.length === 0) {
+      alert('No report data available to download');
+      return;
     }
-  };
+    const header = ['ID', 'Date', 'Amount', 'Employee'];
+    const csvRows = rows.map(r => {
+      const dateStr = r.createdAt ? new Date(r.createdAt).toLocaleString() : '';
+      const amountStr = r.grandTotal !== undefined && r.grandTotal !== null ? r.grandTotal : '0';
+      const employeeName = r.User?.name || r.user?.name || '';
+      return `"${r.id || ''}","${dateStr}","${amountStr}","${employeeName}"`;
+    });
+    const csvContent = [header.join(','), ...csvRows].join('\n');
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.setAttribute('href', url);
+    link.setAttribute('download', 'sales_report.csv');
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  } catch (err) {
+    console.error('Report download failed', err);
+    alert('Unable to generate report');
+  }
+};
 
   useEffect(() => {
     const fetchData = async () => {
@@ -179,13 +189,33 @@ const Dashboard = ({ user }) => {
           ) : (
             <button 
               onClick={async (e) => {
-                e.currentTarget.disabled = true;
-                try {
-                  await attendanceAPI.clockIn();
-                  const res = await attendanceAPI.getMyActive();
-                  setActiveAttendance(res.data);
-                } catch (err) { alert(err.response?.data?.message || 'Clock in failed'); }
-                finally { e.currentTarget.disabled = false; }
+                const btn = e.currentTarget;
+                btn.disabled = true;
+                const clockInWithCoords = async (latitude, longitude) => {
+                  try {
+                    await attendanceAPI.clockIn({ latitude, longitude });
+                    const res = await attendanceAPI.getMyActive();
+                    setActiveAttendance(res.data);
+                  } catch (err) {
+                    alert(err.response?.data?.message || 'Clock in failed');
+                  } finally {
+                    btn.disabled = false;
+                  }
+                };
+
+                if (navigator.geolocation) {
+                  navigator.geolocation.getCurrentPosition(
+                    (position) => {
+                      clockInWithCoords(position.coords.latitude, position.coords.longitude);
+                    },
+                    (error) => {
+                      // Fallback to office location if denied or not available
+                      clockInWithCoords(31.5204, 74.3587);
+                    }
+                  );
+                } else {
+                  clockInWithCoords(31.5204, 74.3587);
+                }
               }}
               style={{ width: '100%', padding: '16px', borderRadius: 16, background: '#f1f5f9', border: 'none', color: '#0f172a', fontWeight: 800, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10 }}
             >

@@ -1,10 +1,11 @@
+const { v7: uuidv7 } = require('uuid');
 const { DataTypes } = require('sequelize');
 const sequelize = require('../config/database');
 
 const Sale = sequelize.define('Sale', {
   id: {
     type: DataTypes.UUID,
-    defaultValue: DataTypes.UUIDV4,
+    defaultValue: uuidv7,
     primaryKey: true,
   },
   customerId: {
@@ -12,8 +13,7 @@ const Sale = sequelize.define('Sale', {
   },
   userId: {
     type: DataTypes.UUID,
-    allowNull: true,
-    defaultValue: null,
+    allowNull: false,
   },
   totalAmount: {
     type: DataTypes.DECIMAL(12, 2),

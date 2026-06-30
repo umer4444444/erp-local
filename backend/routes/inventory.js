@@ -183,22 +183,102 @@ router.post('/import', auth, roleCheck(['admin', 'inventory', 'manager']), audit
       return res.status(400).json({ message: 'Invalid items array' });
     }
 
+    // Helper functions for backend sanitization
+    const cleanNumber = (val) => {
+      if (val === undefined || val === null || val === '') return 0;
+      const cleaned = String(val).replace(/[^0-9.-]/g, '');
+      const parsed = parseFloat(cleaned);
+      return isNaN(parsed) ? 0 : parsed;
+    };
+
+    const cleanInt = (val) => {
+      if (val === undefined || val === null || val === '') return 0;
+      const cleaned = String(val).replace(/[^0-9.-]/g, '');
+      const parsed = parseInt(cleaned, 10);
+      return isNaN(parsed) ? 0 : parsed;
+    };
+
+    const cleanDate = (val) => {
+      if (!val) return null;
+      const trimmed = String(val).trim().toLowerCase();
+      if (trimmed === '' || trimmed === 'n/a' || trimmed === 'none' || trimmed === 'null' || trimmed === 'undefined') {
+        return null;
+      }
+      const date = new Date(val);
+      if (isNaN(date.getTime())) {
+        return null;
+      }
+      return date.toISOString().split('T')[0];
+    };
+
+    // Load categories to support name-based mapping on the backend
+    const categories = await Category.findAll({ transaction });
+    const categoryMap = {};
+    categories.forEach(cat => {
+      categoryMap[cat.name.toLowerCase().trim()] = cat.id;
+      categoryMap[cat.id.toLowerCase().trim()] = cat.id;
+    });
+
     const imported = [];
+    let createdCount = 0;
+    let updatedCount = 0;
+
     for (const item of items) {
-      const prod = await Product.create({
-        name: item.name,
-        sku: item.sku || `SKU-${Math.random().toString(36).substr(2, 5).toUpperCase()}`,
-        price: parseFloat(item.price || 0),
-        costPrice: parseFloat(item.costPrice || 0),
-        stock: parseInt(item.stock || 0),
-        categoryId: item.categoryId || null,
-        expiryDate: item.expiryDate || null,
-        storeType: item.storeType || 'department'
-      }, { transaction });
+      if (!item.name) continue;
+
+      // Resolve category
+      let categoryId = null;
+      const categoryRaw = item.categoryId || item.category || '';
+      if (categoryRaw) {
+        const catVal = String(categoryRaw).trim().toLowerCase();
+        if (/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(catVal)) {
+          categoryId = catVal;
+        } else if (categoryMap[catVal]) {
+          categoryId = categoryMap[catVal];
+        }
+      }
+
+      // Normalize storeType
+      const storeTypeRaw = String(item.storeType || item.storetype || 'department').toLowerCase().trim();
+      const storeType = (storeTypeRaw === 'pharmacy') ? 'pharmacy' : 'department';
+
+      // Generate or normalize SKU
+      const sku = (item.sku || '').trim() || `SKU-${Math.random().toString(36).substr(2, 5).toUpperCase()}`;
+
+      // Upsert product based on SKU
+      let prod = await Product.findOne({ where: { sku }, transaction });
+      if (prod) {
+        await prod.update({
+          name: item.name,
+          price: cleanNumber(item.price),
+          costPrice: cleanNumber(item.costPrice || item.cost),
+          stock: cleanInt(item.stock),
+          categoryId,
+          expiryDate: cleanDate(item.expiryDate || item.expiry),
+          storeType
+        }, { transaction });
+        updatedCount++;
+      } else {
+        prod = await Product.create({
+          name: item.name,
+          sku,
+          price: cleanNumber(item.price),
+          costPrice: cleanNumber(item.costPrice || item.cost),
+          stock: cleanInt(item.stock),
+          categoryId,
+          expiryDate: cleanDate(item.expiryDate || item.expiry),
+          storeType
+        }, { transaction });
+        createdCount++;
+      }
       imported.push(prod);
     }
+
     await transaction.commit();
-    res.json({ message: `Successfully imported ${imported.length} products`, products: imported });
+    res.json({ 
+      message: `Successfully processed ${imported.length} products (${createdCount} created, ${updatedCount} updated)`, 
+      products: imported 
+    });
   } catch (err) {
     await transaction.rollback();
     res.status(400).json({ message: err.message });

@@ -33,87 +33,108 @@ const SalesHistory = () => {
     }
   };
 
+  // Reprint — exact same format as Sales.jsx receipt modal
   const handleReprint = (sale) => {
-    const printWindow = window.open('', '_blank');
-    if (!printWindow) return;
-    
-    const itemsHtml = (sale.Items || []).map(item => `
-      <tr style="border-bottom: 1px solid #f1f5f9;">
-        <td style="padding: 12px 0; font-weight: 600; color: #0f172a;">${item.Product?.name || 'Item'}</td>
-        <td style="padding: 12px 0; text-align: center; color: #64748b;">${item.quantity}</td>
-        <td style="padding: 12px 0; text-align: right; font-weight: 700; color: #0f172a;">$${parseFloat(item.price).toFixed(2)}</td>
-        <td style="padding: 12px 0; text-align: right; font-weight: 700; color: #0f172a;">$${parseFloat(item.total).toFixed(2)}</td>
-      </tr>
+    const iframe = document.createElement('iframe');
+    document.body.appendChild(iframe);
+    iframe.style.display = 'none';
+
+    const itemRows = (sale.Items || []).map(item => `
+      <div style="display:grid; grid-template-columns:2.5fr 1fr 1fr 1fr; gap:8px; font-size:13px; align-items:center; padding:8px 0; border-bottom:1px solid #f8fafc;">
+        <span style="font-weight:600; color:#0f172a; word-break:break-all;">${item.Product?.name || 'Item'}</span>
+        <span style="text-align:center; font-weight:800; color:#0f172a;">${item.quantity}</span>
+        <span style="text-align:right; color:#64748b;">$${parseFloat(item.price || 0).toFixed(2)}</span>
+        <span style="text-align:right; font-weight:800; color:#0f172a;">$${parseFloat(item.total || 0).toFixed(2)}</span>
+      </div>
     `).join('');
 
-    printWindow.document.write(`
+    const subtotal = parseFloat(sale.totalAmount || sale.grandTotal || 0);
+    const discount = parseFloat(sale.discount || 0);
+    const grandTotal = parseFloat(sale.grandTotal || 0);
+    const cashAmount = parseFloat(sale.cashAmount || 0);
+    const change = sale.paymentMethod === 'cash' && cashAmount > 0 ? Math.max(cashAmount - grandTotal, 0) : 0;
+
+    iframe.contentDocument.write(`
       <html>
         <head>
           <title>Invoice - ${sale.id.slice(0, 8).toUpperCase()}</title>
           <style>
             @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;800;900&display=swap');
-            body { font-family: 'Outfit', sans-serif; padding: 40px; color: #0f172a; }
-            .receipt-header { text-align: center; margin-bottom: 30px; }
-            .receipt-title { font-size: 24px; font-weight: 900; margin-bottom: 8px; }
-            .receipt-meta { font-size: 13px; color: #64748b; font-weight: 600; }
-            .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 40px; font-size: 14px; }
-            .info-label { color: #94a3b8; font-weight: 700; text-transform: uppercase; font-size: 11px; margin-bottom: 4px; }
-            .info-val { font-weight: 700; color: #1e293b; }
-            table { width: 100%; border-collapse: collapse; margin-bottom: 30px; }
-            th { padding: 12px 0; border-bottom: 2px solid #0f172a; text-align: left; font-size: 12px; font-weight: 800; color: #64748b; text-transform: uppercase; }
-            .totals { margin-left: auto; width: 300px; font-size: 14px; }
-            .total-row { display: flex; justify-content: space-between; padding: 8px 0; }
-            .grand-total { border-top: 2px dashed #e2e8f0; margin-top: 8px; padding-top: 12px; font-size: 20px; font-weight: 900; color: #0a84ff; }
+            body { font-family: 'Outfit', sans-serif; padding: 40px; max-width: 400px; margin: 0 auto; color: #0f172a; }
           </style>
         </head>
         <body>
-          <div class="receipt-header">
-            <div class="receipt-title">SAP ERP TRANSACTION</div>
-            <div class="receipt-meta">Transaction Receipt</div>
+          <!-- REPRINT stamp -->
+          <div style="text-align:center; margin-bottom:12px;">
+            <span style="display:inline-block; border:3px solid #ef4444; color:#ef4444; font-size:13px; font-weight:900; padding:4px 14px; border-radius:4px; letter-spacing:2px; transform:rotate(-5deg);">REPRINT</span>
           </div>
-          <div class="info-grid">
-            <div>
-              <div class="info-label">Transaction ID</div>
-              <div class="info-val">#${sale.id.toUpperCase()}</div>
-              <div class="info-label" style="margin-top: 12px;">Date & Time</div>
-              <div class="info-val">${new Date(sale.createdAt).toLocaleString()}</div>
-            </div>
-            <div style="text-align: right;">
-              <div class="info-label">Customer</div>
-              <div class="info-val">${sale.Customer?.name || 'Walk-in Customer'}</div>
-              <div class="info-label" style="margin-top: 12px;">Payment Method</div>
-              <div class="info-val" style="text-transform: capitalize;">${sale.paymentMethod}</div>
+
+          <!-- Header -->
+          <div style="text-align:center; margin-bottom:24px;">
+            <h2 style="font-size:28px; font-weight:900; color:#0f172a; margin:0;">ENTERPRISE ERP</h2>
+            <p style="color:#64748b; font-weight:600; font-size:13px; margin:4px 0 0 0;">Official Sales Invoice</p>
+            <div style="margin-top:12px; font-size:12px; color:#94a3b8; font-weight:500;">
+              Txn: ${sale.id.slice(0, 8).toUpperCase()}<br/>
+              Date: ${new Date(sale.createdAt).toLocaleString()}
             </div>
           </div>
-          <table>
-            <thead>
-              <tr>
-                <th>Item</th>
-                <th style="text-align: center;">Qty</th>
-                <th style="text-align: right;">Unit Price</th>
-                <th style="text-align: right;">Total</th>
-              </tr>
-            </thead>
-            <tbody>
-              ${itemsHtml}
-            </tbody>
-          </table>
-          <div class="totals">
-            <div class="total-row grand-total">
-              <span>Grand Total</span>
-              <span>$${parseFloat(sale.grandTotal).toFixed(2)}</span>
+
+          ${sale.Customer?.name ? `
+          <div style="margin-bottom:12px; padding:8px 16px; background:#f8fafc; border-radius:10px; font-size:12px; font-weight:700; color:#64748b; display:flex; align-items:center; gap:6px;">
+            Customer: ${sale.Customer.name}
+          </div>` : ''}
+
+          <!-- Items -->
+          <div style="border-top:2px dashed #e2e8f0; border-bottom:2px dashed #e2e8f0; padding:16px 0; margin:16px 0;">
+            <div style="display:grid; grid-template-columns:2.5fr 1fr 1fr 1fr; gap:8px; font-size:12px; font-weight:800; color:#64748b; padding-bottom:6px; border-bottom:1px solid #e2e8f0;">
+              <span>Item</span>
+              <span style="text-align:center;">Qty</span>
+              <span style="text-align:right;">Unit</span>
+              <span style="text-align:right;">Total</span>
+            </div>
+            ${itemRows}
+          </div>
+
+          <!-- Totals -->
+          <div style="display:flex; flex-direction:column; gap:8px; margin-bottom:24px;">
+            <div style="display:flex; justify-content:space-between; font-size:14px; color:#64748b; font-weight:600;">
+              <span>Subtotal</span><span>$${subtotal.toFixed(2)}</span>
+            </div>
+            ${discount > 0 ? `
+            <div style="display:flex; justify-content:space-between; font-size:14px; color:#ef4444; font-weight:700;">
+              <span>Discount</span><span>-$${discount.toFixed(2)}</span>
+            </div>` : ''}
+            <div style="display:flex; justify-content:space-between; font-size:18px; color:#0f172a; font-weight:900; margin-top:8px; padding-top:8px; border-top:1px solid #f1f5f9;">
+              <span>Grand Total</span><span style="color:#0a84ff;">$${grandTotal.toFixed(2)}</span>
             </div>
           </div>
-          <div style="text-align: center; margin-top: 60px; font-size: 12px; color: #94a3b8; font-weight: 700; text-transform: uppercase; letter-spacing: 1px;">
-            Thank you for shopping with us!
+
+          <!-- Payment -->
+          <div style="background:#f8fafc; padding:16px; border-radius:12px; font-size:13px;">
+            <div style="display:flex; justify-content:space-between; margin-bottom:4px; font-weight:600;">
+              <span style="color:#64748b;">Payment Method</span>
+              <span style="text-transform:capitalize; color:#0f172a;">${sale.paymentMethod}</span>
+            </div>
+            ${sale.paymentMethod === 'cash' && cashAmount > 0 ? `
+            <div style="display:flex; justify-content:space-between; margin-bottom:4px; font-weight:600;">
+              <span style="color:#64748b;">Tendered</span>
+              <span style="color:#0f172a;">$${cashAmount.toFixed(2)}</span>
+            </div>
+            <div style="display:flex; justify-content:space-between; font-weight:800;">
+              <span style="color:#64748b;">Change</span>
+              <span style="color:#16a34a;">$${change.toFixed(2)}</span>
+            </div>` : ''}
           </div>
+
+          <div style="text-align:center; margin-top:24px; color:#94a3b8; font-size:12px; font-weight:600;">Thank you for your business!</div>
+
           <script>
-            window.onload = function() { window.print(); window.close(); }
+            window.onload = function() { window.print(); setTimeout(() => window.parent.document.body.removeChild(window.frameElement), 100); }
           </script>
         </body>
       </html>
     `);
-    printWindow.document.close();
+    iframe.contentDocument.close();
   };
 
   const handleVoid = async (sale) => {

@@ -83,6 +83,7 @@ const Suppliers = () => {
   const [poNotes,      setPoNotes]      = useState('');
   const [poLines,      setPoLines]      = useState([emptyLine()]);
   const [submitting,   setSubmitting]   = useState(false);
+  const [autoPoRunning, setAutoPoRunning] = useState(false);
 
   // ── Computed PO total ──
   const poTotal = poLines.reduce((sum, l) => {
@@ -125,6 +126,20 @@ const Suppliers = () => {
     }));
     setPoLines(lines);
     setPoNotes('Auto-generated: reorder for low-stock items');
+  };
+
+  const handleAutoPO = async () => {
+    if (autoPoRunning) return;
+    setAutoPoRunning(true);
+    try {
+      const res = await inventoryAPI.autoGeneratePO();
+      alert(res.data.message || `Purchase Orders created successfully`);
+      fetchAll();
+    } catch (err) {
+      alert(err?.response?.data?.message || 'Failed to auto-generate Purchase Orders');
+    } finally {
+      setAutoPoRunning(false);
+    }
   };
 
   // ─── PO line helpers ─────────────────────────────────────────────────────
@@ -266,10 +281,9 @@ const Suppliers = () => {
             <span style={{ fontWeight: 700, color: '#c2410c', fontSize: 14 }}>
               {lowStockProducts.length} product{lowStockProducts.length > 1 ? 's' : ''} running low on stock.
             </span>
-            <button onClick={() => { setSelectedSupplier(suppliers[0] || null); setShowOrderModal(true); autoFillLowStock(); }}
-              disabled={!suppliers.length}
-              style={{ marginLeft: 'auto', padding: '8px 18px', borderRadius: 10, background: '#f97316', color: 'white', border: 'none', fontWeight: 800, cursor: 'pointer', fontSize: 13 }}>
-              Auto-Generate PO
+            <button onClick={handleAutoPO} disabled={autoPoRunning}
+              style={{ marginLeft: 'auto', padding: '8px 18px', borderRadius: 10, background: autoPoRunning ? '#e2e8f0' : '#f97316', color: autoPoRunning ? '#64748b' : 'white', border: 'none', fontWeight: 800, cursor: autoPoRunning ? 'not-allowed' : 'pointer', fontSize: 13 }}>
+              {autoPoRunning ? 'Generating…' : 'Auto-Generate PO'}
             </button>
           </motion.div>
         )}

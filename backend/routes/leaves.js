@@ -70,20 +70,37 @@ router.get('/pending', auth, roleCheck(['admin', 'manager', 'hr']), async (req, 
   }
 });
 
-// Approve/Reject
-router.put('/:id/status', auth, roleCheck(['admin', 'manager', 'hr']), async (req, res) => {
+// Approve/Reject/Withdraw - employees can withdraw their own pending leaves
+router.put('/:id/status', auth, async (req, res) => {
   try {
     const { status, rejectionReason } = req.body;
-    const leave = await Leave.findByPk(req.params.id);
+    const leave = await Leave.findByPk(req.params.id, {
+      include: [{ model: Employee, include: [User] }]
+    });
     if (!leave) return res.status(404).json({ message: 'Leave request not found' });
+
+    const isOwner = leave.Employee?.userId === req.user.id;
+    const isApprover = ['admin', 'manager', 'hr'].includes(req.user.role);
+
+    // Only allow withdrawal by the owner, or approve/reject by an approver
+    if (status === 'withdrawn') {
+      if (!isOwner) return res.status(403).json({ message: 'You can only withdraw your own leave.' });
+      if (leave.status !== 'pending') return res.status(400).json({ message: 'Only pending leaves can be withdrawn.' });
+    } else {
+      if (!isApprover) return res.status(403).json({ message: 'Insufficient permissions.' });
+      // Block self-approval
+      if (isOwner && ['approved', 'rejected'].includes(status)) {
+        return res.status(403).json({ message: 'Self-approval is not permitted.' });
+      }
+    }
 
     await leave.update({ 
       status, 
-      rejectionReason, 
-      approvedBy: req.user.id 
+      rejectionReason: rejectionReason || null,
+      approvedBy: isApprover ? req.user.id : null
     });
 
-    // If approved, update leave balance (simplified logic)
+    // If approved, update leave balance
     if (status === 'approved') {
       const balance = await LeaveBalance.findOne({ 
         where: { employeeId: leave.employeeId, type: leave.type } 
@@ -118,6 +135,18 @@ router.get('/balance/:id', auth, async (req, res) => {
     const balance = await LeaveBalance.findAll({
       where: { employeeId: req.params.id }
     });
+    res.json(balance);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
+// Get my own leave balance
+router.get('/my-balance', auth, async (req, res) => {
+  try {
+    const employee = await Employee.findOne({ where: { userId: req.user.id } });
+    if (!employee) return res.json([]);
+    const balance = await LeaveBalance.findAll({ where: { employeeId: employee.id } });
     res.json(balance);
   } catch (err) {
     res.status(500).json({ message: err.message });

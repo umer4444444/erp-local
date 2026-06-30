@@ -1,3 +1,4 @@
+const { v7: uuidv7 } = require('uuid');
 const { DataTypes } = require('sequelize');
 const sequelize = require('../config/database');
 const bcrypt = require('bcryptjs');
@@ -5,7 +6,7 @@ const bcrypt = require('bcryptjs');
 const User = sequelize.define('User', {
   id: {
     type: DataTypes.UUID,
-    defaultValue: DataTypes.UUIDV4,
+    defaultValue: uuidv7,
     primaryKey: true,
   },
   name: {
@@ -31,7 +32,7 @@ const User = sequelize.define('User', {
   },
   role: {
     type: DataTypes.ENUM('admin', 'manager', 'cashier', 'hr', 'inventory', 'pharmacist', 'expenses'),
-    defaultValue: 'admin',
+    defaultValue: 'cashier',
     allowNull: false,
   },
   profileImage: {
@@ -51,13 +52,9 @@ const User = sequelize.define('User', {
     type: DataTypes.BOOLEAN,
     defaultValue: false,
   },
-  current_lat: {
-    type: DataTypes.DECIMAL(10, 8),
-    defaultValue: 0,
-  },
-  current_lng: {
-    type: DataTypes.DECIMAL(11, 8),
-    defaultValue: 0,
+  location: {
+    type: DataTypes.GEOMETRY('POINT'),
+    allowNull: false,
   },
   isActive: {
     type: DataTypes.BOOLEAN,
@@ -65,6 +62,12 @@ const User = sequelize.define('User', {
   },
 }, {
   timestamps: true,
+  indexes: [
+    {
+      type: 'SPATIAL',
+      fields: ['location'],
+    }
+  ]
 });
 
 // Instance method to compare password

@@ -42,11 +42,11 @@ StockLog.belongsTo(Product, { foreignKey: 'productId' });
 Product.hasMany(ProductVariation, { as: 'Variations', foreignKey: 'productId' });
 ProductVariation.belongsTo(Product, { foreignKey: 'productId' });
 
-User.hasMany(StockLog, { foreignKey: 'userId', onDelete: 'CASCADE', onUpdate: 'CASCADE' });
+User.hasMany(StockLog, { foreignKey: 'userId', onDelete: 'RESTRICT', onUpdate: 'CASCADE' });
 StockLog.belongsTo(User, { foreignKey: 'userId' });
 
 // Sales Associations
-Customer.hasMany(Sale, { foreignKey: 'customerId' });
+Customer.hasMany(Sale, { foreignKey: 'customerId', onDelete: 'RESTRICT' });
 Sale.belongsTo(Customer, { foreignKey: 'customerId' });
 
 
@@ -54,7 +54,7 @@ Sale.belongsTo(Customer, { foreignKey: 'customerId' });
 Sale.hasMany(SaleItem, { as: 'Items', foreignKey: 'saleId' });
 SaleItem.belongsTo(Sale, { foreignKey: 'saleId' });
 
-Product.hasMany(SaleItem, { foreignKey: 'productId' });
+Product.hasMany(SaleItem, { foreignKey: 'productId', onDelete: 'RESTRICT' });
 SaleItem.belongsTo(Product, { foreignKey: 'productId' });
 
 // User/SalesSession Associations
@@ -87,7 +87,7 @@ User.hasOne(Employee, { foreignKey: 'userId' });
 Employee.belongsTo(User, { foreignKey: 'userId' });
 
 // HR Core Associations (Day 7-8)
-Employee.hasMany(Attendance, { foreignKey: 'employeeId' });
+Employee.hasMany(Attendance, { foreignKey: 'employeeId', onDelete: 'RESTRICT' });
 Attendance.belongsTo(Employee, { foreignKey: 'employeeId' });
 
 WorkShift.hasMany(Attendance, { foreignKey: 'workShiftId' });
@@ -103,7 +103,7 @@ LeaveBalance.belongsTo(Employee, { foreignKey: 'employeeId' });
 PayrollRun.hasMany(Payslip, { foreignKey: 'payrollRunId' });
 Payslip.belongsTo(PayrollRun, { foreignKey: 'payrollRunId' });
 
-Employee.hasMany(Payslip, { foreignKey: 'employeeId' });
+Employee.hasMany(Payslip, { foreignKey: 'employeeId', onDelete: 'RESTRICT' });
 Payslip.belongsTo(Employee, { foreignKey: 'employeeId' });
 
 // User/Expense Associations
@@ -148,6 +148,17 @@ Employee.hasMany(SalaryAdvance, { foreignKey: 'employeeId' });
 SalaryAdvance.belongsTo(Employee, { foreignKey: 'employeeId' });
 Employee.hasMany(DocumentVault, { foreignKey: 'employeeId' });
 DocumentVault.belongsTo(Employee, { foreignKey: 'employeeId' });
+
+// Global Hook to convert empty strings to NULL
+sequelize.addHook('beforeValidate', (instance) => {
+  if (instance && instance.dataValues) {
+    for (const key of Object.keys(instance.dataValues)) {
+      if (instance.dataValues[key] === '') {
+        instance.setDataValue(key, null);
+      }
+    }
+  }
+});
 
 module.exports = {
   sequelize,

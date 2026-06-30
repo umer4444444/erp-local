@@ -5,12 +5,37 @@ const { Op } = require('sequelize');
 const socketHelper = require('../socket');
 const router = express.Router();
 
-// Get active rides
+// ─── GET /rides/drivers — list users who can act as drivers ───────────────
+router.get('/drivers', auth, async (req, res) => {
+  try {
+    const drivers = await User.findAll({
+      where: {
+        role: { [Op.in]: ['driver', 'admin', 'manager'] },
+        isActive: { [Op.ne]: false }
+      },
+      attributes: ['id', 'name', 'email', 'role']
+    });
+    res.json(drivers);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
+// ─── GET /rides — get active (non-completed/cancelled) rides ──────────────
 router.get('/', auth, async (req, res) => {
   try {
     const rides = await Ride.findAll({
-      where: { status: { [Op.ne]: 'completed' } },
-      include: [{ model: User, as: 'Rider' }, { model: User, as: 'Driver' }, { model: Bid }]
+      where: {
+        status: {
+          [Op.notIn]: ['completed', 'cancelled', 'delivered', 'failed']
+        }
+      },
+      include: [
+        { model: User, as: 'Rider', attributes: ['id', 'name', 'email'] },
+        { model: User, as: 'Driver', attributes: ['id', 'name', 'email'] },
+        { model: Bid }
+      ],
+      order: [['createdAt', 'DESC']]
     });
     res.json(rides);
   } catch (err) {
@@ -18,28 +43,41 @@ router.get('/', auth, async (req, res) => {
   }
 });
 
-// Create ride
+// ─── GET /rides/all — get all rides including completed ───────────────────
+router.get('/all', auth, async (req, res) => {
+  try {
+    const rides = await Ride.findAll({
+      include: [
+        { model: User, as: 'Rider', attributes: ['id', 'name', 'email'] },
+        { model: User, as: 'Driver', attributes: ['id', 'name', 'email'] },
+      ],
+      order: [['createdAt', 'DESC']]
+    });
+    res.json(rides);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
+// ─── POST /rides — create delivery/ride ──────────────────────────────────
 router.post('/', auth, async (req, res) => {
   try {
     const ride = await Ride.create({
       ...req.body,
       riderId: req.user.id,
-      status: 'requested'
+      status: req.body.status || 'pending'
     });
-    
-    // Broadcast new ride request in real-time
+
     const io = socketHelper.getIo();
-    if (io) {
-      io.emit('newRideRequest', ride);
-    }
-    
+    if (io) io.emit('newRideRequest', ride);
+
     res.status(201).json(ride);
   } catch (err) {
     res.status(400).json({ message: err.message });
   }
 });
 
-// Place bid
+// ─── POST /rides/:id/bid — place bid ──────────────────────────────────────
 router.post('/:id/bid', auth, async (req, res) => {
   try {
     const { amount } = req.body;
@@ -48,55 +86,51 @@ router.post('/:id/bid', auth, async (req, res) => {
       driverId: req.user.id,
       amount
     });
-    
-    // Notify about new bid
+
     const io = socketHelper.getIo();
-    if (io) {
-      io.emit('newBidPlaced', bid);
-    }
-    
+    if (io) io.emit('newBidPlaced', bid);
+
     res.status(201).json(bid);
   } catch (err) {
     res.status(400).json({ message: err.message });
   }
 });
 
-// Assign driver to ride
-router.post('/:id/assign', auth, async (req, res) => {
+// ─── PUT /rides/:id/assign — assign driver (was POST, fixed to PUT) ───────
+router.put('/:id/assign', auth, async (req, res) => {
   try {
     const { driverId } = req.body;
     const ride = await Ride.findByPk(req.params.id);
     if (!ride) return res.status(404).json({ message: 'Ride/Delivery not found' });
 
-    await ride.update({
-      driverId,
-      status: 'accepted'
-    });
+    await ride.update({ driverId, status: 'assigned' });
 
     const io = socketHelper.getIo();
-    if (io) {
-      io.emit('rideStatusUpdated', { rideId: ride.id, status: 'accepted', driverId });
-    }
+    if (io) io.emit('rideStatusUpdated', { rideId: ride.id, status: 'assigned', driverId });
 
-    res.json(ride);
+    // Return with driver info
+    const updated = await Ride.findByPk(ride.id, {
+      include: [
+        { model: User, as: 'Driver', attributes: ['id', 'name', 'email'] }
+      ]
+    });
+    res.json(updated);
   } catch (err) {
     res.status(400).json({ message: err.message });
   }
 });
 
-// Update delivery status
-router.post('/:id/status', auth, async (req, res) => {
+// ─── PUT /rides/:id/status — update delivery status (was POST, fixed to PUT)
+router.put('/:id/status', auth, async (req, res) => {
   try {
-    const { status } = req.body; // accepted, in_progress, completed, cancelled
+    const { status } = req.body;
     const ride = await Ride.findByPk(req.params.id);
     if (!ride) return res.status(404).json({ message: 'Ride/Delivery not found' });
 
     await ride.update({ status });
 
     const io = socketHelper.getIo();
-    if (io) {
-      io.emit('rideStatusUpdated', { rideId: ride.id, status });
-    }
+    if (io) io.emit('rideStatusUpdated', { rideId: ride.id, status });
 
     res.json(ride);
   } catch (err) {
@@ -104,7 +138,7 @@ router.post('/:id/status', auth, async (req, res) => {
   }
 });
 
-// Complete ride
+// ─── POST /rides/:id/complete — legacy complete endpoint ──────────────────
 router.post('/:id/complete', auth, async (req, res) => {
   try {
     const ride = await Ride.findByPk(req.params.id);
@@ -112,9 +146,7 @@ router.post('/:id/complete', auth, async (req, res) => {
     await ride.update({ status: 'completed' });
 
     const io = socketHelper.getIo();
-    if (io) {
-      io.emit('rideStatusUpdated', { rideId: ride.id, status: 'completed' });
-    }
+    if (io) io.emit('rideStatusUpdated', { rideId: ride.id, status: 'completed' });
 
     res.json(ride);
   } catch (err) {

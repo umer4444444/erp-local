@@ -32,6 +32,7 @@ const Inventory = () => {
   const [showPredictiveModal, setShowPredictiveModal] = useState(false);
   const [predictiveData, setPredictiveData] = useState([]);
   const [predictiveLoading, setPredictiveLoading] = useState(false);
+  const [autoPoLoading, setAutoPoLoading] = useState(false);
 
   const [showAutoDiscountModal, setShowAutoDiscountModal] = useState(false);
   const [autoDiscounts, setAutoDiscounts] = useState([]);
@@ -56,6 +57,21 @@ const Inventory = () => {
   useEffect(() => {
     if (showPredictiveModal) fetchPredictive();
   }, [showPredictiveModal]);
+
+  const handleAutoGeneratePO = async () => {
+    if (autoPoLoading) return;
+    setAutoPoLoading(true);
+    try {
+      const res = await inventoryAPI.autoGeneratePO();
+      alert(res.data.message || 'Purchase Orders created');
+      fetchData();
+      fetchPredictive();
+    } catch (err) {
+      alert(err.response?.data?.message || 'Failed to auto-generate Purchase Orders');
+    } finally {
+      setAutoPoLoading(false);
+    }
+  };
 
   useEffect(() => {
     if (showAutoDiscountModal) fetchAutoDiscounts();
@@ -122,50 +138,126 @@ const Inventory = () => {
   const handleCSVImport = (e) => {
     const file = e.target.files[0];
     if (!file) return;
+
+    // Save a reference to the input element for resetting
+    const inputEl = e.target;
+
     const reader = new FileReader();
     reader.onload = async (event) => {
       try {
         const text = event.target.result;
-        const lines = text.split('\n');
+        const lines = text.split(/\r?\n/);
         if (lines.length < 2) {
           alert('CSV file is empty or invalid.');
+          inputEl.value = '';
           return;
         }
-        const headers = lines[0].split(',').map(h => h.trim().replace(/^["']|["']$/g, '').toLowerCase());
+
+        // Robust CSV row parser handling quoted fields
+        const parseCSVRow = (row) => {
+          const result = [];
+          let current = '';
+          let inQuotes = false;
+          for (let i = 0; i < row.length; i++) {
+            const ch = row[i];
+            if (ch === '"' || ch === "'") {
+              inQuotes = !inQuotes;
+            } else if (ch === ',' && !inQuotes) {
+              result.push(current.trim());
+              current = '';
+            } else {
+              current += ch;
+            }
+          }
+          result.push(current.trim());
+          return result;
+        };
+
+        const cleanNumber = (val) => {
+          if (!val) return 0;
+          const cleaned = String(val).replace(/[^0-9.-]/g, '');
+          const parsed = parseFloat(cleaned);
+          return isNaN(parsed) ? 0 : parsed;
+        };
+
+        const cleanInt = (val) => {
+          if (!val) return 0;
+          const cleaned = String(val).replace(/[^0-9.-]/g, '');
+          const parsed = parseInt(cleaned, 10);
+          return isNaN(parsed) ? 0 : parsed;
+        };
+
+        const cleanDate = (val) => {
+          if (!val) return null;
+          const trimmed = String(val).trim().toLowerCase();
+          if (trimmed === '' || trimmed === 'n/a' || trimmed === 'none' || trimmed === 'null' || trimmed === 'undefined') {
+            return null;
+          }
+          const date = new Date(val);
+          if (isNaN(date.getTime())) {
+            return null;
+          }
+          return date.toISOString().split('T')[0];
+        };
+
+        const categoryMap = {};
+        categories.forEach(cat => {
+          categoryMap[cat.name.toLowerCase().trim()] = cat.id;
+          categoryMap[cat.id.toLowerCase().trim()] = cat.id;
+        });
+
+        const headers = parseCSVRow(lines[0]).map(h => h.toLowerCase().trim());
         const items = [];
+
         for (let i = 1; i < lines.length; i++) {
           const line = lines[i].trim();
           if (!line) continue;
-          const values = line.split(',').map(v => v.trim().replace(/^["']|["']$/g, ''));
+          const values = parseCSVRow(line);
           const item = {};
           headers.forEach((h, index) => {
-            item[h] = values[index];
+            item[h] = (values[index] || '').trim();
           });
           if (item.name) {
+            const categoryRaw = item.category || item.categoryid || item['category id'] || '';
+            const categoryId = categoryMap[categoryRaw.toLowerCase().trim()] || null;
+
+            const storeTypeRaw = (item.storetype || item['store type'] || 'department').toLowerCase().trim();
+            const storeType = (storeTypeRaw === 'pharmacy') ? 'pharmacy' : 'department';
+
             items.push({
               name: item.name,
               sku: item.sku || `SKU-${Math.random().toString(36).substr(2, 5).toUpperCase()}`,
-              price: parseFloat(item.price || 0),
-              costPrice: parseFloat(item.cost || item.costprice || 0),
-              stock: parseInt(item.stock || 0),
-              expiryDate: item.expiry || item.expirydate || null,
-              storeType: item.storetype || 'department'
+              price: cleanNumber(item.price),
+              costPrice: cleanNumber(item.cost || item.costprice),
+              stock: cleanInt(item.stock),
+              expiryDate: cleanDate(item.expiry || item.expirydate),
+              storeType,
+              categoryId,
             });
           }
         }
+
         if (items.length === 0) {
-          alert('No valid products found in CSV.');
+          alert('No valid products found in CSV. Make sure the file has a "name" column.');
+          inputEl.value = '';
           return;
         }
+
         setLoading(true);
         const res = await inventoryAPI.importCSV({ items });
         alert(res.data.message || `Successfully imported ${items.length} products!`);
         fetchData();
       } catch (err) {
-        alert(err.response?.data?.message || 'Failed to parse or import CSV');
+        alert(err.response?.data?.message || 'Failed to import CSV. Check file format and try again.');
       } finally {
         setLoading(false);
+        // Always reset the file input so the same file can be selected again
+        inputEl.value = '';
       }
+    };
+    reader.onerror = () => {
+      alert('Failed to read the file. Please try again.');
+      inputEl.value = '';
     };
     reader.readAsText(file);
   };
@@ -703,7 +795,13 @@ const Inventory = () => {
                   <h2 style={{ fontSize: 24, fontWeight: 900 }}>AI Restock Suggestions</h2>
                   <p style={{ color: '#64748b', fontSize: 13, fontWeight: 600 }}>Smart stock projections based on daily sales velocity.</p>
                 </div>
-                <button onClick={() => setShowPredictiveModal(false)} style={{ border: 'none', background: 'transparent', cursor: 'pointer' }}><X size={24} /></button>
+                <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+                  <button onClick={handleAutoGeneratePO} disabled={autoPoLoading}
+                    style={{ padding: '8px 14px', borderRadius: 10, background: autoPoLoading ? '#e2e8f0' : '#10b981', color: autoPoLoading ? '#64748b' : 'white', border: 'none', cursor: autoPoLoading ? 'not-allowed' : 'pointer', fontWeight: 800 }}>
+                    {autoPoLoading ? 'Generating…' : 'Auto-Generate POs'}
+                  </button>
+                  <button onClick={() => setShowPredictiveModal(false)} style={{ border: 'none', background: 'transparent', cursor: 'pointer' }}><X size={24} /></button>
+                </div>
               </div>
 
               <div style={{ flex: 1, overflowY: 'auto', border: '1px solid #e2e8f0', borderRadius: 16 }}>

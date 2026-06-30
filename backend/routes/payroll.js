@@ -1,5 +1,5 @@
 const express = require('express');
-const { PayrollRun, Payslip, Employee, User, Attendance, Leave, SalaryAdvance } = require('../models');
+const { PayrollRun, Payslip, Employee, User, Attendance, Leave, SalaryAdvance, LeaveBalance } = require('../models');
 const { Op } = require('sequelize');
 const { auth, roleCheck } = require('../middleware/auth');
 const audit = require('../middleware/audit');
@@ -10,8 +10,23 @@ router.post('/run', auth, roleCheck(['admin', 'hr']), audit('payroll'), async (r
   try {
     const { month, year } = req.body;
     
+    const existing = await PayrollRun.findOne({ where: { month, year } });
+    if (existing) {
+      return res.status(409).json({ 
+        message: `Payroll run already exists for ${month}/${year} (ID: ${existing.id}, status: ${existing.status})` 
+      });
+    }
+
     const employees = await Employee.findAll({ include: [User] });
     
+    const employeesWithNoSalary = employees.filter(e => !e.salary || parseFloat(e.salary) === 0);
+    if (employeesWithNoSalary.length > 0 && !req.body.forceZeroSalary) {
+      return res.status(422).json({
+        message: `${employeesWithNoSalary.length} employee(s) have no salary configured`,
+        employees: employeesWithNoSalary.map(e => ({ id: e.id, name: `${e.firstName} ${e.lastName}` }))
+      });
+    }
+
     const run = await PayrollRun.create({
       month,
       year,
@@ -29,7 +44,7 @@ router.post('/run', auth, roleCheck(['admin', 'hr']), audit('payroll'), async (r
       let deductions = 0;
       
       // 1. Unpaid Leaves deduction
-      const unpaidLeaves = await Leave.sum('days', {
+      const explicitUnpaid = await Leave.sum('days', {
         where: {
           employeeId: emp.id,
           status: 'approved',
@@ -37,9 +52,28 @@ router.post('/run', auth, roleCheck(['admin', 'hr']), audit('payroll'), async (r
           startDate: { [Op.between]: [startDate, endDate] }
         }
       }) || 0;
+      
+      let totalUnpaidDays = parseFloat(explicitUnpaid);
+      
+      const balances = await LeaveBalance.findAll({ where: { employeeId: emp.id } });
+      for (const b of balances) {
+        const priorLeaves = await Leave.sum('days', {
+          where: { employeeId: emp.id, type: b.type, status: 'approved', startDate: { [Op.lt]: startDate } }
+        }) || 0;
+        
+        const monthLeaves = await Leave.sum('days', {
+          where: { employeeId: emp.id, type: b.type, status: 'approved', startDate: { [Op.between]: [startDate, endDate] } }
+        }) || 0;
+        
+        const availableAtStart = Math.max(0, parseFloat(b.total) - parseFloat(priorLeaves));
+        
+        if (monthLeaves > availableAtStart) {
+          totalUnpaidDays += parseFloat(monthLeaves) - availableAtStart;
+        }
+      }
 
       const dailyRate = base / 30;
-      deductions += parseFloat((unpaidLeaves * dailyRate).toFixed(2));
+      deductions += parseFloat((totalUnpaidDays * dailyRate).toFixed(2));
 
       // 2. Hyper-Automated Late Deduction (15-min deduction)
       const totalLateMinutes = await Attendance.sum('lateMinutes', {
@@ -83,6 +117,9 @@ router.post('/run', auth, roleCheck(['admin', 'hr']), audit('payroll'), async (r
         status: 'unpaid'
       });
     }
+
+    const totalAmount = await Payslip.sum('netSalary', { where: { payrollRunId: run.id } });
+    await run.update({ totalAmount });
 
     res.status(201).json(run);
   } catch (err) {
@@ -158,6 +195,22 @@ router.post('/advance/request', auth, audit('payroll'), async (req, res) => {
   }
 });
 
+// Get my own advances (for employee portal)
+router.get('/advance/my', auth, async (req, res) => {
+  try {
+    const employee = await Employee.findOne({ where: { userId: req.user.id } });
+    if (!employee) return res.status(404).json({ message: 'Employee profile not found' });
+
+    const advances = await SalaryAdvance.findAll({
+      where: { employeeId: employee.id },
+      order: [['createdAt', 'DESC']]
+    });
+    res.json(advances);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
 // Get pending advances for approval
 router.get('/advance/pending', auth, roleCheck(['admin', 'hr']), async (req, res) => {
   try {
@@ -185,6 +238,23 @@ router.put('/advance/:id/approve', auth, roleCheck(['admin', 'hr']), audit('payr
     res.json(advance);
   } catch (err) {
     res.status(400).json({ message: err.message });
+  }
+});
+
+// Finalize a draft payroll run (DRAFT → PROCESSED)
+router.put('/runs/:id/finalize', auth, roleCheck(['admin', 'hr']), audit('payroll'), async (req, res) => {
+  try {
+    const run = await PayrollRun.findByPk(req.params.id);
+    if (!run) return res.status(404).json({ message: 'Payroll run not found' });
+    if (run.status === 'processed') return res.status(400).json({ message: 'Payroll run is already finalized.' });
+
+    // Mark all payslips in this run as paid
+    await Payslip.update({ status: 'paid' }, { where: { payrollRunId: run.id } });
+    await run.update({ status: 'processed' });
+
+    res.json(run);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
   }
 });
 

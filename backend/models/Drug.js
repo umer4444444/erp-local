@@ -1,10 +1,11 @@
+const { v7: uuidv7 } = require('uuid');
 const { DataTypes } = require('sequelize');
 const sequelize = require('../config/database');
 
 const Drug = sequelize.define('Drug', {
   id: {
     type: DataTypes.UUID,
-    defaultValue: DataTypes.UUIDV4,
+    defaultValue: uuidv7,
     primaryKey: true,
   },
   productId: {
@@ -28,6 +29,10 @@ const Drug = sequelize.define('Drug', {
   },
   expiryDate: {
     type: DataTypes.DATEONLY,
+  },
+  isControlledSubstance: {
+    type: DataTypes.BOOLEAN,
+    defaultValue: false,
   }
 }, {
   timestamps: true,

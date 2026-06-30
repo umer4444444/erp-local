@@ -1,10 +1,11 @@
+const { v7: uuidv7 } = require('uuid');
 const { DataTypes } = require('sequelize');
 const sequelize = require('../config/database');
 
 const Payslip = sequelize.define('Payslip', {
   id: {
     type: DataTypes.UUID,
-    defaultValue: DataTypes.UUIDV4,
+    defaultValue: uuidv7,
     primaryKey: true,
   },
   employeeId: {
@@ -32,7 +33,7 @@ const Payslip = sequelize.define('Payslip', {
     allowNull: false,
   },
   status: {
-    type: DataTypes.ENUM('unpaid', 'paid'),
+    type: DataTypes.ENUM('unpaid', 'paid', 'voided'),
     defaultValue: 'unpaid',
   }
 }, {

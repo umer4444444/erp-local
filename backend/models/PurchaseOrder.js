@@ -1,10 +1,11 @@
+const { v7: uuidv7 } = require('uuid');
 const { DataTypes } = require('sequelize');
 const sequelize = require('../config/database');
 
 const PurchaseOrder = sequelize.define('PurchaseOrder', {
   id: {
     type: DataTypes.UUID,
-    defaultValue: DataTypes.UUIDV4,
+    defaultValue: uuidv7,
     primaryKey: true,
   },
   supplierId: {
@@ -21,6 +22,16 @@ const PurchaseOrder = sequelize.define('PurchaseOrder', {
   status: {
     type: DataTypes.ENUM('pending', 'ordered', 'received', 'cancelled'),
     defaultValue: 'pending',
+  },
+  receivedDate: {
+    type: DataTypes.DATE,
+  },
+  receivedByUserId: {
+    type: DataTypes.UUID,
+  },
+  stockUpdated: {
+    type: DataTypes.BOOLEAN,
+    defaultValue: false,
   },
   notes: {
     type: DataTypes.TEXT,

@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import {
   DollarSign, Calculator, History, CheckCircle,
   Play, Edit2, Save, X, CreditCard, Clock,
-  ThumbsUp, ThumbsDown, AlertCircle, ChevronDown
+  ThumbsUp, ThumbsDown, AlertCircle, ChevronDown, Printer, Lock
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { payrollAPI, advanceAPI } from '../api';
@@ -19,6 +19,10 @@ const TABS = ['payroll', 'advances'];
 
 const Payroll = () => {
   const [activeTab, setActiveTab]   = useState('payroll');
+  const [runDate, setRunDate]       = useState(() => {
+    const now = new Date();
+    return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+  });
   const [runs, setRuns]             = useState([]);
   const [selectedRun, setSelectedRun] = useState(null);
   const [payslips, setPayslips]     = useState([]);
@@ -33,6 +37,7 @@ const Payroll = () => {
   const [advLoading, setAdvLoading] = useState(false);
   const [advForm, setAdvForm]       = useState({ amount: '', reason: '' });
   const [submitting, setSubmitting] = useState(false);
+  const [finalizing, setFinalizing] = useState(false);
 
   useEffect(() => { fetchHistory(); }, []);
   useEffect(() => { if (activeTab === 'advances') fetchAdvances(); }, [activeTab]);
@@ -54,8 +59,9 @@ const Payroll = () => {
   };
 
   const handleRunPayroll = async () => {
-    const month = new Date().getMonth() + 1;
-    const year  = new Date().getFullYear();
+    const [yearStr, monthStr] = runDate.split('-');
+    const month = parseInt(monthStr, 10);
+    const year = parseInt(yearStr, 10);
     if (!window.confirm(`Run payroll for ${month}/${year}?`)) return;
     setProcessing(true);
     try {
@@ -107,6 +113,77 @@ const Payroll = () => {
     } catch { alert('Action failed'); }
   };
 
+  const handleFinalize = async () => {
+    if (!selectedRun) return;
+    if (!window.confirm(`Finalize payroll for ${selectedRun.month}/${selectedRun.year}? This will mark all payslips as PAID and cannot be undone.`)) return;
+    setFinalizing(true);
+    try {
+      const res = await payrollAPI.finalizeRun(selectedRun.id);
+      setSelectedRun(prev => ({ ...prev, status: res.data.status }));
+      setRuns(prev => prev.map(r => r.id === selectedRun.id ? { ...r, status: res.data.status } : r));
+    } catch (err) {
+      alert(err.response?.data?.message || 'Failed to finalize payroll run');
+    } finally {
+      setFinalizing(false);
+    }
+  };
+
+  const printPayslip = (ps) => {
+    const printWindow = window.open('', '_blank');
+    const net = parseFloat(ps.netSalary).toFixed(2);
+    const empName = ps.Employee?.User?.name || 'Employee';
+    const html = `<!DOCTYPE html>
+    <html>
+    <head>
+      <title>Payslip - ${empName} - ${selectedRun.month}/${selectedRun.year}</title>
+      <style>
+        body { font-family: 'Segoe UI', sans-serif; margin: 0; padding: 40px; background: white; color: #0f172a; }
+        .header { display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 3px solid #0f172a; padding-bottom: 20px; margin-bottom: 24px; }
+        .company { font-size: 24px; font-weight: 900; }
+        .company small { display: block; font-size: 12px; font-weight: 400; color: #64748b; margin-top: 4px; }
+        .payslip-title { font-size: 14px; font-weight: 800; color: #64748b; text-align: right; }
+        .payslip-title span { display: block; font-size: 28px; color: #0f172a; font-weight: 900; margin-top: 4px; }
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-bottom: 24px; }
+        .info-box { background: #f8fafc; padding: 16px; border-radius: 12px; }
+        .info-box label { font-size: 11px; font-weight: 800; color: #64748b; text-transform: uppercase; }
+        .info-box value { display: block; font-size: 15px; font-weight: 800; color: #0f172a; margin-top: 4px; }
+        table { width: 100%; border-collapse: collapse; margin-bottom: 24px; }
+        th { text-align: left; padding: 12px 16px; background: #f1f5f9; font-size: 11px; font-weight: 800; color: #64748b; text-transform: uppercase; }
+        td { padding: 12px 16px; border-bottom: 1px solid #f1f5f9; font-size: 14px; }
+        .net-salary { background: #0f172a; color: white; padding: 20px 24px; border-radius: 12px; display: flex; justify-content: space-between; align-items: center; }
+        .net-salary .label { font-size: 14px; font-weight: 700; opacity: 0.8; }
+        .net-salary .amount { font-size: 28px; font-weight: 900; }
+        .footer { margin-top: 40px; font-size: 11px; color: #94a3b8; text-align: center; border-top: 1px solid #e2e8f0; padding-top: 16px; }
+      </style>
+    </head>
+    <body>
+      <div class="header">
+        <div class="company">Company Name<small>HR & Payroll System</small></div>
+        <div class="payslip-title">PAYSLIP<span>${selectedRun.month}/${selectedRun.year}</span></div>
+      </div>
+      <div class="grid">
+        <div class="info-box"><label>Employee Name</label><value>${empName}</value></div>
+        <div class="info-box"><label>Employee Code</label><value>${ps.Employee?.empCode || '—'}</value></div>
+        <div class="info-box"><label>Pay Period</label><value>${selectedRun.month}/${selectedRun.year}</value></div>
+        <div class="info-box"><label>Status</label><value>${ps.status?.toUpperCase() || 'UNPAID'}</value></div>
+      </div>
+      <table>
+        <tr><th>Description</th><th>Amount</th></tr>
+        <tr><td>Base Salary</td><td>$${parseFloat(ps.baseSalary).toFixed(2)}</td></tr>
+        <tr><td style="color:#10b981">+ Allowances</td><td style="color:#10b981">$${parseFloat(ps.allowances).toFixed(2)}</td></tr>
+        <tr><td style="color:#ef4444">- Deductions</td><td style="color:#ef4444">$${parseFloat(ps.deductions).toFixed(2)}</td></tr>
+      </table>
+      <div class="net-salary">
+        <div class="label">NET SALARY</div>
+        <div class="amount">$${net}</div>
+      </div>
+      <div class="footer">This is a computer-generated payslip. No signature required.</div>
+    </body></html>`;
+    printWindow.document.write(html);
+    printWindow.document.close();
+    printWindow.print();
+  };
+
   const statusBadge = (s) => {
     const map = {
       pending:  { color: '#f59e0b', label: 'Pending'  },
@@ -140,11 +217,19 @@ const Payroll = () => {
             ))}
           </div>
           {activeTab === 'payroll' && (
-            <button onClick={handleRunPayroll} disabled={processing}
-              style={{ padding: '12px 24px', borderRadius: 14, background: '#0a84ff', color: 'white', border: 'none', fontWeight: 800, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 8, opacity: processing ? 0.7 : 1 }}>
-              {processing ? <Calculator size={18} /> : <Play size={18} />}
-              {processing ? 'Processing...' : 'Run Payroll'}
-            </button>
+            <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+              <input 
+                type="month" 
+                value={runDate}
+                onChange={(e) => setRunDate(e.target.value)}
+                style={{ ...inputStyle, width: 'auto', padding: '10px 14px' }}
+              />
+              <button onClick={handleRunPayroll} disabled={processing}
+                style={{ padding: '12px 24px', borderRadius: 14, background: '#0a84ff', color: 'white', border: 'none', fontWeight: 800, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 8, opacity: processing ? 0.7 : 1 }}>
+                {processing ? <Calculator size={18} /> : <Play size={18} />}
+                {processing ? 'Processing...' : 'Run Payroll'}
+              </button>
+            </div>
           )}
         </div>
       </header>
@@ -183,9 +268,24 @@ const Payroll = () => {
             <div style={{ background: 'white', padding: 32, borderRadius: 28, border: '1px solid rgba(0,0,0,0.05)' }}>
               {selectedRun ? (
                 <>
-                  <div style={{ marginBottom: 28 }}>
-                    <h2 style={{ fontSize: 22, fontWeight: 900, color: '#0f172a' }}>Payroll Details — {selectedRun.month}/{selectedRun.year}</h2>
-                    <p style={{ color: '#94a3b8', fontSize: 13, fontWeight: 600, marginTop: 4 }}>Click the edit icon to adjust allowances and deductions per employee.</p>
+                  <div style={{ marginBottom: 28, display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                    <div>
+                      <h2 style={{ fontSize: 22, fontWeight: 900, color: '#0f172a' }}>Payroll Details — {selectedRun.month}/{selectedRun.year}</h2>
+                      <p style={{ color: '#94a3b8', fontSize: 13, fontWeight: 600, marginTop: 4 }}>Click the edit icon to adjust allowances and deductions per employee.</p>
+                    </div>
+                    <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
+                      <span style={{ fontSize: 12, fontWeight: 800, padding: '6px 14px', borderRadius: 10,
+                        background: selectedRun.status === 'processed' ? '#dcfce7' : '#fef3c7',
+                        color: selectedRun.status === 'processed' ? '#16a34a' : '#d97706' }}>
+                        {selectedRun.status?.toUpperCase()}
+                      </span>
+                      {selectedRun.status !== 'processed' && (
+                        <button onClick={handleFinalize} disabled={finalizing}
+                          style={{ padding: '10px 20px', borderRadius: 12, background: '#10b981', color: 'white', border: 'none', fontWeight: 800, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 8, opacity: finalizing ? 0.7 : 1, fontSize: 13 }}>
+                          <Lock size={14} /> {finalizing ? 'Finalizing...' : 'Finalize & Pay'}
+                        </button>
+                      )}
+                    </div>
                   </div>
                   <div style={{ overflowX: 'auto' }}>
                     <table style={{ width: '100%', borderCollapse: 'collapse' }}>
@@ -218,23 +318,33 @@ const Payroll = () => {
                               </td>
                               <td style={{ padding: '16px', fontWeight: 900, color: '#0a84ff', fontSize: 16 }}>{fmtMoney(net)}</td>
                               <td style={{ padding: '16px' }}>
-                                {isEditing ? (
-                                  <div style={{ display: 'flex', gap: 6 }}>
-                                    <button onClick={() => handleSave(ps.id)} disabled={saving}
-                                      style={{ padding: '7px 12px', borderRadius: 8, background: '#10b981', color: 'white', border: 'none', fontWeight: 800, cursor: 'pointer', fontSize: 12, display: 'flex', alignItems: 'center', gap: 4 }}>
-                                      <Save size={13} /> Save
-                                    </button>
-                                    <button onClick={() => setEditingId(null)}
-                                      style={{ padding: '7px', borderRadius: 8, background: '#f1f5f9', border: 'none', cursor: 'pointer' }}>
-                                      <X size={13} color="#64748b" />
-                                    </button>
-                                  </div>
-                                ) : (
-                                  <button onClick={() => startEdit(ps)}
-                                    style={{ padding: '7px', borderRadius: 8, background: '#f8fafc', border: '1px solid #e2e8f0', cursor: 'pointer' }}>
-                                    <Edit2 size={15} color="#0a84ff" />
-                                  </button>
-                                )}
+                                <div style={{ display: 'flex', gap: 6 }}>
+                                  {isEditing ? (
+                                    <>
+                                      <button onClick={() => handleSave(ps.id)} disabled={saving}
+                                        style={{ padding: '7px 12px', borderRadius: 8, background: '#10b981', color: 'white', border: 'none', fontWeight: 800, cursor: 'pointer', fontSize: 12, display: 'flex', alignItems: 'center', gap: 4 }}>
+                                        <Save size={13} /> Save
+                                      </button>
+                                      <button onClick={() => setEditingId(null)}
+                                        style={{ padding: '7px', borderRadius: 8, background: '#f1f5f9', border: 'none', cursor: 'pointer' }}>
+                                        <X size={13} color="#64748b" />
+                                      </button>
+                                    </>
+                                  ) : (
+                                    <>
+                                      {selectedRun.status !== 'processed' && (
+                                        <button onClick={() => startEdit(ps)}
+                                          style={{ padding: '7px', borderRadius: 8, background: '#f8fafc', border: '1px solid #e2e8f0', cursor: 'pointer' }}>
+                                          <Edit2 size={15} color="#0a84ff" />
+                                        </button>
+                                      )}
+                                      <button onClick={() => printPayslip(ps)} title="Print Payslip"
+                                        style={{ padding: '7px', borderRadius: 8, background: '#f8fafc', border: '1px solid #e2e8f0', cursor: 'pointer' }}>
+                                        <Printer size={15} color="#64748b" />
+                                      </button>
+                                    </>
+                                  )}
+                                </div>
                               </td>
                             </tr>
                           );

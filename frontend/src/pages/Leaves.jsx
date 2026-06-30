@@ -5,10 +5,14 @@ import {
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { leaveAPI } from '../api';
+import { useAuth } from '../context/AuthContext';
 
 const Leaves = () => {
+  const { user } = useAuth();
+  const canApproveLeaves = user && ['admin', 'manager', 'hr'].includes(user.role);
   const [leaves, setLeaves] = useState([]);
   const [pendingLeaves, setPendingLeaves] = useState([]);
+  const [leaveBalance, setLeaveBalance] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
   const [formData, setFormData] = useState({ type: 'casual', startDate: '', endDate: '', reason: '' });
@@ -17,17 +21,20 @@ const Leaves = () => {
     fetchData();
     const interval = setInterval(fetchData, 3000); // Live polling every 3s
     return () => clearInterval(interval);
-  }, []);
+  }, [user]);
 
   const fetchData = async () => {
     setLoading(true);
     try {
-      const [myRes, pendingRes] = await Promise.all([
-        leaveAPI.getMy(),
-        leaveAPI.getPending().catch(err => ({ data: [] }))
-      ]);
+      const requests = [leaveAPI.getMy(), leaveAPI.getMyBalance().catch(() => ({ data: [] }))];
+      if (canApproveLeaves) {
+        requests.push(leaveAPI.getPending().catch(err => ({ data: [] })));
+      }
+
+      const [myRes, balanceRes, pendingRes] = await Promise.all(requests);
       setLeaves(myRes.data);
-      setPendingLeaves(pendingRes.data);
+      setLeaveBalance(balanceRes.data || []);
+      setPendingLeaves(pendingRes?.data || []);
     } catch (err) {
       console.error(err);
     } finally {
@@ -37,6 +44,10 @@ const Leaves = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (new Date(formData.endDate) < new Date(formData.startDate)) {
+      alert("Invalid date range: End Date cannot be before Start Date.");
+      return;
+    }
     try {
       await leaveAPI.apply(formData);
       setShowModal(false);
@@ -46,12 +57,30 @@ const Leaves = () => {
     }
   };
 
+  const fmtDate = (d) => d ? new Date(d).toLocaleDateString('en-PK', { day: '2-digit', month: 'short', year: 'numeric' }) : '—';
+
   const handleStatusUpdate = async (id, status) => {
+    if (!canApproveLeaves) return;
+    const leave = pendingLeaves.find(l => l.id === id);
+    if (leave && leave.Employee?.User?.email === user?.email) {
+      alert('Self-approval is not permitted. A secondary approver is required.');
+      return;
+    }
     try {
       await leaveAPI.updateStatus(id, status);
       fetchData();
     } catch (err) {
       alert(err.response?.data?.message || err.message || 'Failed to update leave status');
+    }
+  };
+
+  const handleWithdraw = async (id) => {
+    if (!window.confirm('Withdraw this leave request?')) return;
+    try {
+      await leaveAPI.updateStatus(id, 'withdrawn');
+      fetchData();
+    } catch (err) {
+      alert(err.response?.data?.message || 'Failed to withdraw leave.');
     }
   };
 
@@ -86,9 +115,18 @@ const Leaves = () => {
       </header>
 
       <div style={{ display: 'flex', gap: 24, marginBottom: 40 }}>
-        <BalanceCard title="Annual Leave" used={12} total={24} color="#0a84ff" />
-        <BalanceCard title="Medical Leave" used={3} total={10} color="#10b981" />
-        <BalanceCard title="Casual Leave" used={4} total={8} color="#f59e0b" />
+        {[
+          { title: 'Annual Leave', type: 'annual', color: '#0a84ff', total: 24 },
+          { title: 'Medical Leave', type: 'medical', color: '#10b981', total: 10 },
+          { title: 'Casual Leave', type: 'casual', color: '#f59e0b', total: 8 },
+        ].map(({ title, type, color, total }) => {
+          const bal = leaveBalance.find(b => b.type === type);
+          const used = bal ? parseFloat(bal.used) : 0;
+          const totalDays = bal ? parseFloat(bal.total || total) : total;
+          return (
+            <BalanceCard key={type} title={title} used={used} total={totalDays} color={color} />
+          );
+        })}
       </div>
 
       <div style={{ display: 'grid', gridTemplateColumns: '1.5fr 1fr', gap: 32 }}>
@@ -97,51 +135,77 @@ const Leaves = () => {
           <h2 style={{ fontSize: 20, fontWeight: 900, color: '#0f172a', marginBottom: 24 }}>My Leave History</h2>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
             {leaves.map(l => (
-              <div key={l.id} style={{ display: 'flex', alignItems: 'center', gap: 20, padding: '20px 24px', borderRadius: 24, background: '#f8fafc' }}>
-                <div style={{ width: 48, height: 48, borderRadius: 14, background: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px solid #e2e8f0' }}>
+              <div key={l.id} style={{ display: 'flex', alignItems: 'flex-start', gap: 20, padding: '20px 24px', borderRadius: 24, background: '#f8fafc' }}>
+                <div style={{ width: 48, height: 48, borderRadius: 14, background: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px solid #e2e8f0', flexShrink: 0 }}>
                   <Calendar size={24} color="#0a84ff" />
                 </div>
                 <div style={{ flex: 1 }}>
                   <div style={{ fontWeight: 800, color: '#0f172a' }}>{l.type.toUpperCase()} LEAVE</div>
-                  <div style={{ fontSize: 13, color: '#64748b', fontWeight: 600 }}>{l.startDate} to {l.endDate} ({l.days} days)</div>
+                  <div style={{ fontSize: 13, color: '#64748b', fontWeight: 600 }}>{fmtDate(l.startDate)} → {fmtDate(l.endDate)} ({l.days} days)</div>
+                  {l.reason && <div style={{ fontSize: 12, color: '#94a3b8', fontStyle: 'italic', marginTop: 4 }}>"{l.reason}"</div>}
                 </div>
-                <div style={{ 
-                  padding: '8px 16px', borderRadius: 12, fontSize: 12, fontWeight: 800,
-                  background: l.status === 'approved' ? '#dcfce7' : (l.status === 'rejected' ? '#fee2e2' : '#fef3c7'),
-                  color: l.status === 'approved' ? '#10b981' : (l.status === 'rejected' ? '#ef4444' : '#d97706')
-                }}>
-                  {l.status.toUpperCase()}
+                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 6 }}>
+                  <div style={{ 
+                    padding: '8px 16px', borderRadius: 12, fontSize: 12, fontWeight: 800,
+                    background: l.status === 'approved' ? '#dcfce7' : l.status === 'rejected' ? '#fee2e2' : l.status === 'withdrawn' ? '#f1f5f9' : '#fef3c7',
+                    color: l.status === 'approved' ? '#10b981' : l.status === 'rejected' ? '#ef4444' : l.status === 'withdrawn' ? '#94a3b8' : '#d97706'
+                  }}>
+                    {l.status.toUpperCase()}
+                  </div>
+                  {l.status === 'pending' && (
+                    <button onClick={() => handleWithdraw(l.id)} style={{ fontSize: 11, fontWeight: 800, color: '#ef4444', background: 'none', border: '1px solid #fecaca', borderRadius: 8, padding: '4px 10px', cursor: 'pointer' }}>
+                      Withdraw
+                    </button>
+                  )}
                 </div>
               </div>
             ))}
           </div>
         </div>
 
-        {/* Manager Approval Queue */}
-        <div style={{ background: 'white', padding: 32, borderRadius: 32, border: '1px solid rgba(0,0,0,0.05)' }}>
+        {canApproveLeaves ? (
+          <div style={{ background: 'white', padding: 32, borderRadius: 32, border: '1px solid rgba(0,0,0,0.05)' }}>
           <h2 style={{ fontSize: 20, fontWeight: 900, color: '#0f172a', marginBottom: 24 }}>Approval Queue</h2>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-            {pendingLeaves.map(l => (
-              <div key={l.id} style={{ padding: 20, borderRadius: 24, background: '#f8fafc', border: '1px solid #e2e8f0' }}>
+            {pendingLeaves.map(l => {
+              const isSelf = l.Employee?.User?.email === user?.email;
+              return (
+              <div key={l.id} style={{ padding: 20, borderRadius: 24, background: '#f8fafc', border: isSelf ? '1.5px solid #fde68a' : '1px solid #e2e8f0' }}>
+                {isSelf && <div style={{ fontSize: 11, fontWeight: 800, color: '#d97706', marginBottom: 8, padding: '4px 10px', background: '#fef3c7', borderRadius: 8, display: 'inline-block' }}>⚠ Your own request</div>}
                 <div style={{ display: 'flex', gap: 12, marginBottom: 16 }}>
                   <div style={{ width: 40, height: 40, borderRadius: '50%', background: '#0f172a', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 800 }}>
-                    {l.Employee?.User?.name[0]}
+                    {l.Employee?.User?.name?.[0]}
                   </div>
                   <div>
                     <div style={{ fontWeight: 800, color: '#0f172a' }}>{l.Employee?.User?.name}</div>
-                    <div style={{ fontSize: 12, color: '#64748b' }}>{l.type.toUpperCase()} • {l.days} days</div>
+                    <div style={{ fontSize: 12, color: '#64748b' }}>{l.type.toUpperCase()} • {l.days} days • {fmtDate(l.startDate)} → {fmtDate(l.endDate)}</div>
                   </div>
                 </div>
-                <p style={{ fontSize: 13, color: '#64748b', marginBottom: 16, lineHeight: 1.5 }}>"{l.reason}"</p>
+                {l.reason && <p style={{ fontSize: 13, color: '#64748b', marginBottom: 16, lineHeight: 1.5 }}>"{l.reason}"</p>}
                 <div style={{ display: 'flex', gap: 8 }}>
-                  <button onClick={() => handleStatusUpdate(l.id, 'approved')} style={{ flex: 1, padding: '10px', borderRadius: 12, background: '#10b981', color: 'white', border: 'none', fontWeight: 800, cursor: 'pointer', fontSize: 12 }}>Approve</button>
-                  <button onClick={() => handleStatusUpdate(l.id, 'rejected')} style={{ flex: 1, padding: '10px', borderRadius: 12, background: 'white', color: '#ef4444', border: '1px solid #fee2e2', fontWeight: 800, cursor: 'pointer', fontSize: 12 }}>Reject</button>
+                  {isSelf ? (
+                    <div style={{ flex: 1, padding: '10px', borderRadius: 12, background: '#f1f5f9', color: '#94a3b8', textAlign: 'center', fontWeight: 700, fontSize: 12 }}>⛔ Cannot self-approve</div>
+                  ) : (
+                    <>
+                      <button onClick={() => handleStatusUpdate(l.id, 'approved')} style={{ flex: 1, padding: '10px', borderRadius: 12, background: '#10b981', color: 'white', border: 'none', fontWeight: 800, cursor: 'pointer', fontSize: 12 }}>Approve</button>
+                      <button onClick={() => handleStatusUpdate(l.id, 'rejected')} style={{ flex: 1, padding: '10px', borderRadius: 12, background: 'white', color: '#ef4444', border: '1px solid #fee2e2', fontWeight: 800, cursor: 'pointer', fontSize: 12 }}>Reject</button>
+                    </>
+                  )}
                 </div>
               </div>
-            ))}
+              );
+            })}
             {pendingLeaves.length === 0 && <p style={{ textAlign: 'center', padding: 40, color: '#94a3b8' }}>No pending requests.</p>}
           </div>
         </div>
+        ) : (
+          <div style={{ background: 'white', padding: 32, borderRadius: 32, border: '1px solid rgba(0,0,0,0.05)', color: '#334155' }}>
+            <h2 style={{ fontSize: 20, fontWeight: 900, color: '#0f172a', marginBottom: 18 }}>Approval Queue</h2>
+            <p style={{ lineHeight: 1.7, color: '#64748b' }}>
+              You do not have permission to view or act on pending leave approvals. This section is reserved for HR, managers, and admin users.
+            </p>
+          </div>
+        )}
       </div>
 
       {/* Request Modal (Simplified) */}
@@ -161,6 +225,7 @@ const Leaves = () => {
                   <option value="medical">Medical</option>
                   <option value="annual">Annual</option>
                   <option value="unpaid">Unpaid</option>
+                  <option value="other">Other</option>
                 </select>
               </div>
               <div style={{ display: 'flex', gap: 16 }}>

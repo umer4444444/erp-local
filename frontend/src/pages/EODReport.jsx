@@ -14,13 +14,40 @@ const EODReport = () => {
   const [notes, setNotes] = useState('');
   const [loading, setLoading] = useState(true);
   const [submitted, setSubmitted] = useState(false);
+  const [activeSession, setActiveSession] = useState(null);
+
+  const checkSession = async () => {
+    try {
+      const res = await shiftAPI.getActiveShift();
+      setActiveSession(res.data);
+    } catch (err) {
+      console.error(err);
+    }
+  };
 
   useEffect(() => {
-    salesAPI.getEOD().then(res => {
-      setSummary(res.data);
+    const init = async () => {
+      await checkSession();
+      try {
+        const res = await salesAPI.getEOD();
+        setSummary(res.data);
+      } catch (err) {
+        console.error(err);
+      }
       setLoading(false);
-    });
+    };
+    init();
   }, []);
+
+  const handleStartSession = async () => {
+    try {
+      const res = await shiftAPI.startShift();
+      setActiveSession(res.data);
+      alert('Shift session started successfully!');
+    } catch (err) {
+      alert(err.response?.data?.message || 'Failed to start shift session');
+    }
+  };
 
   const handleCloseEOD = async () => {
     if (!cashCount) return alert('Please enter actual cash count');
@@ -34,6 +61,83 @@ const EODReport = () => {
 
   const variance = parseFloat(cashCount || 0) - summary.cash;
 
+  const handlePrintEOD = () => {
+    const printWindow = window.open('', '_blank');
+    printWindow.document.write(`
+      <html>
+        <head>
+          <title>EOD Report</title>
+          <style>
+            body { font-family: sans-serif; padding: 40px; max-width: 400px; margin: 0 auto; color: #333; }
+            h2 { text-align: center; margin-bottom: 5px; }
+            p { text-align: center; margin-top: 0; color: #666; font-size: 14px; }
+            .divider { border-top: 2px dashed #ccc; margin: 15px 0; }
+            .row { display: flex; justify-content: space-between; margin: 8px 0; font-size: 15px; }
+            .total { font-weight: bold; font-size: 18px; border-top: 1px solid #eee; padding-top: 8px; }
+            .variance { background: #f9f9f9; padding: 10px; border-radius: 6px; font-weight: bold; display: flex; justify-content: space-between; }
+          </style>
+        </head>
+        <body onload="window.print();window.close();">
+          <h2>ENTERPRISE ERP</h2>
+          <p>End of Day Report</p>
+          <div class="row"><strong>Date:</strong> <span>${new Date().toLocaleString()}</span></div>
+          <div class="divider"></div>
+          <div class="row"><span>Cash Expected:</span> <strong>$${summary.cash.toFixed(2)}</strong></div>
+          <div class="row"><span>Card Expected:</span> <strong>$${summary.card.toFixed(2)}</strong></div>
+          <div class="row total"><span>Total Expected:</span> <span>$${summary.total.toFixed(2)}</span></div>
+          <div class="divider"></div>
+          <div class="row"><span>Actual Cash:</span> <strong>$${parseFloat(cashCount || 0).toFixed(2)}</strong></div>
+          <div class="variance" style="color: ${variance === 0 ? '#16a34a' : '#e11d48'}">
+            <span>Variance:</span>
+            <span>${variance > 0 ? '+' : ''}$${variance.toFixed(2)}</span>
+          </div>
+          ${notes ? `<div class="divider"></div><div style="font-size: 13px;"><strong>Notes:</strong><p style="text-align: left; margin-top: 5px; font-style: italic;">${notes}</p></div>` : ''}
+          <div class="divider" style="margin-top: 30px;"></div>
+          <p style="font-size: 12px; margin-top: 20px; color: #999;">Shift Completed Successfully</p>
+        </body>
+      </html>
+    `);
+    printWindow.document.close();
+  };
+
+  if (loading) {
+    return (
+      <div style={{ minHeight: '100vh', background: '#f8fafc', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <p style={{ fontWeight: 600, color: '#64748b' }}>Loading EOD details...</p>
+      </div>
+    );
+  }
+
+  if (!activeSession) {
+    return (
+      <div style={{ padding: 40, minHeight: '100vh', background: '#f8fafc', display: 'flex', justifyContent: 'center', alignItems: 'center', fontFamily: "'Outfit', sans-serif" }}>
+        <div style={{ width: '100%', maxWidth: 500, background: 'white', borderRadius: 32, padding: 40, textAlign: 'center', border: '1px solid rgba(0,0,0,0.05)', boxShadow: '0 10px 30px rgba(0,0,0,0.03)' }}>
+          <div style={{ width: 64, height: 64, borderRadius: '50%', background: '#fffbeb', color: '#d97706', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 20px' }}>
+            <AlertCircle size={32} />
+          </div>
+          <h2 style={{ fontSize: 24, fontWeight: 900, color: '#0f172a', marginBottom: 12 }}>No Active Shift Session</h2>
+          <p style={{ color: '#64748b', fontWeight: 600, fontSize: 14, lineHeight: 1.6, marginBottom: 32 }}>
+            You do not have an active shift session. You must start a shift session first to register EOD sales totals and perform EOD closing.
+          </p>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+            <button 
+              onClick={handleStartSession}
+              style={{ width: '100%', padding: 16, borderRadius: 16, background: '#0a84ff', color: 'white', border: 'none', fontWeight: 800, fontSize: 16, cursor: 'pointer' }}
+            >
+              Start Shift Session
+            </button>
+            <button 
+              onClick={() => navigate('/')}
+              style={{ width: '100%', padding: 16, borderRadius: 16, background: '#f1f5f9', color: '#64748b', border: 'none', fontWeight: 800, fontSize: 14, cursor: 'pointer' }}
+            >
+              Go to Dashboard
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   if (submitted) {
     return (
       <div style={{ minHeight: '100vh', background: '#f8fafc', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20 }}>
@@ -44,7 +148,7 @@ const EODReport = () => {
           <h2 style={{ fontSize: 28, fontWeight: 900, color: '#0f172a', marginBottom: 12 }}>EOD Closed</h2>
           <p style={{ color: '#64748b', fontWeight: 600, marginBottom: 40 }}>Your shift has been successfully completed and the drawer is balanced.</p>
           <div style={{ display: 'flex', gap: 16 }}>
-            <button onClick={() => window.print()} style={{ flex: 1, padding: 16, borderRadius: 16, background: '#f1f5f9', border: 'none', fontWeight: 800, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
+            <button onClick={handlePrintEOD} style={{ flex: 1, padding: 16, borderRadius: 16, background: '#f1f5f9', border: 'none', fontWeight: 800, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
               <Printer size={20} /> Print
             </button>
             <button onClick={() => navigate('/')} style={{ flex: 1, padding: 16, borderRadius: 16, background: '#0a84ff', color: 'white', border: 'none', fontWeight: 800, cursor: 'pointer' }}>

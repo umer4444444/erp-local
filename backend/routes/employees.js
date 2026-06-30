@@ -177,6 +177,7 @@ router.post('/', auth, roleCheck(['admin', 'hr', 'manager']), async (req, res) =
       firstName,
       lastName,
       email,
+      address: req.body.address || null,
       cnic,
       phone,
       departmentId: departmentId || null,
@@ -275,7 +276,7 @@ router.put('/:id', auth, roleCheck(['admin', 'hr']), async (req, res) => {
     if (!employee) return res.status(404).json({ message: 'Employee not found' });
 
     const {
-      firstName, lastName, email, cnic, phone,
+      firstName, lastName, email, cnic, phone, address,
       departmentId, designationId, joiningDate,
       salaryType, salary, baseSalary, payRate, bankAccount,
       position, status: empStatus
@@ -291,6 +292,7 @@ router.put('/:id', auth, roleCheck(['admin', 'hr']), async (req, res) => {
       firstName: firstName ?? employee.firstName,
       lastName: lastName ?? employee.lastName,
       email: email ?? employee.email,
+      address: address ?? employee.address,
       cnic: cnic ?? employee.cnic,
       phone: phone ?? employee.phone,
       departmentId: departmentId ?? employee.departmentId,

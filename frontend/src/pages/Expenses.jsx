@@ -8,6 +8,16 @@ import {
 import { motion, AnimatePresence } from 'framer-motion';
 import { expenseAPI, salesAPI, supplierAPI } from '../api';
 
+// Parse DATEONLY strings ("YYYY-MM-DD") in local time to avoid UTC midnight shift
+const parseExpenseDate = (dateStr) => {
+  if (!dateStr) return null;
+  const parts = String(dateStr).split('T')[0].split('-');
+  if (parts.length === 3) {
+    return new Date(Number(parts[0]), Number(parts[1]) - 1, Number(parts[2]));
+  }
+  return new Date(dateStr);
+};
+
 const Expenses = () => {
   const [expenses, setExpenses] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -35,14 +45,14 @@ const Expenses = () => {
 
       const now = new Date();
       const currentMonthExpenses = expensesData.filter(e => {
-        const d = new Date(e.date || e.createdAt);
-        return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear();
+        const d = parseExpenseDate(e.date || e.createdAt);
+        return d && d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear();
       }).reduce((sum, e) => sum + parseFloat(e.amount || 0), 0);
 
       const lastMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1);
       const lastMonthExpenses = expensesData.filter(e => {
-        const d = new Date(e.date || e.createdAt);
-        return d.getMonth() === lastMonth.getMonth() && d.getFullYear() === lastMonth.getFullYear();
+        const d = parseExpenseDate(e.date || e.createdAt);
+        return d && d.getMonth() === lastMonth.getMonth() && d.getFullYear() === lastMonth.getFullYear();
       }).reduce((sum, e) => sum + parseFloat(e.amount || 0), 0);
 
       let change = 0;
@@ -125,9 +135,14 @@ const Expenses = () => {
     const today = new Date();
     return expenses.filter(e => {
       if (filterType === 'all') return true;
-      const expenseDate = new Date(e.date || e.createdAt);
+      const expenseDate = parseExpenseDate(e.date || e.createdAt);
+      if (!expenseDate) return false;
       if (filterType === 'daily') {
-        return expenseDate.toDateString() === today.toDateString();
+        return (
+          expenseDate.getFullYear() === today.getFullYear() &&
+          expenseDate.getMonth() === today.getMonth() &&
+          expenseDate.getDate() === today.getDate()
+        );
       }
       if (filterType === 'monthly') {
         return expenseDate.getMonth() === today.getMonth() && expenseDate.getFullYear() === today.getFullYear();
@@ -201,7 +216,7 @@ const Expenses = () => {
                 </div>
                 <div style={{ flex: 1 }}>
                   <div style={{ fontWeight: 800, color: '#0f172a' }}>{expense.description}</div>
-                  <div style={{ fontSize: 12, color: '#64748b', fontWeight: 600 }}>{expense.category} • {expense.date ? new Date(expense.date).toLocaleDateString() : 'N/A'}</div>
+                  <div style={{ fontSize: 12, color: '#64748b', fontWeight: 600 }}>{expense.category} • {expense.date ? parseExpenseDate(expense.date).toLocaleDateString() : 'N/A'}</div>
                 </div>
                 <div style={{ textAlign: 'right', display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 4 }}>
                   <div style={{ fontWeight: 900, color: '#ef4444' }}>-${parseFloat(expense.amount).toFixed(2)}</div>

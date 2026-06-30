@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { employeeAPI } from '../api';
+import { employeeAPI, leaveAPI } from '../api';
 import { UserPlus, Search, Filter, Briefcase, Mail, Phone, Calendar, DollarSign, X, ChevronRight, CheckCircle2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useLocation } from 'react-router-dom';
@@ -23,15 +23,22 @@ const Employees = () => {
   const [employees, setEmployees] = useState([]);
   const [departments, setDepartments] = useState([]);
   const [designations, setDesignations] = useState([]);
-  const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
+  const [statusFilter, setStatusFilter] = useState('');
+  const [deptFilter, setDeptFilter] = useState('');
+  const [selectedIds, setSelectedIds] = useState(new Set());
   const [showModal, setShowModal] = useState(location.state?.openAddModal || false);
   const [selectedEmployee, setSelectedEmployee] = useState(null);
   const [editingSalary, setEditingSalary] = useState(false);
   const [salaryForm, setSalaryForm] = useState({ salary: '', salaryType: 'monthly' });
+  const [loading, setLoading] = useState(true);
+  const [empLeaves, setEmpLeaves] = useState([]);
+  const [empLeaveBalance, setEmpLeaveBalance] = useState([]);
+  const [loadingLeaves, setLoadingLeaves] = useState(false);
   const [step, setStep] = useState(1);
+  const [phoneCode, setPhoneCode] = useState('+92');
   const [form, setForm] = useState({
-    firstName: '', lastName: '', email: '', phone: '', cnic: '',
+    firstName: '', lastName: '', email: '', phone: '', cnic: '', address: '',
     departmentId: '', designationId: '', joiningDate: '',
     salaryType: 'monthly', salary: '', bankAccount: '', role: ''
   });
@@ -43,6 +50,28 @@ const Employees = () => {
       window.history.replaceState({}, document.title);
     }
   }, []);
+
+  useEffect(() => {
+    if (selectedEmployee && (user?.role === 'admin' || user?.role === 'hr' || user?.role === 'manager')) {
+      fetchEmpLeaves(selectedEmployee.id);
+    }
+  }, [selectedEmployee, user]);
+
+  const fetchEmpLeaves = async (id) => {
+    setLoadingLeaves(true);
+    try {
+      const [lRes, bRes] = await Promise.all([
+        leaveAPI.getByEmployee(id),
+        leaveAPI.getBalanceByEmployee(id)
+      ]);
+      setEmpLeaves(lRes.data || []);
+      setEmpLeaveBalance(bRes.data || []);
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setLoadingLeaves(false);
+    }
+  };
 
   const fetchData = async () => {
     setLoading(true);
@@ -62,17 +91,72 @@ const Employees = () => {
     }
   };
 
+  const handleCnicChange = (e) => {
+    let val = e.target.value.replace(/[^0-9-]/g, '');
+    const digits = val.replace(/-/g, '');
+    let formatted = '';
+    if (digits.length > 0) {
+      formatted += digits.substring(0, 5);
+    }
+    if (digits.length > 5) {
+      formatted += '-' + digits.substring(5, 12);
+    }
+    if (digits.length > 12) {
+      formatted += '-' + digits.substring(12, 13);
+    }
+    setForm({ ...form, cnic: formatted });
+  };
+
   const handleSave = async (e) => {
     e.preventDefault();
+    if (!form.firstName || !form.lastName || !form.email || !form.cnic || !form.address) {
+      alert("Please fill in all required basic info (Name, Email, CNIC, Address).");
+      setStep(1); return;
+    }
+    if (!form.departmentId || !form.designationId) {
+      alert("Please select Department and Designation.");
+      setStep(2); return;
+    }
     try {
-      await employeeAPI.create(form);
+      // Store full phone number with country code
+      const fullPhone = form.phone ? `${phoneCode} ${form.phone}` : '';
+      await employeeAPI.create({ ...form, phone: fullPhone });
       setShowModal(false);
       setStep(1);
-      setForm({ firstName: '', lastName: '', email: '', phone: '', cnic: '', departmentId: '', designationId: '', joiningDate: '', salaryType: 'monthly', salary: '', bankAccount: '', role: '' });
+      setPhoneCode('+92');
+      setForm({ firstName: '', lastName: '', email: '', phone: '', cnic: '', address: '', departmentId: '', designationId: '', joiningDate: '', salaryType: 'monthly', salary: '', bankAccount: '', role: '' });
       fetchData();
     } catch (e) {
       alert(e.response?.data?.message || 'Error saving employee. Please check all fields.');
     }
+  };
+
+  const filteredEmployees = employees.filter(emp => {
+    const term = searchTerm.toLowerCase();
+    const fullName = `${emp.firstName || ''} ${emp.lastName || ''}`.toLowerCase();
+    const code = (emp.empCode || '').toLowerCase();
+    const dept = (emp.Department?.name || '').toLowerCase();
+    const matchesSearch = fullName.includes(term) || code.includes(term) || dept.includes(term);
+    const matchesStatus = statusFilter ? emp.status === statusFilter : true;
+    const matchesDept = deptFilter ? emp.departmentId === deptFilter : true;
+    return matchesSearch && matchesStatus && matchesDept;
+  });
+
+  const getStatusColor = (status) => {
+    switch(status) {
+      case 'active': return { bg: '#f0fdf4', color: '#16a34a' };
+      case 'on_leave': return { bg: '#fef3c7', color: '#d97706' };
+      case 'inactive': return { bg: '#f1f5f9', color: '#64748b' };
+      case 'resigned': return { bg: '#fee2e2', color: '#ef4444' };
+      default: return { bg: '#f1f5f9', color: '#64748b' };
+    }
+  };
+
+  const toggleSelect = (id) => {
+    const newSelected = new Set(selectedIds);
+    if (newSelected.has(id)) newSelected.delete(id);
+    else newSelected.add(id);
+    setSelectedIds(newSelected);
   };
 
   const handleTerminate = async (id) => {
@@ -116,7 +200,7 @@ const Employees = () => {
 
       {/* Dept Stats */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: 20, marginBottom: 32 }}>
-        {departments.map(dept => (
+        {departments.filter(d => d.employeeCount > 0).map(dept => (
           <div key={dept.id} style={{ ...cardStyle, padding: '16px 20px', display: 'flex', alignItems: 'center', gap: 12 }}>
             <div style={{ width: 40, height: 40, borderRadius: 10, background: 'rgba(10,132,255,0.1)', color: '#0a84ff', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
               <Briefcase size={20} />
@@ -131,9 +215,35 @@ const Employees = () => {
 
       {/* Table */}
       <div style={{ ...cardStyle, overflow: 'hidden', padding: 0 }}>
+        <div style={{ padding: '16px 20px', borderBottom: '1px solid #f1f5f9', display: 'flex', gap: 16, alignItems: 'center' }}>
+          <div style={{ position: 'relative', flex: 1, maxWidth: 300 }}>
+            <Search size={16} style={{ position: 'absolute', left: 14, top: '50%', transform: 'translateY(-50%)', color: '#94a3b8' }} />
+            <input value={searchTerm} onChange={e => setSearchTerm(e.target.value)} placeholder="Search employees..." style={{ ...inputStyle, paddingLeft: 40 }} />
+          </div>
+          <select value={deptFilter} onChange={e => setDeptFilter(e.target.value)} style={{ ...inputStyle, width: 'auto' }}>
+            <option value="">All Departments</option>
+            {departments.map(d => <option key={d.id} value={d.id}>{d.name}</option>)}
+          </select>
+          <select value={statusFilter} onChange={e => setStatusFilter(e.target.value)} style={{ ...inputStyle, width: 'auto' }}>
+            <option value="">All Statuses</option>
+            <option value="active">Active</option>
+            <option value="on_leave">On Leave</option>
+            <option value="inactive">Inactive</option>
+            <option value="resigned">Terminated</option>
+          </select>
+          {selectedIds.size > 0 && (
+            <button style={{ marginLeft: 'auto', padding: '12px 16px', borderRadius: 12, background: '#e2e8f0', border: 'none', fontWeight: 800, cursor: 'pointer' }}>
+              Bulk Actions ({selectedIds.size}) ▾
+            </button>
+          )}
+        </div>
         <table style={{ width: '100%', borderCollapse: 'collapse' }}>
           <thead>
             <tr style={{ background: '#f8fafc', borderBottom: '1px solid #f1f5f9' }}>
+              <th style={{ padding: 16, width: 40 }}><input type="checkbox" onChange={e => {
+                if (e.target.checked) setSelectedIds(new Set(filteredEmployees.map(emp => emp.id)));
+                else setSelectedIds(new Set());
+              }} checked={filteredEmployees.length > 0 && selectedIds.size === filteredEmployees.length} /></th>
               <th style={{ padding: 16, textAlign: 'left', fontSize: 11, fontWeight: 900, color: '#94a3b8', textTransform: 'uppercase' }}>Employee</th>
               <th style={{ padding: 16, textAlign: 'left', fontSize: 11, fontWeight: 900, color: '#94a3b8', textTransform: 'uppercase' }}>Department</th>
               <th style={{ padding: 16, textAlign: 'left', fontSize: 11, fontWeight: 900, color: '#94a3b8', textTransform: 'uppercase' }}>Status</th>
@@ -141,11 +251,14 @@ const Employees = () => {
             </tr>
           </thead>
           <tbody>
-            {employees.map(emp => (
-              <tr key={emp.id} style={{ borderBottom: '1px solid #f8fafc' }}>
+            {filteredEmployees.map(emp => {
+              const statusStyle = getStatusColor(emp.status);
+              return (
+              <tr key={emp.id} style={{ borderBottom: '1px solid #f8fafc', background: selectedIds.has(emp.id) ? '#eff6ff' : 'transparent' }}>
+                <td style={{ padding: 16 }}><input type="checkbox" checked={selectedIds.has(emp.id)} onChange={() => toggleSelect(emp.id)} /></td>
                 <td style={{ padding: 16 }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                    <div style={{ width: 36, height: 36, borderRadius: 10, background: '#e2e8f0', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 800 }}>{(emp.firstName || '')[0]}</div>
+                    <div style={{ width: 36, height: 36, borderRadius: 10, background: '#e2e8f0', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 800 }}>{(emp.firstName || '')[0]}{(emp.lastName || '')[0]}</div>
                     <div>
                       <div style={{ fontWeight: 800, fontSize: 14 }}>{emp.firstName} {emp.lastName}</div>
                       <div style={{ fontSize: 11, color: '#94a3b8' }}>{emp.empCode}</div>
@@ -154,13 +267,14 @@ const Employees = () => {
                 </td>
                 <td style={{ padding: 16, fontSize: 13, fontWeight: 600 }}>{emp.Department?.name || '—'}</td>
                 <td style={{ padding: 16 }}>
-                  <span style={{ padding: '4px 10px', borderRadius: 20, fontSize: 10, fontWeight: 900, background: emp.status === 'active' ? '#f0fdf4' : '#fef2f2', color: emp.status === 'active' ? '#16a34a' : '#ef4444' }}>{emp.status}</span>
+                  <span style={{ padding: '4px 10px', borderRadius: 20, fontSize: 10, fontWeight: 900, background: statusStyle.bg, color: statusStyle.color }}>{emp.status}</span>
                 </td>
                 <td style={{ padding: 16, textAlign: 'right' }}>
                   <button onClick={() => setSelectedEmployee(emp)} style={{ background: 'none', border: 'none', color: '#0a84ff', fontWeight: 800, fontSize: 12, cursor: 'pointer' }}>View Profile</button>
                 </td>
               </tr>
-            ))}
+              );
+            })}
           </tbody>
         </table>
       </div>
@@ -175,7 +289,7 @@ const Employees = () => {
                 <h2 style={{ fontSize: 20, fontWeight: 900 }}>Add New Employee</h2>
                 <div style={{ display: 'flex', gap: 4 }}>
                   {[1, 2, 3].map(i => <div key={i} style={{ width: 24, height: 4, borderRadius: 2, background: step >= i ? '#0a84ff' : '#e2e8f0' }} />)}
-                </div>
+                </div><button onClick={() => setShowModal(false)} style={{ background: 'none', border: 'none', cursor: 'pointer' }}><X size={20} color="#94a3b8" /></button>
               </div>
 
               <form onSubmit={handleSave}>
@@ -185,8 +299,45 @@ const Employees = () => {
                       <input placeholder="First Name" style={inputStyle} value={form.firstName} onChange={e => setForm({...form, firstName: e.target.value})} />
                       <input placeholder="Last Name" style={inputStyle} value={form.lastName} onChange={e => setForm({...form, lastName: e.target.value})} />
                     </div>
-                    <input placeholder="Email Address" style={inputStyle} value={form.email} onChange={e => setForm({...form, email: e.target.value})} />
-                    <input placeholder="Phone Number" style={inputStyle} value={form.phone} onChange={e => setForm({...form, phone: e.target.value})} />
+                    <input placeholder="Email Address *" style={inputStyle} value={form.email} onChange={e => setForm({...form, email: e.target.value})} />
+                    <div style={{ display: 'flex', gap: 8 }}>
+                      <select
+                        value={phoneCode}
+                        onChange={e => setPhoneCode(e.target.value)}
+                        style={{ ...inputStyle, width: 110, flexShrink: 0, paddingRight: 4 }}
+                      >
+                        <option value="+92">🇵🇰 +92</option>
+                        <option value="+1">🇺🇸 +1</option>
+                        <option value="+44">🇬🇧 +44</option>
+                        <option value="+971">🇦🇪 +971</option>
+                        <option value="+966">🇸🇦 +966</option>
+                        <option value="+974">🇶🇦 +974</option>
+                        <option value="+968">🇴🇲 +968</option>
+                        <option value="+91">🇮🇳 +91</option>
+                        <option value="+880">🇧🇩 +880</option>
+                        <option value="+49">🇩🇪 +49</option>
+                        <option value="+33">🇫🇷 +33</option>
+                        <option value="+86">🇨🇳 +86</option>
+                        <option value="+81">🇯🇵 +81</option>
+                        <option value="+61">🇦🇺 +61</option>
+                        <option value="+55">🇧🇷 +55</option>
+                        <option value="+7">🇷🇺 +7</option>
+                        <option value="+27">🇿🇦 +27</option>
+                        <option value="+234">🇳🇬 +234</option>
+                        <option value="+20">🇪🇬 +20</option>
+                        <option value="+90">🇹🇷 +90</option>
+                      </select>
+                      <input
+                        placeholder="Phone Number"
+                        style={{ ...inputStyle, flex: 1 }}
+                        value={form.phone}
+                        onChange={e => setForm({...form, phone: e.target.value})}
+                      />
+                    </div>
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+                      <input placeholder="CNIC (ID Card No) *" style={inputStyle} value={form.cnic} onChange={handleCnicChange} maxLength={15} />
+                      <input placeholder="Address (Based on ID Card) *" style={inputStyle} value={form.address} onChange={e => setForm({...form, address: e.target.value})} />
+                    </div>
                     <button type="button" onClick={() => setStep(2)} style={{ padding: 14, borderRadius: 12, background: '#0a84ff', color: 'white', fontWeight: 800, border: 'none', marginTop: 12 }}>Continue</button>
                   </div>
                 )}
@@ -198,19 +349,23 @@ const Employees = () => {
                         // Map department name to role & portal — uses keyword matching for flexibility
                         const getDeptInfo = (name) => {
                           const n = name.toLowerCase();
-                          if (n.includes('admin')) return { portal: 'Admin Dashboard', role: 'admin', color: '#6366f1' };
-                          if (n.includes('management')) return { portal: 'Manager Hub', role: 'manager', color: '#0a84ff' };
-                          if (n.includes('inventory') || n.includes('warehouse') || n.includes('stock') || n.includes('procurement')) return { portal: 'Inventory & Procurement', role: 'inventory', color: '#f59e0b' };
-                          if (n.includes('sales') || n.includes('pos') || n.includes('cashier')) return { portal: 'Sales Terminal', role: 'cashier', color: '#10b981' };
-                          if (n.includes('hr') || n.includes('human') || n.includes('payroll')) return { portal: 'HR & Payroll', role: 'hr', color: '#a855f7' };
-                          if (n.includes('pharmac')) return { portal: 'Pharmacy Module', role: 'pharmacist', color: '#ec4899' };
-                          if (n.includes('finance') || n.includes('revenue') || n.includes('accounting')) return { portal: 'Finance & Revenue', role: 'finance', color: '#0ea5e9' };
-                          if (n.includes('expense')) return { portal: 'Expenses Module', role: 'expenses', color: '#ef4444' };
-                          if (n.includes('eod') || n.includes('operation')) return { portal: 'Operations Hub', role: 'operations', color: '#64748b' };
-                          if (n.includes('engineer') || n.includes('civil') || n.includes('architect') || n.includes('design') || n.includes('technical')) return { portal: 'Manager Hub', role: 'manager', color: '#0a84ff' };
-                          return { portal: 'Staff Portal', role: 'staff', color: '#94a3b8' };
+                          if (n.includes('admin')) return { portal: 'Admin Dashboard', role: 'admin', color: '#6366f1', isAdmin: true };
+                          if (n.includes('management')) return { portal: 'Manager Hub', role: 'manager', color: '#0a84ff', isAdmin: false };
+                          if (n.includes('inventory') || n.includes('warehouse') || n.includes('stock') || n.includes('procurement')) return { portal: 'Inventory & Procurement', role: 'inventory', color: '#f59e0b', isAdmin: false };
+                          if (n.includes('sales') || n.includes('pos') || n.includes('cashier')) return { portal: 'Sales Terminal', role: 'cashier', color: '#10b981', isAdmin: false };
+                          if (n.includes('hr') || n.includes('human') || n.includes('payroll')) return { portal: 'HR & Payroll', role: 'hr', color: '#a855f7', isAdmin: false };
+                          if (n.includes('pharmac')) return { portal: 'Pharmacy Module', role: 'pharmacist', color: '#ec4899', isAdmin: false };
+                          if (n.includes('finance') || n.includes('revenue') || n.includes('accounting')) return { portal: 'Finance & Revenue', role: 'finance', color: '#0ea5e9', isAdmin: false };
+                          if (n.includes('expense')) return { portal: 'Expenses Module', role: 'expenses', color: '#ef4444', isAdmin: false };
+                          if (n.includes('eod') || n.includes('operation')) return { portal: 'Operations Hub', role: 'operations', color: '#64748b', isAdmin: false };
+                          if (n.includes('engineer') || n.includes('civil') || n.includes('architect') || n.includes('design') || n.includes('technical')) return { portal: 'Manager Hub', role: 'manager', color: '#0a84ff', isAdmin: false };
+                          return { portal: 'Staff Portal', role: 'staff', color: '#94a3b8', isAdmin: false };
                         };
                         const info = getDeptInfo(d.name);
+                        // If current user is admin creating an admin employee, only show admin departments
+                        // If creating a non-admin, hide admin departments to prevent role escalation
+                        const currentlySelectedInfo = form.departmentId ? getDeptInfo(departments.find(dep => dep.id === form.departmentId)?.name || '') : null;
+                        // Show all departments — let admin decide. Admin departments are visually marked.
                         const isSelected = form.departmentId === d.id;
                         return (
                           <div
@@ -222,7 +377,10 @@ const Employees = () => {
                               background: isSelected ? `${info.color}10` : 'white',
                             }}
                           >
-                            <div style={{ fontWeight: 800, fontSize: 13, color: '#0f172a' }}>{d.name}</div>
+                            <div style={{ fontWeight: 800, fontSize: 13, color: '#0f172a', display: 'flex', alignItems: 'center', gap: 6 }}>
+                              {d.name}
+                              {info.isAdmin && <span style={{ fontSize: 9, fontWeight: 900, background: '#6366f1', color: 'white', padding: '2px 5px', borderRadius: 4 }}>ADMIN</span>}
+                            </div>
                             <div style={{ fontSize: 11, fontWeight: 600, color: info.color, marginTop: 2 }}>→ {info.portal}</div>
                             <div style={{ fontSize: 10, color: '#94a3b8', fontWeight: 700, textTransform: 'uppercase', marginTop: 2 }}>Role: {info.role}</div>
                           </div>
@@ -230,11 +388,14 @@ const Employees = () => {
                       })}
                     </div>
                     <select style={inputStyle} value={form.designationId} onChange={e => setForm({...form, designationId: e.target.value})}>
-                      <option value="">Select Designation</option>
-                      {designations.map(d => <option key={d.id} value={d.id}>{d.name}</option>)}
+                      <option value="">Select Designation *</option>
+                      {designations.filter(d => !d.departmentId || d.departmentId === form.departmentId).map(d => <option key={d.id} value={d.id}>{d.name}</option>)}
                     </select>
                     <input type="date" style={inputStyle} value={form.joiningDate} onChange={e => setForm({...form, joiningDate: e.target.value})} />
-                    <button type="button" onClick={() => setStep(3)} disabled={!form.departmentId} style={{ padding: 14, borderRadius: 12, background: form.departmentId ? '#0a84ff' : '#e2e8f0', color: form.departmentId ? 'white' : '#94a3b8', fontWeight: 800, border: 'none', marginTop: 4, cursor: form.departmentId ? 'pointer' : 'not-allowed' }}>Continue</button>
+                    <div style={{ display: 'flex', gap: 10, marginTop: 4 }}>
+                      <button type="button" onClick={() => setStep(1)} style={{ flex: 1, padding: 14, borderRadius: 12, background: '#f1f5f9', color: '#64748b', fontWeight: 800, border: 'none', cursor: 'pointer' }}>← Back</button>
+                      <button type="button" onClick={() => setStep(3)} disabled={!form.departmentId} style={{ flex: 2, padding: 14, borderRadius: 12, background: form.departmentId ? '#0a84ff' : '#e2e8f0', color: form.departmentId ? 'white' : '#94a3b8', fontWeight: 800, border: 'none', cursor: form.departmentId ? 'pointer' : 'not-allowed' }}>Continue →</button>
+                    </div>
                   </div>
                 )}
                 {step === 3 && (
@@ -245,7 +406,12 @@ const Employees = () => {
                     </select>
                     <input type="number" placeholder="Amount" style={inputStyle} value={form.salary} onChange={e => setForm({...form, salary: e.target.value})} />
                     <input placeholder="Bank Account Number" style={inputStyle} value={form.bankAccount} onChange={e => setForm({...form, bankAccount: e.target.value})} />
-                    <button type="submit" style={{ padding: 14, borderRadius: 12, background: '#10b981', color: 'white', fontWeight: 800, border: 'none', marginTop: 12 }}>Complete & Add Employee</button>
+                    <div style={{ display: 'flex', gap: 10, marginTop: 12 }}>
+                      <button type="button" onClick={() => setStep(1)} style={{ flex: 1, padding: 14, borderRadius: 12, background: '#f1f5f9', color: '#64748b', fontWeight: 800, border: 'none', cursor: 'pointer' }}>Edit Basic Info</button>
+<button type="button" onClick={() => setStep(2)} style={{ flex: 1, padding: 14, borderRadius: 12, background: '#f1f5f9', color: '#64748b', fontWeight: 800, border: 'none', cursor: 'pointer' }}>← Back</button>
+<button type="submit" style={{ flex: 2, padding: 14, borderRadius: 12, background: '#10b981', color: 'white', fontWeight: 800, border: 'none', cursor: 'pointer' }}>✓ Complete & Add Employee</button>
+                      
+                    </div>
                   </div>
                 )}
               </form>
@@ -327,6 +493,53 @@ const Employees = () => {
                 </div>
               </div>
               
+              {(user?.role === 'admin' || user?.role === 'hr' || user?.role === 'manager') && (
+                <div style={{ marginTop: 24, paddingTop: 24, borderTop: '1px solid #f1f5f9' }}>
+                  <h4 style={{ fontSize: 16, fontWeight: 900, marginBottom: 16 }}>Leave Overview</h4>
+                  {loadingLeaves ? (
+                    <div style={{ fontSize: 13, color: '#94a3b8' }}>Loading leaves...</div>
+                  ) : (
+                    <div style={{ display: 'grid', gap: 16 }}>
+                      {empLeaveBalance.length > 0 && (
+                        <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+                          {empLeaveBalance.map(b => (
+                            <div key={b.id} style={{ background: '#f8fafc', padding: '8px 12px', borderRadius: 8, border: '1px solid #e2e8f0', fontSize: 12 }}>
+                              <span style={{ fontWeight: 800, color: '#0f172a' }}>{b.type.toUpperCase()}:</span> {b.used}/{b.total} used
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                      {empLeaves.length > 0 ? (
+                        <table style={{ width: '100%', fontSize: 13, textAlign: 'left', borderCollapse: 'collapse' }}>
+                          <thead>
+                            <tr style={{ borderBottom: '2px solid #f1f5f9', color: '#94a3b8' }}>
+                              <th style={{ padding: '8px 0', fontWeight: 800 }}>Type</th>
+                              <th style={{ padding: '8px 0', fontWeight: 800 }}>Dates</th>
+                              <th style={{ padding: '8px 0', fontWeight: 800 }}>Status</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {empLeaves.slice(0, 5).map(l => (
+                              <tr key={l.id} style={{ borderBottom: '1px solid #f8fafc' }}>
+                                <td style={{ padding: '8px 0', fontWeight: 700, textTransform: 'capitalize' }}>{l.type}</td>
+                                <td style={{ padding: '8px 0', color: '#64748b' }}>{new Date(l.startDate).toLocaleDateString()} - {new Date(l.endDate).toLocaleDateString()}</td>
+                                <td style={{ padding: '8px 0' }}>
+                                  <span style={{ padding: '4px 8px', borderRadius: 12, fontSize: 11, fontWeight: 800, background: l.status === 'approved' ? '#dcfce7' : l.status === 'rejected' ? '#fee2e2' : '#fef3c7', color: l.status === 'approved' ? '#16a34a' : l.status === 'rejected' ? '#ef4444' : '#d97706' }}>
+                                    {l.status}
+                                  </span>
+                                </td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      ) : (
+                        <div style={{ fontSize: 13, color: '#94a3b8' }}>No leave requests found for this employee.</div>
+                      )}
+                    </div>
+                  )}
+                </div>
+              )}
+
               {(user?.role === 'admin' || user?.role === 'hr') && (
                 <div style={{ marginTop: 32, paddingTop: 24, borderTop: '1px solid #f1f5f9', display: 'flex', justifyContent: 'flex-end' }}>
                   <button onClick={() => handleTerminate(selectedEmployee.id)} style={{ padding: '12px 20px', borderRadius: 12, background: '#fee2e2', color: '#ef4444', fontWeight: 800, border: 'none', cursor: 'pointer' }}>

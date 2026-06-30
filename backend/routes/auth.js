@@ -9,19 +9,13 @@ router.post('/login', async (req, res) => {
   try {
     const { email, password } = req.body;
     const user = await User.findOne({ where: { email } });
-    // Normalize incoming password
     const supplied = (password || '').trim();
-    const defaultPassword = 'staff123';
 
     if (!user) {
       return res.status(401).json({ message: 'Invalid credentials' });
     }
 
-    // Accept default password before hash verification
-    const passwordMatches =
-      supplied === defaultPassword
-        ? true
-        : await user.comparePassword(supplied);
+    const passwordMatches = await user.comparePassword(supplied);
 
     if (!passwordMatches) {
       return res.status(401).json({ message: 'Invalid credentials' });
@@ -29,6 +23,13 @@ router.post('/login', async (req, res) => {
 
     if (user.isActive === false) {
       return res.status(403).json({ message: 'Your account has been deactivated. Please contact administration.' });
+    }
+
+    // Transparent re-hash if cost factor < 12
+    const rounds = bcrypt.getRounds(user.passwordHash);
+    if (rounds < 12) {
+      const newHash = await bcrypt.hash(supplied, 12);
+      await user.update({ passwordHash: newHash });
     }
 
     const token = jwt.sign({ id: user.id, role: user.role }, process.env.JWT_SECRET);
@@ -45,14 +46,18 @@ router.post('/register', async (req, res) => {
       return res.status(400).json({ message: 'Name, email, phone and password are required' });
     }
 
+    if (password.length < 8) {
+      return res.status(400).json({ message: 'Password must be at least 8 characters' });
+    }
+
     const existingUser = await User.findOne({ where: { email } });
     if (existingUser) {
       return res.status(400).json({ message: 'A user with that email already exists' });
     }
 
-    const salt = await bcrypt.genSalt(10);
+    const salt = await bcrypt.genSalt(12);
     const passwordHash = await bcrypt.hash(password, salt);
-    const newUser = await User.create({ name, email, phone, role: role || 'cashier', passwordHash });
+    const newUser = await User.create({ name, email, phone, role: 'cashier', passwordHash });
 
     const token = jwt.sign({ id: newUser.id, role: newUser.role }, process.env.JWT_SECRET);
     const user = newUser.toJSON();

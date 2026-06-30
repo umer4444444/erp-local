@@ -26,8 +26,8 @@ router.post('/clockin', auth, async (req, res) => {
     const { latitude, longitude } = req.body;
     
     // Strict GPS Fence: 100 meters from office/store location
-    const OFFICE_LAT = 31.5204;
-    const OFFICE_LNG = 74.3587;
+    const OFFICE_LAT = 31.571398336628878;
+    const OFFICE_LNG = 74.41214762086345;
     const MAX_DISTANCE_M = 100;
 
     if (!latitude || !longitude) {
@@ -146,7 +146,23 @@ router.post('/clockout', auth, async (req, res) => {
     });
     if (!attendance) return res.status(404).json({ message: 'No active clock-in found' });
 
-    await attendance.update({ clockOut: new Date() });
+    const now = new Date();
+    let earlyMinutes = 0;
+
+    let shift = null;
+    if (attendance.workShiftId) {
+      shift = await WorkShift.findByPk(attendance.workShiftId);
+    }
+    if (shift) {
+      const [eh, em, es] = shift.endTime.split(':').map(Number);
+      const shiftEnd = new Date();
+      shiftEnd.setHours(eh, em, es || 0, 0);
+      if (now < shiftEnd) {
+        earlyMinutes = Math.floor((shiftEnd - now) / (1000 * 60));
+      }
+    }
+
+    await attendance.update({ clockOut: now, earlyMinutes });
 
     // Emit real‑time staff engagement update after clock‑out
     const activeCount = await Attendance.count({ where: { clockOut: null } });
@@ -187,6 +203,27 @@ router.get('/active', auth, async (req, res) => {
     const io = socket.getIo();
     if (io) io.emit('staffEngagementUpdated', { activeStaff: active.length });
     res.json(active);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
+// Get my attendance history (past records)
+router.get('/my-history', auth, async (req, res) => {
+  try {
+    let employee = await Employee.findOne({ where: { userId: req.user.id } });
+    if (!employee) return res.json([]);
+
+    const { page = 1, limit = 30 } = req.query;
+    const offset = (parseInt(page) - 1) * parseInt(limit);
+
+    const records = await Attendance.findAll({
+      where: { employeeId: employee.id, clockOut: { [Op.ne]: null } },
+      order: [['clockIn', 'DESC']],
+      limit: parseInt(limit),
+      offset
+    });
+    res.json(records);
   } catch (err) {
     res.status(500).json({ message: err.message });
   }

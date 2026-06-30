@@ -1,10 +1,11 @@
+const { v7: uuidv7 } = require('uuid');
 const { DataTypes } = require('sequelize');
 const sequelize = require('../config/database');
 
 const Prescription = sequelize.define('Prescription', {
   id: {
     type: DataTypes.UUID,
-    defaultValue: DataTypes.UUIDV4,
+    defaultValue: uuidv7,
     primaryKey: true,
   },
   customerId: {
@@ -20,8 +21,11 @@ const Prescription = sequelize.define('Prescription', {
     type: DataTypes.ENUM('pending', 'verified', 'rejected'),
     defaultValue: 'pending',
   },
-  verifiedBy: {
+  verifiedByUserId: {
     type: DataTypes.UUID, // Pharmacist User ID
+  },
+  verifiedAt: {
+    type: DataTypes.DATE,
   }
 }, {
   timestamps: true,

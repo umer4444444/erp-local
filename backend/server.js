@@ -102,12 +102,9 @@ const PORT = process.env.PORT || 5000;
 // Sync Database and Start Server
 const isProduction = process.env.NODE_ENV === 'production';
 sequelize
-  .query('SET FOREIGN_KEY_CHECKS = 0')
-  .then(() => sequelize.sync())
-  .then(() => sequelize.query('ALTER TABLE Sales DROP FOREIGN KEY sales_ibfk_2').catch(() => console.log('FK already dropped')))
-  .then(() => sequelize.query('SET FOREIGN_KEY_CHECKS = 1'))
+  .authenticate()
   .then(() => {
-    console.log('Database connected and synced.');
+    console.log('Database connection verified.');
     server.listen(PORT, () => console.log(`Server running on port ${PORT}`));
   })
   .catch(err => {
