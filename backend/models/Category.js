@@ -20,6 +20,10 @@ const Category = sequelize.define('Category', {
     type: DataTypes.STRING,
   },
 }, {
+  tableName: 'categories',
+  freezeTableName: true,
+  timestamps: true,
+  underscored: false,
   timestamps: true,
 });
 

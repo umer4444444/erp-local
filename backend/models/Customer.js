@@ -35,6 +35,10 @@ const Customer = sequelize.define('Customer', {
     defaultValue: 'Bronze',
   },
 }, {
+  tableName: 'customers',
+  freezeTableName: true,
+  timestamps: true,
+  underscored: false,
   timestamps: true,
 });
 

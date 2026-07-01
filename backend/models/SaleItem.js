@@ -38,6 +38,10 @@ const SaleItem = sequelize.define('SaleItem', {
     defaultValue: 0,
   },
 }, {
+  tableName: 'sale_items',
+  freezeTableName: true,
+  timestamps: true,
+  underscored: false,
   timestamps: true,
 });
 

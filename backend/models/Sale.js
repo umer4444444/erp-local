@@ -54,6 +54,10 @@ const Sale = sequelize.define('Sale', {
     type: DataTypes.TEXT,
   },
 }, {
+  tableName: 'sales',
+  freezeTableName: true,
+  timestamps: true,
+  underscored: false,
   timestamps: true,
 });
 

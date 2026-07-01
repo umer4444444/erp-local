@@ -28,6 +28,10 @@ const Supplier = sequelize.define('Supplier', {
     type: DataTypes.STRING, // e.g. "Pharmacy", "Groceries"
   }
 }, {
+  tableName: 'suppliers',
+  freezeTableName: true,
+  timestamps: true,
+  underscored: false,
   timestamps: true,
 });
 

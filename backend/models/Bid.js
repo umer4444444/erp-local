@@ -22,6 +22,10 @@ const Bid = sequelize.define('Bid', {
     defaultValue: 'pending',
   },
 }, {
+  tableName: 'bids',
+  freezeTableName: true,
+  timestamps: true,
+  underscored: false,
   timestamps: true,
 });
 

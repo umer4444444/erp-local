@@ -25,6 +25,10 @@ const LoyaltyTransaction = sequelize.define('LoyaltyTransaction', {
     allowNull: true,
   },
 }, {
+  tableName: 'loyalty_transactions',
+  freezeTableName: true,
+  timestamps: true,
+  underscored: false,
   timestamps: true,
 });
 

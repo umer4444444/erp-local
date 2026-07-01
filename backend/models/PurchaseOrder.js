@@ -37,6 +37,10 @@ const PurchaseOrder = sequelize.define('PurchaseOrder', {
     type: DataTypes.TEXT,
   }
 }, {
+  tableName: 'purchase_orders',
+  freezeTableName: true,
+  timestamps: true,
+  underscored: false,
   timestamps: true,
 });
 

@@ -29,6 +29,10 @@ const ProductVariation = sequelize.define('ProductVariation', {
     defaultValue: 0,
   },
 }, {
+  tableName: 'product_variations',
+  freezeTableName: true,
+  timestamps: true,
+  underscored: false,
   timestamps: true,
 });
 

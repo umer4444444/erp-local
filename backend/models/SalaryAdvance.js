@@ -38,6 +38,10 @@ const SalaryAdvance = sequelize.define('SalaryAdvance', {
     allowNull: true,
   },
 }, {
+  tableName: 'salary_advances',
+  freezeTableName: true,
+  timestamps: true,
+  underscored: false,
   timestamps: true,
 });
 

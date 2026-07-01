@@ -37,6 +37,10 @@ const Payslip = sequelize.define('Payslip', {
     defaultValue: 'unpaid',
   }
 }, {
+  tableName: 'payslips',
+  freezeTableName: true,
+  timestamps: true,
+  underscored: false,
   timestamps: true,
 });
 

@@ -37,6 +37,10 @@ const AuditLog = sequelize.define('AuditLog', {
     allowNull: true,
   },
 }, {
+  tableName: 'audit_logs',
+  freezeTableName: true,
+  timestamps: true,
+  underscored: false,
   timestamps: true,
   updatedAt: false, // Audit logs are insert-only
 });

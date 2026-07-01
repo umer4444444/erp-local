@@ -29,6 +29,10 @@ const DocumentVault = sequelize.define('DocumentVault', {
     allowNull: true,
   },
 }, {
+  tableName: 'document_vaults',
+  freezeTableName: true,
+  timestamps: true,
+  underscored: false,
   timestamps: true,
 });
 

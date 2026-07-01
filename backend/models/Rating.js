@@ -21,6 +21,10 @@ const Rating = sequelize.define('Rating', {
     type: DataTypes.TEXT,
   },
 }, {
+  tableName: 'ratings',
+  freezeTableName: true,
+  timestamps: true,
+  underscored: false,
   timestamps: true,
 });
 

@@ -21,6 +21,10 @@ const PrescriptionItem = sequelize.define('PrescriptionItem', {
     allowNull: false,
   }
 }, {
+  tableName: 'prescription_items',
+  freezeTableName: true,
+  timestamps: true,
+  underscored: false,
   timestamps: true,
 });
 

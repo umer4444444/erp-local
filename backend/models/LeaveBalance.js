@@ -31,6 +31,10 @@ const LeaveBalance = sequelize.define('LeaveBalance', {
     }
   }
 }, {
+  tableName: 'leave_balances',
+  freezeTableName: true,
+  timestamps: true,
+  underscored: false,
   timestamps: true,
 });
 

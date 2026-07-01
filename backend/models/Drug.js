@@ -35,6 +35,10 @@ const Drug = sequelize.define('Drug', {
     defaultValue: false,
   }
 }, {
+  tableName: 'drugs',
+  freezeTableName: true,
+  timestamps: true,
+  underscored: false,
   timestamps: true,
 });
 

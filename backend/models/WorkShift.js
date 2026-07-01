@@ -25,6 +25,10 @@ const WorkShift = sequelize.define('WorkShift', {
     defaultValue: [],
   },
 }, {
+  tableName: 'work_shifts',
+  freezeTableName: true,
+  timestamps: true,
+  underscored: false,
   timestamps: true,
 });
 

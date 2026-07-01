@@ -28,6 +28,10 @@ const Prescription = sequelize.define('Prescription', {
     type: DataTypes.DATE,
   }
 }, {
+  tableName: 'prescriptions',
+  freezeTableName: true,
+  timestamps: true,
+  underscored: false,
   timestamps: true,
 });
 

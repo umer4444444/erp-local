@@ -22,6 +22,10 @@ const Department = sequelize.define('Department', {
     defaultValue: 'active',
   },
 }, {
+  tableName: 'departments',
+  freezeTableName: true,
+  timestamps: true,
+  underscored: false,
   timestamps: true,
 });
 

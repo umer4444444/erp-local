@@ -36,6 +36,10 @@ const SalesSession = sequelize.define('SalesSession', {
     defaultValue: 'active',
   },
 }, {
+  tableName: 'sales_sessions',
+  freezeTableName: true,
+  timestamps: true,
+  underscored: false,
   timestamps: true,
 });
 

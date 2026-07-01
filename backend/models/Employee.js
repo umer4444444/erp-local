@@ -82,6 +82,10 @@ const Employee = sequelize.define('Employee', {
     allowNull: true,
   },
 }, {
+  tableName: 'employees',
+  freezeTableName: true,
+  timestamps: true,
+  underscored: false,
   timestamps: true,
   paranoid: true,
 });

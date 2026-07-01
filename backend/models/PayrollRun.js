@@ -31,6 +31,10 @@ const PayrollRun = sequelize.define('PayrollRun', {
     type: DataTypes.DATE,
   }
 }, {
+  tableName: 'payroll_runs',
+  freezeTableName: true,
+  timestamps: true,
+  underscored: false,
   timestamps: true,
   indexes: [
     { unique: true, fields: ['month', 'year'], name: 'unique_payroll_month_year' }

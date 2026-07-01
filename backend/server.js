@@ -95,6 +95,19 @@ app.use('/api/suppliers', require('./routes/suppliers'));
 app.use('/api/rides', require('./routes/rides'));
 app.use('/api/reports', require('./routes/reports'));
 
+// Health Check Endpoint
+app.get('/api/health', (req, res) => {
+  res.json({
+    status: 'ok',
+    database: 'connected',
+    jwt: !!process.env.JWT_SECRET,
+    socket: io ? 'running' : 'stopped',
+    version: process.env.npm_package_version || '1.0.0',
+    uptime: process.uptime(),
+    environment: process.env.NODE_ENV || 'development'
+  });
+});
+
 // Basic route
 app.get('/', (req, res) => {
   res.send('ERP Ride-Sharing API is running...');
@@ -111,14 +124,33 @@ io.on('connection', (socket) => {
 
 const PORT = process.env.PORT || 5002;
 
+// Startup Validation
+const requiredEnvVars = ['DB_HOST', 'DB_NAME', 'DB_USER', 'JWT_SECRET'];
+for (const envVar of requiredEnvVars) {
+  if (!process.env[envVar]) {
+    console.error(`[FATAL] Missing required environment variable: ${envVar}`);
+    process.exit(1);
+  }
+}
+
 // Sync Database and Start Server
 const isProduction = process.env.NODE_ENV === 'production';
 sequelize
   .authenticate()
   .then(() => {
     console.log('Database connection verified.');
-    server.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+    // Validate required tables exist
+    return sequelize.getQueryInterface().showAllTables().then(tables => {
+      const requiredTables = ['users', 'employees', 'departments'];
+      const missing = requiredTables.filter(t => !tables.includes(t));
+      if (missing.length > 0) {
+        console.error(`[FATAL] Missing required database tables: ${missing.join(', ')}. Please run 'npm run db:init'`);
+        process.exit(1);
+      }
+      server.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+    });
   })
   .catch(err => {
-    console.error('Unable to connect to the database:', err);
+    console.error('[FATAL] Unable to connect to the database:', err.message);
+    process.exit(1);
   });

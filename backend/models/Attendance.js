@@ -38,6 +38,10 @@ const Attendance = sequelize.define('Attendance', {
     type: DataTypes.TEXT,
   }
 }, {
+  tableName: 'attendance',
+  freezeTableName: true,
+  timestamps: true,
+  underscored: false,
   timestamps: true,
 });
 

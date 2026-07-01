@@ -1,0 +1,15 @@
+RENAME TABLE `productvariations` TO `product_variations`;
+RENAME TABLE `saleitems` TO `sale_items`;
+RENAME TABLE `salessessions` TO `sales_sessions`;
+RENAME TABLE `stocklogs` TO `stock_logs`;
+RENAME TABLE `workshifts` TO `work_shifts`;
+RENAME TABLE `attendances` TO `attendance`;
+RENAME TABLE `leavebalances` TO `leave_balances`;
+RENAME TABLE `payrollruns` TO `payroll_runs`;
+RENAME TABLE `prescriptionitems` TO `prescription_items`;
+RENAME TABLE `purchaseorders` TO `purchase_orders`;
+RENAME TABLE `auditlogs` TO `audit_logs`;
+RENAME TABLE `loyaltytransactions` TO `loyalty_transactions`;
+RENAME TABLE `poitems` TO `po_items`;
+RENAME TABLE `salaryadvances` TO `salary_advances`;
+RENAME TABLE `documentvaults` TO `document_vaults`;

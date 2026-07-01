@@ -27,6 +27,10 @@ const POItem = sequelize.define('POItem', {
     defaultValue: 0,
   },
 }, {
+  tableName: 'po_items',
+  freezeTableName: true,
+  timestamps: true,
+  underscored: false,
   timestamps: true,
 });
 

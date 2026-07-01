@@ -42,6 +42,10 @@ const Product = sequelize.define('Product', {
     type: DataTypes.STRING,
   },
 }, {
+  tableName: 'products',
+  freezeTableName: true,
+  timestamps: true,
+  underscored: false,
   timestamps: true,
 });
 

@@ -22,6 +22,10 @@ const Designation = sequelize.define('Designation', {
     allowNull: true,
   },
 }, {
+  tableName: 'designations',
+  freezeTableName: true,
+  timestamps: true,
+  underscored: false,
   timestamps: true,
 });
 

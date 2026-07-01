@@ -49,6 +49,10 @@ const Ride = sequelize.define('Ride', {
     type: DataTypes.DECIMAL(10, 2),
   },
 }, {
+  tableName: 'rides',
+  freezeTableName: true,
+  timestamps: true,
+  underscored: false,
   timestamps: true,
 });
 

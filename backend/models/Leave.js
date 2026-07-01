@@ -42,6 +42,10 @@ const Leave = sequelize.define('Leave', {
     type: DataTypes.TEXT,
   }
 }, {
+  tableName: 'leaves',
+  freezeTableName: true,
+  timestamps: true,
+  underscored: false,
   timestamps: true,
 });
 

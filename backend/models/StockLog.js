@@ -30,6 +30,10 @@ const StockLog = sequelize.define('StockLog', {
     allowNull: true,
   },
 }, {
+  tableName: 'stock_logs',
+  freezeTableName: true,
+  timestamps: true,
+  underscored: false,
   timestamps: true,
 });
 
