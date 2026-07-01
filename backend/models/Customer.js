@@ -1,4 +1,4 @@
-const { v7: uuidv7 } = require('uuid');
+const uuidv7 = () => require('crypto').randomUUID();
 const { DataTypes } = require('sequelize');
 const sequelize = require('../config/database');
 

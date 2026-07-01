@@ -20,7 +20,7 @@ for (const file of files) {
 
   if (modified) {
     if (!content.includes("require('uuid')")) {
-      const requireStatement = "const { v7: uuidv7 } = require('uuid');\n";
+      const requireStatement = "const uuidv7 = () => require('crypto').randomUUID();\n";
       content = requireStatement + content;
     }
     fs.writeFileSync(filePath, content, 'utf8');
