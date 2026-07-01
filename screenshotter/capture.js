@@ -41,8 +41,10 @@ const routes = [
   const page = await browser.newPage();
   await page.setViewport({ width: 1440, height: 900 });
 
+  const baseUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
+
   console.log('Navigating to login...');
-  await page.goto('http://localhost:5173/login', { waitUntil: 'networkidle2' });
+  await page.goto(`${baseUrl}/login`, { waitUntil: 'networkidle2' });
 
   console.log('Logging in...');
   // Fill in login form
@@ -70,7 +72,7 @@ const routes = [
   for (const route of routes) {
     console.log(`Taking screenshot for ${route.name} at ${route.path}...`);
     try {
-      await page.goto(`http://localhost:5173${route.path}`, { waitUntil: 'networkidle0', timeout: 10000 });
+      await page.goto(`${baseUrl}${route.path}`, { waitUntil: 'networkidle0', timeout: 10000 });
       // Wait extra time for animations or data fetching
       await delay(2000);
       

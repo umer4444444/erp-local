@@ -44,7 +44,8 @@ const Manager = () => {
   };
 
   useEffect(() => {
-    const socket = io('http://localhost:5003', {
+    const socketUrl = import.meta.env.VITE_SOCKET_URL || '';
+    const socket = io(socketUrl, {
       auth: { token: localStorage.getItem('token') }
     }); // connect to backend socket server
     socket.on('staffEngagementUpdated', data => {
