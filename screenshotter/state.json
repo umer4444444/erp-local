@@ -1,0 +1,18 @@
+{
+  "cookies": [],
+  "origins": [
+    {
+      "origin": "http://erp.lancerstech.com",
+      "localStorage": [
+        {
+          "name": "token",
+          "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjgxNmNmNGI5LTZhOWItNDY1NC05NDBmLTFjYTc2MzRjZDg4OSIsInJvbGUiOiJhZG1pbiIsImlhdCI6MTc4Mjk4ODgyM30.j_WofqohKzTI1ZfLLFwU7UNlo-qznrWJI4dWUhwC9QI"
+        },
+        {
+          "name": "user",
+          "value": "{\"id\":\"816cf4b9-6a9b-4654-940f-1ca7634cd889\",\"name\":\"System Admin\",\"role\":\"admin\",\"email\":\"admin@erp.com\"}"
+        }
+      ]
+    }
+  ]
+}

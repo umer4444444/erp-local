@@ -110,6 +110,8 @@ router.post('/clockin', auth, async (req, res) => {
       clockIn: now,
       status,
       lateMinutes,
+      latitude,
+      longitude,
       workShiftId: shift ? shift.id : null
     });
 

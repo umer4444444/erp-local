@@ -107,7 +107,9 @@ const handleDownloadReport = async () => {
           netProfit: salesRes.data.netProfit || 0,
           totalProducts: prodRes.data.length || 0,
           totalEmployees: hrRes.data.totalEmployees || 0,
-          activeEmployees: hrRes.data.activeEmployees || 0
+          activeEmployees: hrRes.data.activeEmployees || 0,
+          maleEmployees: hrRes.data.maleEmployees || 0,
+          femaleEmployees: hrRes.data.femaleEmployees || 0
         });
         setAlerts(alertRes.data);
         setActiveShift(shiftRes.data);
@@ -133,7 +135,18 @@ const handleDownloadReport = async () => {
       <StatCard title="Net Profit" value={`$${stats.netProfit || 0}`} icon={<Activity />} rgb="16,185,129" delay={0.2} />
       <StatCard title="Today's Sales" value={stats.totalSales} icon={<ShoppingCart />} rgb="10,132,255" delay={0.3} />
       <StatCard title="Low Stock" value={alerts.lowStock?.length || 0} icon={<AlertTriangle />} rgb="249,115,22" delay={0.4} />
-      <StatCard title="Active Staff" value={stats.activeEmployees} icon={<Users />} rgb="168,85,247" delay={0.5} />
+      <StatCard 
+        title="Staff Strength" 
+        value={
+          <div style={{ display: 'flex', alignItems: 'baseline', gap: 6 }}>
+            <span>{stats.activeEmployees}</span>
+            <span style={{ fontSize: 13, fontWeight: 700, color: '#94a3b8' }}>({stats.maleEmployees || 0}M / {stats.femaleEmployees || 0}F)</span>
+          </div>
+        } 
+        icon={<Users />} 
+        rgb="168,85,247" 
+        delay={0.5} 
+      />
     </div>
   );
 
@@ -262,7 +275,7 @@ const handleDownloadReport = async () => {
                   <div style={{ fontSize: 13, color: '#ef4444', fontWeight: 600 }}>{alerts.expiringSoon.length} products are expiring within 30 days.</div>
                 </div>
               </div>
-              <button onClick={() => navigate('/inventory')} style={{ background: '#ef4444', color: 'white', border: 'none', padding: '8px 16px', borderRadius: 10, fontWeight: 700, cursor: 'pointer' }}>
+              <button onClick={() => navigate('/inventory', { state: { filter: 'expiringSoon' } })} style={{ background: '#ef4444', color: 'white', border: 'none', padding: '8px 16px', borderRadius: 10, fontWeight: 700, cursor: 'pointer' }}>
                 Review Now
               </button>
             </div>

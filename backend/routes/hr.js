@@ -62,6 +62,8 @@ router.get('/stats', auth, async (req, res) => {
     res.json({
       totalEmployees: employees.length,
       activeEmployees: employees.filter(e => e.status === 'active').length,
+      maleEmployees: employees.filter(e => e.status === 'active' && e.gender === 'male').length,
+      femaleEmployees: employees.filter(e => e.status === 'active' && e.gender === 'female').length,
       pendingLeaves,
       unverifiedShifts,
       estPayroll,

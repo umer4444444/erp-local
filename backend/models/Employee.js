@@ -42,6 +42,10 @@ const Employee = sequelize.define('Employee', {
       }
     }
   },
+  gender: {
+    type: DataTypes.ENUM('male', 'female', 'other'),
+    allowNull: true,
+  },
   address: {
     type: DataTypes.STRING,
   },

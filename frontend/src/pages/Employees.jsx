@@ -40,7 +40,7 @@ const Employees = () => {
   const [form, setForm] = useState({
     firstName: '', lastName: '', email: '', phone: '', cnic: '', address: '',
     departmentId: '', designationId: '', joiningDate: '',
-    salaryType: 'monthly', salary: '', bankAccount: '', role: ''
+    salaryType: 'monthly', salary: '', bankAccount: '', role: '', gender: ''
   });
 
   useEffect(() => {
@@ -124,7 +124,7 @@ const Employees = () => {
       setShowModal(false);
       setStep(1);
       setPhoneCode('+92');
-      setForm({ firstName: '', lastName: '', email: '', phone: '', cnic: '', address: '', departmentId: '', designationId: '', joiningDate: '', salaryType: 'monthly', salary: '', bankAccount: '', role: '' });
+      setForm({ firstName: '', lastName: '', email: '', phone: '', cnic: '', address: '', departmentId: '', designationId: '', joiningDate: '', salaryType: 'monthly', salary: '', bankAccount: '', role: '', gender: '' });
       fetchData();
     } catch (e) {
       alert(e.response?.data?.message || 'Error saving employee. Please check all fields.');
@@ -335,9 +335,15 @@ const Employees = () => {
                       />
                     </div>
                     <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
-                      <input placeholder="CNIC (ID Card No) *" style={inputStyle} value={form.cnic} onChange={handleCnicChange} maxLength={15} />
-                      <input placeholder="Address (Based on ID Card) *" style={inputStyle} value={form.address} onChange={e => setForm({...form, address: e.target.value})} />
+                      <input placeholder="CNIC (e.g: 36309-1895678-8) *" style={inputStyle} value={form.cnic} onChange={handleCnicChange} maxLength={15} />
+                      <select style={inputStyle} value={form.gender || ''} onChange={e => setForm({...form, gender: e.target.value})}>
+                        <option value="">Select Gender</option>
+                        <option value="male">Male</option>
+                        <option value="female">Female</option>
+                        <option value="other">Other</option>
+                      </select>
                     </div>
+                    <input placeholder="Address (Based on ID Card) *" style={inputStyle} value={form.address} onChange={e => setForm({...form, address: e.target.value})} />
                     <button type="button" onClick={() => setStep(2)} style={{ padding: 14, borderRadius: 12, background: '#0a84ff', color: 'white', fontWeight: 800, border: 'none', marginTop: 12 }}>Continue</button>
                   </div>
                 )}

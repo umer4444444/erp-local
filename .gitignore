@@ -11,3 +11,4 @@ backend/node_modules/
 frontend/dist/
 backend/dist/
 credentials_list.txt
+*.mp4

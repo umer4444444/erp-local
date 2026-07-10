@@ -386,10 +386,22 @@ const Inventory = () => {
   };
 
   const filteredProducts = products.filter(p => {
+    if (location.state?.filter === 'expiringSoon') {
+      if (!p.expiryDate) return false;
+      const daysToExpiry = (new Date(p.expiryDate) - new Date()) / (1000 * 60 * 60 * 24);
+      if (daysToExpiry > 30 || daysToExpiry <= 0) return false;
+    }
+
     const matchesSearch = p.name.toLowerCase().includes(search.toLowerCase());
     const matchesCat = categoryFilter ? (p.categoryId === categoryFilter || p.Category?.id === categoryFilter) : true;
     return matchesSearch && matchesCat;
   });
+
+  const isExpiring = (expiryDate) => {
+    if (!expiryDate) return false;
+    const days = (new Date(expiryDate) - new Date()) / (1000 * 60 * 60 * 24);
+    return days <= 30 && days > 0;
+  };
 
   return (
     <div style={{ padding: 40, minHeight: '100vh', background: '#f8fafc', fontFamily: "'Outfit', sans-serif" }}>
@@ -479,7 +491,7 @@ const Inventory = () => {
             {filteredProducts.map(product => {
               const margin = product.costPrice ? (((product.price - product.costPrice) / product.price) * 100).toFixed(0) : 0;
               return (
-                <tr key={product.id} style={{ borderBottom: '1px solid #f8fafc', background: selectedIds.has(product.id) ? 'rgba(10,132,255,0.05)' : 'transparent' }}>
+                <tr key={product.id} style={{ borderBottom: '1px solid #f8fafc', background: selectedIds.has(product.id) ? 'rgba(10,132,255,0.05)' : (location.state?.filter === 'expiringSoon' && isExpiring(product.expiryDate) ? 'rgba(239,68,68,0.1)' : 'transparent') }}>
                   <td style={{ padding: '16px 24px' }}>
                     <input 
                       type="checkbox" 

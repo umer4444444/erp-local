@@ -98,6 +98,7 @@ const Sales = () => {
   const [processing, setProcessing] = useState(false);
   const [receipt, setReceipt] = useState(null);
   const [globalDiscount, setGlobalDiscount] = useState('');
+  const [taxRate, setTaxRate] = useState('');
   const [cashTendered, setCashTendered] = useState('');
   const [splitAmount, setSplitAmount] = useState({ cash: 0, card: 0 });
   const [redeemPoints, setRedeemPoints] = useState(false);
@@ -233,7 +234,8 @@ const Sales = () => {
   const maxRedeem = Math.min(loyaltyPoints / 100, subtotal * 0.2); // max 20% off via points
   const loyaltyDiscount = redeemPoints ? maxRedeem : 0;
   
-  const total = Math.max(subtotal - parseFloat(globalDiscount || 0) - loyaltyDiscount, 0);
+  const taxAmount = (subtotal - parseFloat(globalDiscount || 0) - loyaltyDiscount) * (parseFloat(taxRate || 0) / 100);
+  const total = Math.max(subtotal - parseFloat(globalDiscount || 0) - loyaltyDiscount + taxAmount, 0);
   const changeDue = paymentMethod === 'cash' && cashTendered ? Math.max(parseFloat(cashTendered) - total, 0) : 0;
 
   const handleCheckout = async () => {
@@ -244,6 +246,7 @@ const Sales = () => {
       customerId: selectedCustomer?.id,
       totalAmount: subtotal,
       discount: parseFloat(globalDiscount || 0) + loyaltyDiscount,
+      tax: taxAmount,
       grandTotal: total,
       paymentMethod,
       cashAmount: paymentMethod === 'split' ? splitAmount.cash : (paymentMethod === 'cash' ? total : 0),
@@ -264,6 +267,7 @@ const Sales = () => {
       setCart([]);
       setSelectedCustomer(null);
       setGlobalDiscount('');
+      setTaxRate('');
       setCashTendered('');
       setPaymentMethod('cash');
       setCustomerSearch('');
@@ -457,6 +461,12 @@ const Sales = () => {
               style={{ width: 80, padding: '6px 10px', borderRadius: 8, border: '1px solid #e2e8f0', textAlign: 'right', fontWeight: 700, fontSize: 13 }} />
           </div>
 
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
+            <span style={{ color: '#64748b', fontWeight: 700, fontSize: 13 }}>Tax (%)</span>
+            <input type="number" min="0" value={taxRate} onChange={e => setTaxRate(e.target.value)} 
+              style={{ width: 80, padding: '6px 10px', borderRadius: 8, border: '1px solid #e2e8f0', textAlign: 'right', fontWeight: 700, fontSize: 13 }} />
+          </div>
+
           {redeemPoints && loyaltyDiscount > 0 && (
             <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 6, color: '#d97706', fontWeight: 700, fontSize: 13 }}>
               <span>Loyalty Redemption</span><span>-${loyaltyDiscount.toFixed(2)}</span>
@@ -575,6 +585,11 @@ const Sales = () => {
                 {parseFloat(receipt.discount) > 0 && (
                   <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 14, color: '#ef4444', fontWeight: 700 }}>
                     <span>Discount</span><span>-${parseFloat(receipt.discount).toFixed(2)}</span>
+                  </div>
+                )}
+                {parseFloat(receipt.tax) > 0 && (
+                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 14, color: '#64748b', fontWeight: 600 }}>
+                    <span>Tax</span><span>+${parseFloat(receipt.tax).toFixed(2)}</span>
                   </div>
                 )}
                 <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 18, color: '#0f172a', fontWeight: 900, marginTop: 8, paddingTop: 8, borderTop: '1px solid #f1f5f9' }}>
