@@ -54,7 +54,7 @@ const User = sequelize.define('User', {
   },
   location: {
     type: DataTypes.GEOMETRY('POINT'),
-    allowNull: false,
+    allowNull: true,
   },
   isActive: {
     type: DataTypes.BOOLEAN,
@@ -66,12 +66,6 @@ const User = sequelize.define('User', {
   timestamps: true,
   underscored: false,
   timestamps: true,
-  indexes: [
-    {
-      type: 'SPATIAL',
-      fields: ['location'],
-    }
-  ]
 });
 
 // Instance method to compare password

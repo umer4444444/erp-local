@@ -1,0 +1,6 @@
+{
+  "storeName": "Enterprise ERP",
+  "taxRate": 5,
+  "currency": "USD",
+  "allowOfflinePOS": true
+}
