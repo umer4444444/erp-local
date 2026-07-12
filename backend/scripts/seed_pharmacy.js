@@ -62,7 +62,7 @@ const seedPharmacy = async () => {
 
         await PrescriptionItem.create({
         prescriptionId: rx.id,
-        drugId: (await Drug.findOne({ where: { brandName: 'Amoxil' } })).id,
+        drugId: (await Drug.findOne({ where: { brandName: 'SafeScaff' } })).id,
         quantity: 2,
         dosageInstruction: 'Take 1 pill twice a day'
         });
