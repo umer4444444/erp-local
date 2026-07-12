@@ -90,7 +90,7 @@ app.use('/api/attendance', require('./routes/attendance'));
 app.use('/api/leaves', require('./routes/leaves'));
 app.use('/api/payroll', require('./routes/payroll'));
 app.use('/api/expenses', require('./routes/expenses'));
-app.use('/api/pharmacy', require('./routes/pharmacy'));
+// app.use('/api/pharmacy', require('./routes/pharmacy'));
 app.use('/api/suppliers', require('./routes/suppliers'));
 app.use('/api/rides', require('./routes/rides'));
 app.use('/api/reports', require('./routes/reports'));

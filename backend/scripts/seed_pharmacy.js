@@ -7,24 +7,24 @@ const seedPharmacy = async () => {
     await sequelize.authenticate();
     console.log('Connected to DB. Seeding Pharmacy data...');
 
-    // 1. Create a Pharmacy Category
+    // 1. Create a Construction Category
     const pharmacyCat = await Category.create({
-      name: 'Pharmacy / Medicines',
+      name: 'Site Equipment / Machinery',
       storeType: 'department',
-      description: 'Prescription and OTC drugs'
+      description: 'Heavy machinery and site tools'
     });
 
     // 2. Create Products
     const products = await Product.bulkCreate([
-      { name: 'Paracetamol 500mg', sku: 'PH-PAR-500', price: 50.00, costPrice: 30.00, stock: 1500, categoryId: pharmacyCat.id, storeType: 'department' },
-      { name: 'Amoxicillin 250mg', sku: 'PH-AMX-250', price: 120.00, costPrice: 80.00, stock: 500, categoryId: pharmacyCat.id, storeType: 'department' },
-      { name: 'Ibuprofen 400mg', sku: 'PH-IBU-400', price: 80.00, costPrice: 50.00, stock: 800, categoryId: pharmacyCat.id, storeType: 'department' },
-      { name: 'Diazepam 5mg (Controlled)', sku: 'PH-DZP-05', price: 200.00, costPrice: 150.00, stock: 200, categoryId: pharmacyCat.id, storeType: 'department' },
-      { name: 'Lisinopril 10mg', sku: 'PH-LIS-10', price: 150.00, costPrice: 90.00, stock: 300, categoryId: pharmacyCat.id, storeType: 'department' },
-      { name: 'Metformin 500mg', sku: 'PH-MET-500', price: 60.00, costPrice: 40.00, stock: 1000, categoryId: pharmacyCat.id, storeType: 'department' }
+      { name: 'Concrete Mixer (Portable)', sku: 'CON-MIX-01', price: 1500.00, costPrice: 1200.00, stock: 5, categoryId: pharmacyCat.id, storeType: 'department' },
+      { name: 'Scaffolding Set (Standard)', sku: 'CON-SCAF-02', price: 350.00, costPrice: 250.00, stock: 50, categoryId: pharmacyCat.id, storeType: 'department' },
+      { name: 'Industrial Drill (Corded)', sku: 'CON-DRL-03', price: 120.00, costPrice: 85.00, stock: 25, categoryId: pharmacyCat.id, storeType: 'department' },
+      { name: 'Wheelbarrow (Heavy Duty)', sku: 'CON-WHL-04', price: 80.00, costPrice: 50.00, stock: 100, categoryId: pharmacyCat.id, storeType: 'department' },
+      { name: 'Laser Level (Self-leveling)', sku: 'CON-LSR-05', price: 250.00, costPrice: 180.00, stock: 15, categoryId: pharmacyCat.id, storeType: 'department' },
+      { name: 'Safety Harness (Full Body)', sku: 'CON-HRN-06', price: 75.00, costPrice: 45.00, stock: 200, categoryId: pharmacyCat.id, storeType: 'department' }
     ]);
 
-    // 3. Create Drugs mapping to Products
+    // 3. Create Drugs mapping to Products (Reusing Drug table for warranty/certification info as an example, since structure cannot change)
     const today = new Date();
     const nextMonth = new Date(today);
     nextMonth.setDate(today.getDate() + 15); // Expiring soon
@@ -33,12 +33,12 @@ const seedPharmacy = async () => {
     nextYear.setFullYear(today.getFullYear() + 1);
 
     await Drug.bulkCreate([
-      { productId: products[0].id, genericName: 'Acetaminophen', brandName: 'Panadol', schedule: 'OTC', batchNo: 'BATCH-PAN-001', manufacturer: 'GSK', expiryDate: nextYear, isControlledSubstance: false },
-      { productId: products[1].id, genericName: 'Amoxicillin', brandName: 'Amoxil', schedule: 'Schedule H', batchNo: 'BATCH-AMX-002', manufacturer: 'Pfizer', expiryDate: nextMonth, isControlledSubstance: false },
-      { productId: products[2].id, genericName: 'Ibuprofen', brandName: 'Brufen', schedule: 'OTC', batchNo: 'BATCH-BRU-003', manufacturer: 'Abbott', expiryDate: nextYear, isControlledSubstance: false },
-      { productId: products[3].id, genericName: 'Diazepam', brandName: 'Valium', schedule: 'Schedule X', batchNo: 'BATCH-VAL-004', manufacturer: 'Roche', expiryDate: nextYear, isControlledSubstance: true },
-      { productId: products[4].id, genericName: 'Lisinopril', brandName: 'Prinivil', schedule: 'Schedule H', batchNo: 'BATCH-LIS-005', manufacturer: 'Merck', expiryDate: nextMonth, isControlledSubstance: false },
-      { productId: products[5].id, genericName: 'Metformin', brandName: 'Glucophage', schedule: 'Schedule H', batchNo: 'BATCH-GLU-006', manufacturer: 'Merck', expiryDate: nextYear, isControlledSubstance: false }
+      { productId: products[0].id, genericName: 'Mixer', brandName: 'BuildMix', schedule: 'Heavy', batchNo: 'BATCH-MIX-001', manufacturer: 'Cat', expiryDate: nextYear, isControlledSubstance: false },
+      { productId: products[1].id, genericName: 'Scaffolding', brandName: 'SafeScaff', schedule: 'Standard', batchNo: 'BATCH-SCAF-002', manufacturer: 'BuildCo', expiryDate: nextMonth, isControlledSubstance: false },
+      { productId: products[2].id, genericName: 'Drill', brandName: 'PowerDrill', schedule: 'Standard', batchNo: 'BATCH-DRL-003', manufacturer: 'DeWalt', expiryDate: nextYear, isControlledSubstance: false },
+      { productId: products[3].id, genericName: 'Wheelbarrow', brandName: 'CarryAll', schedule: 'Standard', batchNo: 'BATCH-WHL-004', manufacturer: 'Truper', expiryDate: nextYear, isControlledSubstance: false },
+      { productId: products[4].id, genericName: 'Level', brandName: 'LaserPro', schedule: 'Standard', batchNo: 'BATCH-LSR-005', manufacturer: 'Bosch', expiryDate: nextMonth, isControlledSubstance: false },
+      { productId: products[5].id, genericName: 'Harness', brandName: 'SafeFall', schedule: 'Standard', batchNo: 'BATCH-HRN-006', manufacturer: '3M', expiryDate: nextYear, isControlledSubstance: false }
     ]);
 
     // 4. Create Customers if needed
