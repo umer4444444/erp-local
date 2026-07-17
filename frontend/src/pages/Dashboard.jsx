@@ -8,16 +8,18 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { inventoryAPI, managerAPI, salesAPI, shiftAPI, hrAPI, attendanceAPI } from '../api';
 
-const StatCard = ({ title, value, icon, rgb, delay }) => (
+const StatCard = ({ title, value, icon, rgb, delay, onClick }) => (
   <motion.div 
     initial={{ opacity: 0, y: 20 }}
     animate={{ opacity: 1, y: 0 }}
     transition={{ delay }}
+    onClick={onClick}
     style={{
       background: 'white', padding: 24, borderRadius: 24,
       border: '1px solid rgba(0,0,0,0.05)',
       boxShadow: '0 4px 20px rgba(0,0,0,0.03)',
-      display: 'flex', alignItems: 'center', gap: 20
+      display: 'flex', alignItems: 'center', gap: 20,
+      cursor: onClick ? 'pointer' : 'default'
     }}
   >
     <div style={{
@@ -134,7 +136,7 @@ const handleDownloadReport = async () => {
       <StatCard title="Total Revenue" value={`$${stats.totalRevenue || 0}`} icon={<TrendingUp />} rgb="34,197,94" delay={0.1} />
       <StatCard title="Net Profit" value={`$${stats.netProfit || 0}`} icon={<Activity />} rgb="16,185,129" delay={0.2} />
       <StatCard title="Today's Sales" value={stats.totalSales} icon={<ShoppingCart />} rgb="10,132,255" delay={0.3} />
-      <StatCard title="Low Stock" value={alerts.lowStock?.length || 0} icon={<AlertTriangle />} rgb="249,115,22" delay={0.4} />
+      <StatCard title="Low Stock" value={alerts.lowStock?.length || 0} icon={<AlertTriangle />} rgb="249,115,22" delay={0.4} onClick={() => navigate('/suppliers')} />
       <StatCard 
         title="Staff Strength" 
         value={

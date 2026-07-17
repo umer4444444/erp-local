@@ -360,7 +360,7 @@ const Employees = () => {
                           if (n.includes('inventory') || n.includes('warehouse') || n.includes('stock') || n.includes('procurement')) return { portal: 'Inventory & Procurement', role: 'inventory', color: '#f59e0b', isAdmin: false };
                           if (n.includes('sales') || n.includes('pos') || n.includes('cashier')) return { portal: 'Sales Terminal', role: 'cashier', color: '#10b981', isAdmin: false };
                           if (n.includes('hr') || n.includes('human') || n.includes('payroll')) return { portal: 'HR & Payroll', role: 'hr', color: '#a855f7', isAdmin: false };
-                          if (n.includes('pharmac')) return { portal: 'Pharmacy Module', role: 'pharmacist', color: '#ec4899', isAdmin: false };
+
                           if (n.includes('finance') || n.includes('revenue') || n.includes('accounting')) return { portal: 'Finance & Revenue', role: 'finance', color: '#0ea5e9', isAdmin: false };
                           if (n.includes('expense')) return { portal: 'Expenses Module', role: 'expenses', color: '#ef4444', isAdmin: false };
                           if (n.includes('eod') || n.includes('operation')) return { portal: 'Operations Hub', role: 'operations', color: '#64748b', isAdmin: false };

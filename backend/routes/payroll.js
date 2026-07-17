@@ -39,7 +39,29 @@ router.post('/run', auth, roleCheck(['admin', 'hr']), audit('payroll'), async (r
     const endDate = new Date(year, month, 0);
 
     for (const emp of employees) {
-      const base = parseFloat(emp.salary || 0);
+      let base = parseFloat(emp.salary || 0);
+      
+      // Calculate hourly salary if salaryType === 'hourly'
+      if (emp.salaryType === 'hourly') {
+        const attendances = await Attendance.findAll({
+          where: {
+            employeeId: emp.id,
+            clockIn: { [Op.between]: [startDate, endDate] }
+          }
+        });
+        let totalHours = 0;
+        for (const att of attendances) {
+          if (att.clockIn && att.clockOut) {
+            const diffMs = new Date(att.clockOut) - new Date(att.clockIn);
+            totalHours += Math.max(0, diffMs / (1000 * 60 * 60));
+          } else if (att.clockIn && !att.clockOut) {
+            // Standard shift cap (9 AM to 11 PM = 14 hours max if forgot clock-out)
+            totalHours += 14;
+          }
+        }
+        base = parseFloat((totalHours * parseFloat(emp.salary || 0)).toFixed(2));
+      }
+
       const allowances = 0;
       let deductions = 0;
       

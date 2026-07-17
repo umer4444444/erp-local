@@ -13,7 +13,7 @@ const Category = sequelize.define('Category', {
     allowNull: false,
   },
   storeType: {
-    type: DataTypes.ENUM('department', 'pharmacy'),
+    type: DataTypes.ENUM('department'),
     defaultValue: 'department',
   },
   description: {

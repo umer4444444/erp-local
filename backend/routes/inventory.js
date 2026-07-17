@@ -240,7 +240,7 @@ router.post('/import', auth, roleCheck(['admin', 'inventory', 'manager']), audit
 
       // Normalize storeType
       const storeTypeRaw = String(item.storeType || item.storetype || 'department').toLowerCase().trim();
-      const storeType = (storeTypeRaw === 'pharmacy') ? 'pharmacy' : 'department';
+      const storeType = 'department';
 
       // Generate or normalize SKU
       const sku = (item.sku || '').trim() || `SKU-${Math.random().toString(36).substr(2, 5).toUpperCase()}`;

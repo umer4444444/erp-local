@@ -366,19 +366,53 @@ const Customers = () => {
                 ) : history.length === 0 ? (
                   <div style={{ textAlign: 'center', padding: 40, color: '#94a3b8', fontWeight: 700 }}>No purchase history yet.</div>
                 ) : (
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-                    {history.map((item, idx) => (
-                      <div key={idx} style={{ padding: '16px 20px', borderRadius: 16, background: '#f8fafc', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                        <div>
-                          <div style={{ fontWeight: 800, color: '#0f172a', fontSize: 14 }}>Sale #{item.id?.slice(0, 8).toUpperCase()}</div>
-                          <div style={{ fontSize: 12, color: '#64748b', fontWeight: 600, marginTop: 2 }}>{new Date(item.createdAt).toLocaleDateString()} · {item.paymentMethod}</div>
-                        </div>
-                        <div style={{ textAlign: 'right' }}>
-                          <div style={{ fontWeight: 900, fontSize: 16, color: '#0f172a' }}>${parseFloat(item.grandTotal).toFixed(2)}</div>
-                          {item.discount > 0 && <div style={{ fontSize: 11, color: '#10b981', fontWeight: 700 }}>-${item.discount} off</div>}
-                        </div>
+                  <div>
+                    {/* Visual Purchase Trend Chart */}
+                    <div style={{ background: '#f8fafc', padding: 20, borderRadius: 20, marginBottom: 24, border: '1px solid #e2e8f0' }}>
+                      <div style={{ fontSize: 13, fontWeight: 800, color: '#0f172a', marginBottom: 16, display: 'flex', alignItems: 'center', gap: 6 }}>
+                        <TrendingUp size={16} color="#0a84ff" /> Purchase History Trend ($)
                       </div>
-                    ))}
+                      <div style={{ display: 'flex', alignItems: 'flex-end', gap: 12, height: 120, paddingBottom: 8, borderBottom: '1px dashed #cbd5e1', overflowX: 'auto' }}>
+                        {history.slice(0, 15).reverse().map((h, i) => {
+                          const maxVal = Math.max(...history.map(x => parseFloat(x.grandTotal || 0)), 1);
+                          const val = parseFloat(h.grandTotal || 0);
+                          const heightPct = Math.max((val / maxVal) * 100, 10);
+                          return (
+                            <div key={i} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', flex: 1, minWidth: 28, gap: 6 }}>
+                              <span style={{ fontSize: 10, fontWeight: 800, color: '#0a84ff' }}>${val.toFixed(0)}</span>
+                              <div 
+                                title={`$${val.toFixed(2)} on ${new Date(h.createdAt).toLocaleDateString()}`}
+                                style={{ 
+                                  width: '100%', 
+                                  height: `${heightPct}%`, 
+                                  background: 'linear-gradient(180deg, #0a84ff, #60a5fa)', 
+                                  borderRadius: '6px 6px 2px 2px',
+                                  transition: 'height 0.4s ease'
+                                }} 
+                              />
+                              <span style={{ fontSize: 9, fontWeight: 600, color: '#94a3b8', whiteSpace: 'nowrap' }}>
+                                {new Date(h.createdAt).toLocaleDateString([], { month: 'short', day: 'numeric' })}
+                              </span>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+                      {history.map((item, idx) => (
+                        <div key={idx} style={{ padding: '16px 20px', borderRadius: 16, background: '#f8fafc', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                          <div>
+                            <div style={{ fontWeight: 800, color: '#0f172a', fontSize: 14 }}>Sale #{item.id?.slice(0, 8).toUpperCase()}</div>
+                            <div style={{ fontSize: 12, color: '#64748b', fontWeight: 600, marginTop: 2 }}>{new Date(item.createdAt).toLocaleDateString()} · {item.paymentMethod}</div>
+                          </div>
+                          <div style={{ textAlign: 'right' }}>
+                            <div style={{ fontWeight: 900, fontSize: 16, color: '#0f172a' }}>${parseFloat(item.grandTotal).toFixed(2)}</div>
+                            {item.discount > 0 && <div style={{ fontSize: 11, color: '#10b981', fontWeight: 700 }}>-${item.discount} off</div>}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
                   </div>
                 )}
               </div>

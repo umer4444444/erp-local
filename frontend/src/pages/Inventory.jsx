@@ -222,7 +222,7 @@ const Inventory = () => {
             const categoryId = categoryMap[categoryRaw.toLowerCase().trim()] || null;
 
             const storeTypeRaw = (item.storetype || item['store type'] || 'department').toLowerCase().trim();
-            const storeType = (storeTypeRaw === 'pharmacy') ? 'pharmacy' : 'department';
+            const storeType = 'department';
 
             items.push({
               name: item.name,
@@ -479,6 +479,7 @@ const Inventory = () => {
                 />
               </th>
               <th style={{ padding: '20px 24px', color: '#64748b', fontSize: 11, fontWeight: 800, textTransform: 'uppercase' }}>Product</th>
+              <th style={{ padding: '20px 24px', color: '#64748b', fontSize: 11, fontWeight: 800, textTransform: 'uppercase' }}>Company Name</th>
               <th style={{ padding: '20px 24px', color: '#64748b', fontSize: 11, fontWeight: 800, textTransform: 'uppercase' }}>Category</th>
               <th style={{ padding: '20px 24px', color: '#64748b', fontSize: 11, fontWeight: 800, textTransform: 'uppercase' }}>Stock</th>
               <th style={{ padding: '20px 24px', color: '#64748b', fontSize: 11, fontWeight: 800, textTransform: 'uppercase' }}>Price</th>
@@ -514,6 +515,11 @@ const Inventory = () => {
                         </span>
                       )}
                     </div>
+                  </td>
+                  <td style={{ padding: '16px 24px' }}>
+                    <span style={{ fontSize: 12, fontWeight: 700, color: '#475569' }}>
+                      {product.manufacturer || 'N/A'}
+                    </span>
                   </td>
                   <td style={{ padding: '16px 24px' }}>
                     <span style={{ fontSize: 12, fontWeight: 700, color: '#0a84ff', background: 'rgba(10,132,255,0.08)', padding: '4px 10px', borderRadius: 8 }}>

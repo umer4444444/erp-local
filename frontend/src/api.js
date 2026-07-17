@@ -150,12 +150,7 @@ export const expenseAPI = {
   updateStatus: (id, status) => API.put(`/expenses/${id}/status`, { status }),
 };
 
-export const pharmacyAPI = {
-  getDrugs: () => API.get('/pharmacy/drugs'),
-  uploadPrescription: (data) => API.post('/pharmacy/prescriptions', data),
-  getPendingPrescriptions: () => API.get('/pharmacy/prescriptions/pending'),
-  verifyPrescription: (id, status) => API.put(`/pharmacy/prescriptions/${id}/verify`, { status }),
-};
+
 
 export const supplierAPI = {
   getAll: () => API.get('/suppliers'),

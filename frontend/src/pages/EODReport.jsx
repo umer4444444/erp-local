@@ -78,9 +78,11 @@ const EODReport = () => {
           </style>
         </head>
         <body onload="window.print();window.close();">
-          <h2>ENTERPRISE ERP</h2>
+          <h2>GlobalAI ERP</h2>
           <p>End of Day Report</p>
-          <div class="row"><strong>Date:</strong> <span>${new Date().toLocaleString()}</span></div>
+          <div class="row"><strong>Date:</strong> <span>${new Date().toLocaleDateString()}</span></div>
+          <div class="row"><strong>Time:</strong> <span>${new Date().toLocaleTimeString()}</span></div>
+          <div class="row"><strong>Shift / Slot:</strong> <span>${activeSession?.id ? 'Shift #' + activeSession.id.slice(0, 8).toUpperCase() : 'Day Shift'}</span></div>
           <div class="divider"></div>
           <div class="row"><span>Cash Expected:</span> <strong>$${summary.cash.toFixed(2)}</strong></div>
           <div class="row"><span>Card Expected:</span> <strong>$${summary.card.toFixed(2)}</strong></div>
@@ -171,7 +173,23 @@ const EODReport = () => {
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 32 }}>
           {/* Sales Summary */}
           <div style={{ background: 'white', borderRadius: 32, padding: 40, border: '1px solid rgba(0,0,0,0.05)' }}>
-            <h2 style={{ fontSize: 20, fontWeight: 900, color: '#0f172a', marginBottom: 32 }}>Expected Totals</h2>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
+              <h2 style={{ fontSize: 20, fontWeight: 900, color: '#0f172a', margin: 0 }}>Expected Totals</h2>
+              <div style={{ padding: '6px 12px', background: '#f1f5f9', borderRadius: 10, fontSize: 11, fontWeight: 800, color: '#0a84ff' }}>
+                {activeSession?.id ? `Shift #${activeSession.id.slice(0, 8).toUpperCase()}` : 'Active Shift'}
+              </div>
+            </div>
+            
+            <div style={{ background: '#f8fafc', padding: 16, borderRadius: 16, marginBottom: 24, fontSize: 13, display: 'flex', flexDirection: 'column', gap: 6 }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', color: '#64748b', fontWeight: 600 }}>
+                <span>Report Date:</span>
+                <strong style={{ color: '#0f172a' }}>{new Date().toLocaleDateString()}</strong>
+              </div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', color: '#64748b', fontWeight: 600 }}>
+                <span>Current Time:</span>
+                <strong style={{ color: '#0f172a' }}>{new Date().toLocaleTimeString()}</strong>
+              </div>
+            </div>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>

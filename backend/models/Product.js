@@ -32,7 +32,7 @@ const Product = sequelize.define('Product', {
     type: DataTypes.UUID,
   },
   storeType: {
-    type: DataTypes.ENUM('department', 'pharmacy'),
+    type: DataTypes.ENUM('department'),
     defaultValue: 'department',
   },
   expiryDate: {

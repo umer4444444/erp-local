@@ -173,7 +173,7 @@ const Manager = () => {
               <h3 style={{ fontSize: 18, fontWeight: 900, color: '#0f172a' }}>Management Tip</h3>
             </div>
             <p style={{ color: '#64748b', fontSize: 14, lineHeight: 1.6, fontWeight: 500 }}>
-              Inventory levels for "Pharmacy" products are currently 15% below threshold. Consider restocking before the weekend rush.
+              Inventory levels for "Tools" products are currently 15% below threshold. Consider restocking before the weekend rush.
             </p>
           </div>
         </div>

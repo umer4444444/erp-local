@@ -22,7 +22,7 @@ const Sidebar = () => {
     { name: 'Shift Audit',   icon: <Briefcase size={18} />,        path: '/shift-audit', roles: ['admin', 'hr'] },
     { name: 'Leave Requests',icon: <Calendar size={18} />,         path: '/leaves',    roles: ['admin', 'manager', 'cashier', 'hr', 'inventory', 'finance', 'staff', 'operations', 'pharmacist', 'expenses'] },
     { name: 'Payroll',       icon: <DollarSign size={18} />,       path: '/payroll',   roles: ['admin', 'hr'] },
-    // { name: 'Pharmacy',      icon: <Pill size={18} />,             path: '/pharmacy',  roles: ['admin', 'pharmacist', 'manager'] },
+
     { name: 'Suppliers',     icon: <Truck size={18} />,            path: '/suppliers', roles: ['admin', 'inventory', 'manager'] },
     { name: 'Delivery',      icon: <Navigation size={18} />,       path: '/delivery',  roles: ['admin', 'manager', 'operations'] },
     { name: 'Users',         icon: <User size={18} />,             path: '/users',     roles: ['admin'] },
@@ -49,7 +49,7 @@ const Sidebar = () => {
           <Zap size={18} fill="currentColor" />
         </motion.div>
         <div>
-          <div style={{ fontSize: 17, fontWeight: 900, color: '#0f172a' }}>SAP <span style={{ color: '#0a84ff' }}>ERP</span></div>
+          <div style={{ fontSize: 17, fontWeight: 900, color: '#0f172a' }}>GlobalAI<span style={{ color: '#0a84ff' }}>ERP</span></div>
           <div style={{ fontSize: 9, fontWeight: 800, color: '#94a3b8', textTransform: 'uppercase' }}>Enterprise v2.0</div>
         </div>
       </div>

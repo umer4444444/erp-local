@@ -82,7 +82,7 @@ const Landing = () => {
           <motion.div whileHover={{ rotate: 180 }} transition={{ duration: 0.4 }} style={{ width: 42, height: 42, borderRadius: 13, background: 'linear-gradient(135deg, #0a84ff, #6366f1)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
             <Zap size={22} fill="white" color="white" />
           </motion.div>
-          <span style={{ fontSize: 22, fontWeight: 900, letterSpacing: '-0.02em' }}>SAP <span style={{ color: '#0a84ff' }}>ERP</span></span>
+          <span style={{ fontSize: 22, fontWeight: 900, letterSpacing: '-0.02em' }}>GlobalAI<span style={{ color: '#0a84ff' }}>ERP</span></span>
         </div>
 
         <div style={{ display: 'flex', gap: 40, alignItems: 'center' }}>
@@ -261,9 +261,9 @@ const Landing = () => {
           <div style={{ width: 32, height: 32, borderRadius: 10, background: 'linear-gradient(135deg, #0a84ff, #6366f1)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
             <Zap size={16} fill="white" color="white" />
           </div>
-          <span style={{ fontWeight: 900, fontSize: 16 }}>SAP ERP</span>
+          <span style={{ fontWeight: 900, fontSize: 16 }}>GlobalAIERP</span>
         </div>
-        <div style={{ color: '#475569', fontSize: 13, fontWeight: 600 }}>© 2026 SAP ERP. Enterprise Edition.</div>
+        <div style={{ color: '#475569', fontSize: 13, fontWeight: 600 }}>© 2026 GlobalAIERP. Enterprise Edition.</div>
         <div style={{ display: 'flex', gap: 24 }}>
           {navLinks.map(l => (
             <span key={l.label} onClick={() => scrollTo(l.id)} style={{ color: '#475569', fontSize: 13, fontWeight: 600, cursor: 'pointer' }}>{l.label}</span>

@@ -86,6 +86,7 @@ const ProductCard = React.memo(({ product, onAdd }) => (
 
 const Sales = () => {
   const navigate = useNavigate();
+  const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
   const [products, setProducts] = useState([]);
   const [cart, setCart] = useState([]);
   const [search, setSearch] = useState('');
@@ -94,10 +95,16 @@ const Sales = () => {
   const [showCustomerDropdown, setShowCustomerDropdown] = useState(false);
   const [customers, setCustomers] = useState([]);
   const [selectedCustomer, setSelectedCustomer] = useState(null);
+  const [walkinName, setWalkinName] = useState('');
+  const [walkinPhone, setWalkinPhone] = useState('');
   const [paymentMethod, setPaymentMethod] = useState('cash');
   const [processing, setProcessing] = useState(false);
   const [receipt, setReceipt] = useState(null);
   const [globalDiscount, setGlobalDiscount] = useState('');
+  const [discountType, setDiscountType] = useState('flat'); // 'flat' or 'percent'
+  const [extraCharges, setExtraCharges] = useState('');
+  const [extraChargeReason, setExtraChargeReason] = useState('');
+  const [creditReason, setCreditReason] = useState('');
   const [taxRate, setTaxRate] = useState('');
   const [cashTendered, setCashTendered] = useState('');
   const [splitAmount, setSplitAmount] = useState({ cash: 0, card: 0 });
@@ -174,6 +181,8 @@ const Sales = () => {
   const selectCustomer = (c) => {
     setSelectedCustomer(c);
     setCustomerSearch(c.name);
+    setWalkinName(c.name);
+    setWalkinPhone(c.phone || '');
     setShowCustomerDropdown(false);
     setCustomerResults([]);
   };
@@ -181,6 +190,8 @@ const Sales = () => {
   const clearCustomer = () => {
     setSelectedCustomer(null);
     setCustomerSearch('');
+    setWalkinName('');
+    setWalkinPhone('');
     setRedeemPoints(false);
   };
 
@@ -234,8 +245,12 @@ const Sales = () => {
   const maxRedeem = Math.min(loyaltyPoints / 100, subtotal * 0.2); // max 20% off via points
   const loyaltyDiscount = redeemPoints ? maxRedeem : 0;
   
-  const taxAmount = (subtotal - parseFloat(globalDiscount || 0) - loyaltyDiscount) * (parseFloat(taxRate || 0) / 100);
-  const total = Math.max(subtotal - parseFloat(globalDiscount || 0) - loyaltyDiscount + taxAmount, 0);
+  const rawDiscountVal = parseFloat(globalDiscount || 0);
+  const calculatedDiscount = discountType === 'percent' ? (subtotal * rawDiscountVal) / 100 : rawDiscountVal;
+
+  const extraChargesVal = parseFloat(extraCharges || 0);
+  const taxAmount = (subtotal - calculatedDiscount - loyaltyDiscount) * (parseFloat(taxRate || 0) / 100);
+  const total = Math.max(subtotal - calculatedDiscount - loyaltyDiscount + taxAmount + extraChargesVal, 0);
   const changeDue = paymentMethod === 'cash' && cashTendered ? Math.max(parseFloat(cashTendered) - total, 0) : 0;
 
   const handleCheckout = async () => {
@@ -244,8 +259,14 @@ const Sales = () => {
     const saleData = {
       items: cart,
       customerId: selectedCustomer?.id,
+      customerName: walkinName || selectedCustomer?.name,
+      customerPhone: walkinPhone || selectedCustomer?.phone,
       totalAmount: subtotal,
-      discount: parseFloat(globalDiscount || 0) + loyaltyDiscount,
+      discount: calculatedDiscount + loyaltyDiscount,
+      discountType,
+      extraCharges: extraChargesVal,
+      extraChargeReason,
+      creditReason,
       tax: taxAmount,
       grandTotal: total,
       paymentMethod,
@@ -253,6 +274,7 @@ const Sales = () => {
       cardAmount: paymentMethod === 'split' ? splitAmount.card : (paymentMethod === 'card' ? total : 0),
       redeemPoints: redeemPoints,
       pointsRedeemed: redeemPoints ? Math.floor(maxRedeem * 100) : 0,
+      cashierName: currentUser.name || 'Staff'
     };
 
     try {
@@ -262,11 +284,17 @@ const Sales = () => {
         setReceipt({ ...saleData, id: 'OFFLINE-' + Date.now(), createdAt: new Date().toISOString(), items: [...cart], changeDue, cashTendered: cashTendered || total, offline: true });
       } else {
         const res = await salesAPI.createSale(saleData);
-        setReceipt({ ...res.data, items: [...cart], changeDue, cashTendered: cashTendered || total });
+        setReceipt({ ...res.data, items: [...cart], changeDue, cashTendered: cashTendered || total, cashierName: currentUser.name || 'Staff' });
       }
       setCart([]);
       setSelectedCustomer(null);
+      setWalkinName('');
+      setWalkinPhone('');
       setGlobalDiscount('');
+      setDiscountType('flat');
+      setExtraCharges('');
+      setExtraChargeReason('');
+      setCreditReason('');
       setTaxRate('');
       setCashTendered('');
       setPaymentMethod('cash');
@@ -293,11 +321,252 @@ const Sales = () => {
     return 'Bronze';
   };
 
-
-
   return (
-    <div style={{ display: 'grid', gridTemplateColumns: '1fr 420px', height: '100vh', background: '#f1f5f9', overflow: 'hidden' }}>
-      {/* Left Side: Product Grid */}
+    <div style={{ display: 'grid', gridTemplateColumns: '480px 1fr', height: '100vh', background: '#f1f5f9', overflow: 'hidden' }}>
+      
+      {/* Left Side: Cart & Checkout (Centered & Larger) */}
+      <div style={{ background: 'white', borderRight: '1px solid #e2e8f0', display: 'flex', flexDirection: 'column', overflowY: 'auto' }}>
+        <div style={{ padding: '24px 28px', borderBottom: '1px solid #f1f5f9' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
+            <h2 style={{ fontSize: 20, fontWeight: 900, color: '#0f172a', margin: 0 }}>Current Cart</h2>
+            <div style={{ fontSize: 12, fontWeight: 800, color: '#0a84ff', background: '#eff6ff', padding: '4px 10px', borderRadius: 8 }}>
+              Cashier: {currentUser.name || 'Staff'}
+            </div>
+          </div>
+          
+          {/* Customer Search & Direct Details Input */}
+          <div style={{ position: 'relative', marginBottom: 12 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '10px 14px', borderRadius: 12, border: `1px solid ${selectedCustomer ? '#0a84ff' : '#e2e8f0'}`, background: selectedCustomer ? '#eff6ff' : 'white' }}>
+              <User size={16} color={selectedCustomer ? '#0a84ff' : '#94a3b8'} />
+              {selectedCustomer ? (
+                <div style={{ flex: 1, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <div>
+                    <div style={{ fontSize: 13, fontWeight: 800, color: '#0f172a' }}>{selectedCustomer.name}</div>
+                    <div style={{ fontSize: 11, color: '#0a84ff', fontWeight: 700, display: 'flex', alignItems: 'center', gap: 4 }}>
+                      <Star size={10} fill="#f59e0b" color="#f59e0b" /> {selectedCustomer.loyaltyPoints || 0} pts · {getTierName(selectedCustomer.loyaltyPoints || 0)}
+                    </div>
+                  </div>
+                  <button onClick={clearCustomer} style={{ border: 'none', background: 'transparent', cursor: 'pointer', color: '#94a3b8' }}><X size={14} /></button>
+                </div>
+              ) : (
+                <input
+                  ref={customerSearchRef}
+                  value={customerSearch}
+                  onChange={e => { setCustomerSearch(e.target.value); setShowCustomerDropdown(true); }}
+                  placeholder="Search existing customer..."
+                  style={{ flex: 1, border: 'none', outline: 'none', fontSize: 13, fontWeight: 600, background: 'transparent' }}
+                />
+              )}
+            </div>
+            <AnimatePresence>
+              {showCustomerDropdown && customerResults.length > 0 && !selectedCustomer && (
+                <motion.div initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}
+                  style={{ position: 'absolute', top: '100%', left: 0, right: 0, background: 'white', border: '1px solid #e2e8f0', borderRadius: 12, boxShadow: '0 8px 24px rgba(0,0,0,0.1)', zIndex: 100, overflow: 'hidden', marginTop: 4 }}>
+                  {customerResults.map(c => {
+                    const tier = getTierInfo(c.loyaltyPoints || 0);
+                    return (
+                      <div key={c.id} onClick={() => selectCustomer(c)}
+                        style={{ padding: '12px 16px', cursor: 'pointer', display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid #f8fafc' }}
+                        onMouseEnter={e => e.currentTarget.style.background = '#f8fafc'}
+                        onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
+                      >
+                        <div>
+                          <div style={{ fontSize: 13, fontWeight: 800, color: '#0f172a' }}>{c.name}</div>
+                          <div style={{ fontSize: 11, color: '#64748b', fontWeight: 600 }}>{c.phone}</div>
+                        </div>
+                        <div style={{ padding: '3px 8px', borderRadius: 6, background: tier.bg, color: tier.color, fontSize: 10, fontWeight: 800 }}>
+                          {getTierName(c.loyaltyPoints || 0)} · {c.loyaltyPoints || 0}pts
+                        </div>
+                      </div>
+                    );
+                  })}
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
+
+          {/* Walk-in Customer Quick Fields */}
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
+            <input 
+              placeholder="Customer Name"
+              value={walkinName}
+              onChange={e => setWalkinName(e.target.value)}
+              style={{ padding: '8px 12px', borderRadius: 8, border: '1px solid #e2e8f0', fontSize: 12, fontWeight: 600 }}
+            />
+            <input 
+              placeholder="Customer Phone"
+              value={walkinPhone}
+              onChange={e => setWalkinPhone(e.target.value)}
+              style={{ padding: '8px 12px', borderRadius: 8, border: '1px solid #e2e8f0', fontSize: 12, fontWeight: 600 }}
+            />
+          </div>
+
+          {/* Loyalty Redemption Toggle */}
+          {selectedCustomer && (selectedCustomer.loyaltyPoints || 0) >= 100 && (
+            <div style={{ marginTop: 10, display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '10px 14px', borderRadius: 12, background: '#fffbeb', border: '1px solid #fde68a' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                <Gift size={14} color="#d97706" />
+                <span style={{ fontSize: 12, fontWeight: 700, color: '#92400e' }}>Redeem {Math.floor(maxRedeem * 100)} pts → -${maxRedeem.toFixed(2)}</span>
+              </div>
+              <button onClick={() => setRedeemPoints(!redeemPoints)} style={{ padding: '4px 12px', borderRadius: 8, border: 'none', cursor: 'pointer', fontWeight: 800, fontSize: 11, background: redeemPoints ? '#d97706' : '#e2e8f0', color: redeemPoints ? 'white' : '#64748b' }}>
+                {redeemPoints ? 'Applied ✓' : 'Apply'}
+              </button>
+            </div>
+          )}
+        </div>
+
+        {/* Cart Items */}
+        <div style={{ flex: 1, padding: '16px 28px', overflowY: 'auto' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+            <AnimatePresence>
+              {cart.map(item => (
+                <motion.div 
+                  layout key={item.productId} initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, scale: 0.9 }}
+                  style={{ display: 'flex', gap: 12, alignItems: 'center', padding: '10px 0', borderBottom: '1px solid #f8fafc' }}
+                >
+                  <div style={{ flex: 1 }}>
+                    <div style={{ fontSize: 14, fontWeight: 800, color: '#0f172a' }}>{item.name}</div>
+                    <div style={{ fontSize: 11, color: '#64748b', fontWeight: 600 }}>${item.price} each</div>
+                  </div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                    <button onClick={() => updateQty(item.productId, -1)} style={{ width: 26, height: 26, borderRadius: 8, border: '1px solid #e2e8f0', background: 'white', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><Minus size={12} /></button>
+                    <span style={{ fontSize: 14, fontWeight: 900, minWidth: 20, textAlign: 'center' }}>{item.quantity}</span>
+                    <button onClick={() => updateQty(item.productId, 1)} style={{ width: 26, height: 26, borderRadius: 8, border: '1px solid #e2e8f0', background: 'white', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><Plus size={12} /></button>
+                  </div>
+                  <div style={{ fontSize: 14, fontWeight: 900, color: '#0f172a', minWidth: 65, textAlign: 'right' }}>${(item.price * item.quantity).toFixed(2)}</div>
+                  <button onClick={() => removeFromCart(item.productId)} style={{ border: 'none', background: 'transparent', color: '#ef4444', cursor: 'pointer' }}>
+                    <Trash size={16} />
+                  </button>
+                </motion.div>
+              ))}
+            </AnimatePresence>
+            {cart.length === 0 && (
+              <div style={{ textAlign: 'center', padding: 40, color: '#94a3b8' }}>
+                <ShoppingCart size={36} style={{ margin: '0 auto 12px', opacity: 0.3 }} />
+                <div style={{ fontWeight: 700 }}>Cart is empty</div>
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Totals & Options */}
+        <div style={{ padding: '20px 28px', background: '#f8fafc', borderTop: '1px solid #e2e8f0', flexShrink: 0 }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 6, color: '#64748b', fontWeight: 700, fontSize: 13 }}>
+            <span>Subtotal</span><span>${subtotal.toFixed(2)}</span>
+          </div>
+          
+          {/* Discount Field with % or $ toggle */}
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+              <span style={{ color: '#64748b', fontWeight: 700, fontSize: 13 }}>Discount</span>
+              <button 
+                onClick={() => setDiscountType(discountType === 'flat' ? 'percent' : 'flat')}
+                style={{ padding: '2px 8px', borderRadius: 6, border: '1px solid #0a84ff', background: '#eff6ff', color: '#0a84ff', fontSize: 11, fontWeight: 800, cursor: 'pointer' }}>
+                {discountType === 'flat' ? '$ Flat' : '% Percent'}
+              </button>
+            </div>
+            <input type="number" min="0" value={globalDiscount} onChange={e => setGlobalDiscount(e.target.value)} 
+              placeholder={discountType === 'flat' ? '0.00' : '0%'}
+              style={{ width: 80, padding: '6px 10px', borderRadius: 8, border: '1px solid #e2e8f0', textAlign: 'right', fontWeight: 700, fontSize: 13 }} />
+          </div>
+
+          {/* Tax Field */}
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
+            <span style={{ color: '#64748b', fontWeight: 700, fontSize: 13 }}>Tax (%)</span>
+            <input type="number" min="0" value={taxRate} onChange={e => setTaxRate(e.target.value)} 
+              style={{ width: 80, padding: '6px 10px', borderRadius: 8, border: '1px solid #e2e8f0', textAlign: 'right', fontWeight: 700, fontSize: 13 }} />
+          </div>
+
+          {/* Extra Charges Field */}
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
+            <span style={{ color: '#64748b', fontWeight: 700, fontSize: 13 }}>Extra Charges ($)</span>
+            <div style={{ display: 'flex', gap: 6 }}>
+              <input type="text" placeholder="Reason (e.g. Delivery)" value={extraChargeReason} onChange={e => setExtraChargeReason(e.target.value)}
+                style={{ width: 130, padding: '6px 8px', borderRadius: 8, border: '1px solid #e2e8f0', fontSize: 11, fontWeight: 600 }} />
+              <input type="number" min="0" value={extraCharges} onChange={e => setExtraCharges(e.target.value)} 
+                style={{ width: 80, padding: '6px 10px', borderRadius: 8, border: '1px solid #e2e8f0', textAlign: 'right', fontWeight: 700, fontSize: 13 }} placeholder="0.00" />
+            </div>
+          </div>
+
+          {redeemPoints && loyaltyDiscount > 0 && (
+            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 6, color: '#d97706', fontWeight: 700, fontSize: 13 }}>
+              <span>Loyalty Redemption</span><span>-${loyaltyDiscount.toFixed(2)}</span>
+            </div>
+          )}
+
+          <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 14, paddingTop: 10, borderTop: '2px solid #e2e8f0' }}>
+            <span style={{ fontSize: 16, fontWeight: 900, color: '#0f172a' }}>Grand Total</span>
+            <span style={{ fontSize: 24, fontWeight: 900, color: '#0a84ff' }}>${total.toFixed(2)}</span>
+          </div>
+
+          {/* Payment Method Selector */}
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr 1fr', gap: 6, marginBottom: 14 }}>
+            {['cash', 'card', 'credit', 'split'].map(method => (
+              <button key={method} onClick={() => setPaymentMethod(method)}
+                style={{ padding: '10px 4px', borderRadius: 10, fontWeight: 800, fontSize: 11, cursor: 'pointer', border: '2px solid', textTransform: 'capitalize',
+                  borderColor: paymentMethod === method ? '#0a84ff' : 'transparent',
+                  background: paymentMethod === method ? '#eff6ff' : 'white',
+                  color: paymentMethod === method ? '#0a84ff' : '#64748b' }}>
+                {method === 'credit' ? 'Udhaar/Credit' : method}
+              </button>
+            ))}
+          </div>
+
+          {paymentMethod === 'credit' && (
+            <div style={{ marginBottom: 14 }}>
+              <label style={{ fontSize: 11, fontWeight: 800, color: '#64748b', display: 'block', marginBottom: 4 }}>CREDIT REASON / NOTES</label>
+              <input 
+                placeholder="e.g. Approved by Project Director, due next week"
+                value={creditReason}
+                onChange={e => setCreditReason(e.target.value)}
+                style={{ width: '100%', padding: '8px 12px', borderRadius: 8, border: '1px solid #e2e8f0', fontSize: 12, fontWeight: 600 }}
+              />
+            </div>
+          )}
+
+          {paymentMethod === 'cash' && (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBottom: 14 }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <span style={{ color: '#64748b', fontWeight: 700, fontSize: 13 }}>Cash Tendered ($)</span>
+                <input type="number" min="0" value={cashTendered} onChange={e => setCashTendered(e.target.value)} 
+                  style={{ width: 110, padding: '8px 10px', borderRadius: 8, border: '1px solid #0a84ff', textAlign: 'right', fontWeight: 800, fontSize: 14 }} placeholder="0.00" />
+              </div>
+              {cashTendered && parseFloat(cashTendered) >= total && (
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: '#dcfce7', padding: 10, borderRadius: 10 }}>
+                  <span style={{ color: '#16a34a', fontWeight: 800, fontSize: 13 }}>Change Due</span>
+                  <span style={{ color: '#16a34a', fontWeight: 900, fontSize: 16 }}>${changeDue.toFixed(2)}</span>
+                </div>
+              )}
+            </div>
+          )}
+
+          {paymentMethod === 'split' && (
+            <div style={{ display: 'flex', gap: 8, marginBottom: 14 }}>
+              <div style={{ flex: 1 }}>
+                <label style={{ fontSize: 11, fontWeight: 800, color: '#64748b', display: 'block', marginBottom: 4 }}>CASH</label>
+                <input type="number" value={splitAmount.cash} onChange={e => setSplitAmount({...splitAmount, cash: parseFloat(e.target.value) || 0})}
+                  style={{ width: '100%', padding: '8px', borderRadius: 8, border: '1px solid #e2e8f0', fontWeight: 700 }} />
+              </div>
+              <div style={{ flex: 1 }}>
+                <label style={{ fontSize: 11, fontWeight: 800, color: '#64748b', display: 'block', marginBottom: 4 }}>CARD</label>
+                <input type="number" value={splitAmount.card} onChange={e => setSplitAmount({...splitAmount, card: parseFloat(e.target.value) || 0})}
+                  style={{ width: '100%', padding: '8px', borderRadius: 8, border: '1px solid #e2e8f0', fontWeight: 700 }} />
+              </div>
+            </div>
+          )}
+
+          <button 
+            disabled={processing || cart.length === 0}
+            onClick={handleCheckout}
+            style={{ width: '100%', padding: '16px', borderRadius: 16, background: '#0f172a', color: 'white',
+              fontSize: 16, fontWeight: 900, border: 'none', cursor: 'pointer', opacity: processing ? 0.7 : 1,
+              display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10 }}>
+            {processing ? 'Processing...' : `Complete Payment`} <ArrowRight size={18} />
+          </button>
+        </div>
+      </div>
+
+      {/* Right Side: Product Grid */}
       <div style={{ padding: 40, overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: 32 }}>
         <header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <div>
@@ -345,193 +614,6 @@ const Sales = () => {
         </div>
       </div>
 
-      {/* Right Side: Cart */}
-      <div style={{ background: 'white', borderLeft: '1px solid #e2e8f0', display: 'flex', flexDirection: 'column', overflowY: 'auto' }}>
-        <div style={{ padding: '24px 28px', borderBottom: '1px solid #f1f5f9' }}>
-          <h2 style={{ fontSize: 18, fontWeight: 900, color: '#0f172a', marginBottom: 16 }}>Current Cart</h2>
-          
-          {/* Customer Picker */}
-          <div style={{ position: 'relative' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '10px 14px', borderRadius: 12, border: `1px solid ${selectedCustomer ? '#0a84ff' : '#e2e8f0'}`, background: selectedCustomer ? '#eff6ff' : 'white' }}>
-              <User size={16} color={selectedCustomer ? '#0a84ff' : '#94a3b8'} />
-              {selectedCustomer ? (
-                <div style={{ flex: 1, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <div>
-                    <div style={{ fontSize: 13, fontWeight: 800, color: '#0f172a' }}>{selectedCustomer.name}</div>
-                    <div style={{ fontSize: 11, color: '#0a84ff', fontWeight: 700, display: 'flex', alignItems: 'center', gap: 4 }}>
-                      <Star size={10} fill="#f59e0b" color="#f59e0b" /> {selectedCustomer.loyaltyPoints || 0} pts · {getTierName(selectedCustomer.loyaltyPoints || 0)}
-                    </div>
-                  </div>
-                  <button onClick={clearCustomer} style={{ border: 'none', background: 'transparent', cursor: 'pointer', color: '#94a3b8' }}><X size={14} /></button>
-                </div>
-              ) : (
-                <input
-                  ref={customerSearchRef}
-                  value={customerSearch}
-                  onChange={e => { setCustomerSearch(e.target.value); setShowCustomerDropdown(true); }}
-                  placeholder="Search customer..."
-                  style={{ flex: 1, border: 'none', outline: 'none', fontSize: 13, fontWeight: 600, background: 'transparent' }}
-                />
-              )}
-            </div>
-            <AnimatePresence>
-              {showCustomerDropdown && customerResults.length > 0 && !selectedCustomer && (
-                <motion.div initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}
-                  style={{ position: 'absolute', top: '100%', left: 0, right: 0, background: 'white', border: '1px solid #e2e8f0', borderRadius: 12, boxShadow: '0 8px 24px rgba(0,0,0,0.1)', zIndex: 100, overflow: 'hidden', marginTop: 4 }}>
-                  {customerResults.map(c => {
-                    const tier = getTierInfo(c.loyaltyPoints || 0);
-                    return (
-                      <div key={c.id} onClick={() => selectCustomer(c)}
-                        style={{ padding: '12px 16px', cursor: 'pointer', display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid #f8fafc' }}
-                        onMouseEnter={e => e.currentTarget.style.background = '#f8fafc'}
-                        onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
-                      >
-                        <div>
-                          <div style={{ fontSize: 13, fontWeight: 800, color: '#0f172a' }}>{c.name}</div>
-                          <div style={{ fontSize: 11, color: '#64748b', fontWeight: 600 }}>{c.phone}</div>
-                        </div>
-                        <div style={{ padding: '3px 8px', borderRadius: 6, background: tier.bg, color: tier.color, fontSize: 10, fontWeight: 800 }}>
-                          {getTierName(c.loyaltyPoints || 0)} · {c.loyaltyPoints || 0}pts
-                        </div>
-                      </div>
-                    );
-                  })}
-                </motion.div>
-              )}
-            </AnimatePresence>
-          </div>
-
-          {/* Loyalty Redemption Toggle */}
-          {selectedCustomer && (selectedCustomer.loyaltyPoints || 0) >= 100 && (
-            <div style={{ marginTop: 10, display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '10px 14px', borderRadius: 12, background: '#fffbeb', border: '1px solid #fde68a' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                <Gift size={14} color="#d97706" />
-                <span style={{ fontSize: 12, fontWeight: 700, color: '#92400e' }}>Redeem {Math.floor(maxRedeem * 100)} pts → -${maxRedeem.toFixed(2)}</span>
-              </div>
-              <button onClick={() => setRedeemPoints(!redeemPoints)} style={{ padding: '4px 12px', borderRadius: 8, border: 'none', cursor: 'pointer', fontWeight: 800, fontSize: 11, background: redeemPoints ? '#d97706' : '#e2e8f0', color: redeemPoints ? 'white' : '#64748b' }}>
-                {redeemPoints ? 'Applied ✓' : 'Apply'}
-              </button>
-            </div>
-          )}
-        </div>
-
-        {/* Cart Items */}
-        <div style={{ flex: 1, padding: '16px 28px', overflowY: 'auto' }}>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-            <AnimatePresence>
-              {cart.map(item => (
-                <motion.div 
-                  layout key={item.productId} initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, scale: 0.9 }}
-                  style={{ display: 'flex', gap: 12, alignItems: 'center', padding: '10px 0', borderBottom: '1px solid #f8fafc' }}
-                >
-                  <div style={{ flex: 1 }}>
-                    <div style={{ fontSize: 13, fontWeight: 800, color: '#0f172a' }}>{item.name}</div>
-                    <div style={{ fontSize: 11, color: '#64748b', fontWeight: 600 }}>${item.price} each</div>
-                  </div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                    <button onClick={() => updateQty(item.productId, -1)} style={{ width: 26, height: 26, borderRadius: 8, border: '1px solid #e2e8f0', background: 'white', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><Minus size={12} /></button>
-                    <span style={{ fontSize: 14, fontWeight: 900, minWidth: 20, textAlign: 'center' }}>{item.quantity}</span>
-                    <button onClick={() => updateQty(item.productId, 1)} style={{ width: 26, height: 26, borderRadius: 8, border: '1px solid #e2e8f0', background: 'white', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><Plus size={12} /></button>
-                  </div>
-                  <div style={{ fontSize: 14, fontWeight: 900, color: '#0f172a', minWidth: 60, textAlign: 'right' }}>${(item.price * item.quantity).toFixed(2)}</div>
-                  <button onClick={() => removeFromCart(item.productId)} style={{ border: 'none', background: 'transparent', color: '#ef4444', cursor: 'pointer' }}>
-                    <Trash size={16} />
-                  </button>
-                </motion.div>
-              ))}
-            </AnimatePresence>
-            {cart.length === 0 && (
-              <div style={{ textAlign: 'center', padding: 40, color: '#94a3b8' }}>
-                <ShoppingCart size={32} style={{ margin: '0 auto 12px', opacity: 0.3 }} />
-                <div style={{ fontWeight: 700 }}>Cart is empty</div>
-              </div>
-            )}
-          </div>
-        </div>
-
-        {/* Totals & Payment */}
-        <div style={{ padding: '20px 28px', background: '#f8fafc', borderTop: '1px solid #e2e8f0', flexShrink: 0 }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 6, color: '#64748b', fontWeight: 700, fontSize: 13 }}>
-            <span>Subtotal</span><span>${subtotal.toFixed(2)}</span>
-          </div>
-          
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
-            <span style={{ color: '#64748b', fontWeight: 700, fontSize: 13 }}>Discount ($)</span>
-            <input type="number" min="0" value={globalDiscount} onChange={e => setGlobalDiscount(e.target.value)} 
-              style={{ width: 80, padding: '6px 10px', borderRadius: 8, border: '1px solid #e2e8f0', textAlign: 'right', fontWeight: 700, fontSize: 13 }} />
-          </div>
-
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
-            <span style={{ color: '#64748b', fontWeight: 700, fontSize: 13 }}>Tax (%)</span>
-            <input type="number" min="0" value={taxRate} onChange={e => setTaxRate(e.target.value)} 
-              style={{ width: 80, padding: '6px 10px', borderRadius: 8, border: '1px solid #e2e8f0', textAlign: 'right', fontWeight: 700, fontSize: 13 }} />
-          </div>
-
-          {redeemPoints && loyaltyDiscount > 0 && (
-            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 6, color: '#d97706', fontWeight: 700, fontSize: 13 }}>
-              <span>Loyalty Redemption</span><span>-${loyaltyDiscount.toFixed(2)}</span>
-            </div>
-          )}
-
-          <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 16, paddingTop: 10, borderTop: '2px solid #e2e8f0' }}>
-            <span style={{ fontSize: 16, fontWeight: 900, color: '#0f172a' }}>Grand Total</span>
-            <span style={{ fontSize: 24, fontWeight: 900, color: '#0a84ff' }}>${total.toFixed(2)}</span>
-          </div>
-
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 8, marginBottom: 16 }}>
-            {['cash', 'card', 'split'].map(method => (
-              <button key={method} onClick={() => setPaymentMethod(method)}
-                style={{ padding: '10px', borderRadius: 10, fontWeight: 800, fontSize: 11, cursor: 'pointer', border: '2px solid', textTransform: 'capitalize',
-                  borderColor: paymentMethod === method ? '#0a84ff' : 'transparent',
-                  background: paymentMethod === method ? '#eff6ff' : 'white',
-                  color: paymentMethod === method ? '#0a84ff' : '#64748b' }}>
-                {method}
-              </button>
-            ))}
-          </div>
-
-          {paymentMethod === 'cash' && (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBottom: 14 }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <span style={{ color: '#64748b', fontWeight: 700, fontSize: 13 }}>Cash Tendered ($)</span>
-                <input type="number" min="0" value={cashTendered} onChange={e => setCashTendered(e.target.value)} 
-                  style={{ width: 110, padding: '8px 10px', borderRadius: 8, border: '1px solid #0a84ff', textAlign: 'right', fontWeight: 800, fontSize: 14 }} placeholder="0.00" />
-              </div>
-              {cashTendered && parseFloat(cashTendered) >= total && (
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: '#dcfce7', padding: 10, borderRadius: 10 }}>
-                  <span style={{ color: '#16a34a', fontWeight: 800, fontSize: 13 }}>Change Due</span>
-                  <span style={{ color: '#16a34a', fontWeight: 900, fontSize: 16 }}>${changeDue.toFixed(2)}</span>
-                </div>
-              )}
-            </div>
-          )}
-
-          {paymentMethod === 'split' && (
-            <div style={{ display: 'flex', gap: 8, marginBottom: 14 }}>
-              <div style={{ flex: 1 }}>
-                <label style={{ fontSize: 11, fontWeight: 800, color: '#64748b', display: 'block', marginBottom: 4 }}>CASH</label>
-                <input type="number" value={splitAmount.cash} onChange={e => setSplitAmount({...splitAmount, cash: parseFloat(e.target.value) || 0})}
-                  style={{ width: '100%', padding: '8px', borderRadius: 8, border: '1px solid #e2e8f0', fontWeight: 700 }} />
-              </div>
-              <div style={{ flex: 1 }}>
-                <label style={{ fontSize: 11, fontWeight: 800, color: '#64748b', display: 'block', marginBottom: 4 }}>CARD</label>
-                <input type="number" value={splitAmount.card} onChange={e => setSplitAmount({...splitAmount, card: parseFloat(e.target.value) || 0})}
-                  style={{ width: '100%', padding: '8px', borderRadius: 8, border: '1px solid #e2e8f0', fontWeight: 700 }} />
-              </div>
-            </div>
-          )}
-
-          <button 
-            disabled={processing || cart.length === 0}
-            onClick={handleCheckout}
-            style={{ width: '100%', padding: '16px', borderRadius: 16, background: '#0f172a', color: 'white',
-              fontSize: 16, fontWeight: 900, border: 'none', cursor: 'pointer', opacity: processing ? 0.7 : 1,
-              display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10 }}>
-            {processing ? 'Processing...' : `Complete Payment`} <ArrowRight size={18} />
-          </button>
-        </div>
-      </div>
-
       {/* Receipt Modal */}
       {receipt && (
         <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20 }}>
@@ -547,17 +629,19 @@ const Sales = () => {
             )}
             <div id="printable-invoice" style={{ flex: 1, overflowY: 'auto', paddingRight: 8 }}>
               <div style={{ textAlign: 'center', marginBottom: 24 }}>
-                <h2 style={{ fontSize: 28, fontWeight: 900, color: '#0f172a', margin: 0 }}>ENTERPRISE ERP</h2>
+                <h2 style={{ fontSize: 28, fontWeight: 900, color: '#0f172a', margin: 0 }}>GlobalAI ERP</h2>
                 <p style={{ color: '#64748b', fontWeight: 600, fontSize: 13, margin: '4px 0 0 0' }}>Official Sales Invoice</p>
                 <div style={{ marginTop: 12, fontSize: 12, color: '#94a3b8', fontWeight: 500 }}>
                   Txn: {receipt.id?.split('-')[0]?.toUpperCase()}<br/>
+                  Cashier: {receipt.cashierName || 'Staff'}<br/>
                   Date: {new Date(receipt.createdAt).toLocaleString()}
                 </div>
               </div>
               
-              {receipt.customerId && (
-                <div style={{ marginBottom: 12, padding: '8px 16px', background: '#f8fafc', borderRadius: 10, fontSize: 12, fontWeight: 700, color: '#64748b', display: 'flex', alignItems: 'center', gap: 6 }}>
-                  <User size={12} /> Customer sale recorded
+              {(receipt.customerName || receipt.customerPhone || receipt.customerId) && (
+                <div style={{ marginBottom: 12, padding: '8px 16px', background: '#f8fafc', borderRadius: 10, fontSize: 12, fontWeight: 700, color: '#64748b', display: 'flex', flexDirection: 'column', gap: 2 }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}><User size={12} /> {receipt.customerName || 'Customer'}</div>
+                  {receipt.customerPhone && <div style={{ fontSize: 11, color: '#94a3b8' }}>Phone: {receipt.customerPhone}</div>}
                 </div>
               )}
 
@@ -580,11 +664,16 @@ const Sales = () => {
 
               <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBottom: 24 }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 14, color: '#64748b', fontWeight: 600 }}>
-                  <span>Subtotal</span><span>${receipt.totalAmount}</span>
+                  <span>Subtotal</span><span>${parseFloat(receipt.totalAmount || 0).toFixed(2)}</span>
                 </div>
                 {parseFloat(receipt.discount) > 0 && (
                   <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 14, color: '#ef4444', fontWeight: 700 }}>
                     <span>Discount</span><span>-${parseFloat(receipt.discount).toFixed(2)}</span>
+                  </div>
+                )}
+                {parseFloat(receipt.extraCharges) > 0 && (
+                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 14, color: '#0a84ff', fontWeight: 700 }}>
+                    <span>Extra ({receipt.extraChargeReason || 'Charges'})</span><span>+${parseFloat(receipt.extraCharges).toFixed(2)}</span>
                   </div>
                 )}
                 {parseFloat(receipt.tax) > 0 && (
@@ -593,24 +682,30 @@ const Sales = () => {
                   </div>
                 )}
                 <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 18, color: '#0f172a', fontWeight: 900, marginTop: 8, paddingTop: 8, borderTop: '1px solid #f1f5f9' }}>
-                  <span>Grand Total</span><span>${receipt.grandTotal}</span>
+                  <span>Grand Total</span><span>${parseFloat(receipt.grandTotal || 0).toFixed(2)}</span>
                 </div>
               </div>
 
               <div style={{ background: '#f8fafc', padding: 16, borderRadius: 16, fontSize: 13 }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 4, fontWeight: 600 }}>
                   <span style={{ color: '#64748b' }}>Payment Method</span>
-                  <span style={{ textTransform: 'capitalize', color: '#0f172a' }}>{receipt.paymentMethod}</span>
+                  <span style={{ textTransform: 'capitalize', color: '#0f172a' }}>{receipt.paymentMethod === 'credit' ? 'Udhaar / Credit' : receipt.paymentMethod}</span>
                 </div>
+                {receipt.creditReason && (
+                  <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 4, fontWeight: 600, fontSize: 12 }}>
+                    <span style={{ color: '#64748b' }}>Credit Reason</span>
+                    <span style={{ color: '#d97706' }}>{receipt.creditReason}</span>
+                  </div>
+                )}
                 {receipt.paymentMethod === 'cash' && (
                   <>
                     <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 4, fontWeight: 600 }}>
                       <span style={{ color: '#64748b' }}>Tendered</span>
-                      <span style={{ color: '#0f172a' }}>${parseFloat(receipt.cashTendered).toFixed(2)}</span>
+                      <span style={{ color: '#0f172a' }}>${parseFloat(receipt.cashTendered || 0).toFixed(2)}</span>
                     </div>
                     <div style={{ display: 'flex', justifyContent: 'space-between', fontWeight: 800 }}>
                       <span style={{ color: '#64748b' }}>Change</span>
-                      <span style={{ color: '#16a34a' }}>${parseFloat(receipt.changeDue).toFixed(2)}</span>
+                      <span style={{ color: '#16a34a' }}>${parseFloat(receipt.changeDue || 0).toFixed(2)}</span>
                     </div>
                   </>
                 )}

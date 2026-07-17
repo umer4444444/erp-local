@@ -21,9 +21,7 @@ const Leave = require('./Leave');
 const LeaveBalance = require('./LeaveBalance');
 const PayrollRun = require('./PayrollRun');
 const Payslip = require('./Payslip');
-const Drug = require('./Drug');
-const Prescription = require('./Prescription');
-const PrescriptionItem = require('./PrescriptionItem');
+
 const Supplier = require('./Supplier');
 const PurchaseOrder = require('./PurchaseOrder');
 const AuditLog = require('./AuditLog');
@@ -110,18 +108,6 @@ Payslip.belongsTo(Employee, { foreignKey: 'employeeId' });
 User.hasMany(Expense, { foreignKey: 'userId' });
 Expense.belongsTo(User, { foreignKey: 'userId' });
 
-// Pharmacy Associations (Day 11)
-Product.hasOne(Drug, { foreignKey: 'productId' });
-Drug.belongsTo(Product, { foreignKey: 'productId' });
-
-Customer.hasMany(Prescription, { foreignKey: 'customerId' });
-Prescription.belongsTo(Customer, { foreignKey: 'customerId' });
-
-Prescription.hasMany(PrescriptionItem, { as: 'Items', foreignKey: 'prescriptionId' });
-PrescriptionItem.belongsTo(Prescription, { foreignKey: 'prescriptionId' });
-
-Drug.hasMany(PrescriptionItem, { foreignKey: 'drugId' });
-PrescriptionItem.belongsTo(Drug, { foreignKey: 'drugId' });
 
 // Supplier Associations (Day 12)
 Supplier.hasMany(PurchaseOrder, { foreignKey: 'supplierId' });
@@ -184,9 +170,7 @@ module.exports = {
   LeaveBalance,
   PayrollRun,
   Payslip,
-  Drug,
-  Prescription,
-  PrescriptionItem,
+
   Supplier,
   PurchaseOrder,
   AuditLog,

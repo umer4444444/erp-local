@@ -50,6 +50,26 @@ const Sale = sequelize.define('Sale', {
   voidReason: {
     type: DataTypes.STRING,
   },
+  discountType: {
+    type: DataTypes.ENUM('flat', 'percent'),
+    defaultValue: 'flat',
+  },
+  extraCharges: {
+    type: DataTypes.DECIMAL(12, 2),
+    defaultValue: 0,
+  },
+  extraChargeReason: {
+    type: DataTypes.STRING,
+  },
+  creditReason: {
+    type: DataTypes.STRING,
+  },
+  customerName: {
+    type: DataTypes.STRING,
+  },
+  customerPhone: {
+    type: DataTypes.STRING,
+  },
   notes: {
     type: DataTypes.TEXT,
   },

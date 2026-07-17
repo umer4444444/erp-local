@@ -5,7 +5,7 @@ export const getDefaultRoute = (role) => {
     case 'cashier': return '/sales';
     case 'hr': return '/hr';
     case 'inventory': return '/inventory';
-    case 'pharmacist': return '/pharmacy';
+
     case 'expenses': return '/expenses';
     case 'finance': return '/revenue';
     case 'operations': return '/eod';

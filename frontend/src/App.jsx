@@ -16,7 +16,7 @@ import Attendance from './pages/Attendance';
 import Leaves from './pages/Leaves';
 import Payroll from './pages/Payroll';
 import ShiftAudit from './pages/ShiftAudit';
-// import Pharmacy from './pages/Pharmacy';
+
 import Suppliers from './pages/Suppliers';
 import EODReport from './pages/EODReport';
 import Expenses from './pages/Expenses';
@@ -78,7 +78,7 @@ function AppContent() {
               <Route path="/shift-audit" element={<PrivateRoute roles={['admin', 'hr']}><PageTransition><ShiftAudit /></PageTransition></PrivateRoute>} />
               <Route path="/leaves" element={<PrivateRoute roles={['admin', 'manager', 'cashier', 'hr', 'inventory', 'finance', 'staff', 'operations', 'pharmacist', 'expenses']}><PageTransition><Leaves /></PageTransition></PrivateRoute>} />
               <Route path="/payroll" element={<PrivateRoute roles={['admin', 'hr']}><PageTransition><Payroll /></PageTransition></PrivateRoute>} />
-              {/* <Route path="/pharmacy" element={<PrivateRoute roles={['admin', 'pharmacist', 'manager']}><PageTransition><Pharmacy /></PageTransition></PrivateRoute>} /> */}
+
               <Route path="/suppliers" element={<PrivateRoute roles={['admin', 'inventory', 'manager']}><PageTransition><Suppliers /></PageTransition></PrivateRoute>} />
               <Route path="/customers" element={<PrivateRoute><PageTransition><Customers /></PageTransition></PrivateRoute>} />
               <Route path="/expenses" element={<PrivateRoute roles={['admin', 'manager', 'expenses']}><PageTransition><Expenses /></PageTransition></PrivateRoute>} />
