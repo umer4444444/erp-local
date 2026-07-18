@@ -24,12 +24,18 @@ router.get('/revenue', auth, roleCheck(['admin', 'manager']), async (req, res) =
 // GET /api/reports/pnl?month=&year=
 router.get('/pnl', auth, roleCheck(['admin', 'manager']), async (req, res) => {
   try {
-    const { month, year } = req.query;
-    const currentMonth = parseInt(month || new Date().getMonth() + 1);
-    const currentYear = parseInt(year || new Date().getFullYear());
+    const { from, to, month, year } = req.query;
+    let startDate, endDate;
 
-    const startDate = new Date(currentYear, currentMonth - 1, 1);
-    const endDate = new Date(currentYear, currentMonth, 0, 23, 59, 59);
+    if (from && to) {
+      startDate = new Date(from);
+      endDate = new Date(to + 'T23:59:59');
+    } else {
+      const currentMonth = parseInt(month || new Date().getMonth() + 1);
+      const currentYear = parseInt(year || new Date().getFullYear());
+      startDate = new Date(currentYear, currentMonth - 1, 1);
+      endDate = new Date(currentYear, currentMonth, 0, 23, 59, 59);
+    }
 
     const [sales, expenses] = await Promise.all([
       Sale.findAll({

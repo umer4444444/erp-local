@@ -37,8 +37,8 @@ const Revenue = () => {
 
   const [from, setFrom] = useState(firstDay);
   const [to, setTo] = useState(todayStr);
-  const [pnlMonth, setPnlMonth] = useState(today.getMonth() + 1);
-  const [pnlYear, setPnlYear] = useState(today.getFullYear());
+  const [pnlFrom, setPnlFrom] = useState(firstDay);
+  const [pnlTo, setPnlTo] = useState(todayStr);
 
   const [revData, setRevData] = useState(null);
   const [pnl, setPnl] = useState(null);
@@ -52,7 +52,7 @@ const Revenue = () => {
     try {
       const [revRes, pnlRes, topRes, spRes, dayRes] = await Promise.all([
         reportsAPI.getRevenue({ from, to }),
-        reportsAPI.getPnL({ month: pnlMonth, year: pnlYear }),
+        reportsAPI.getPnL({ from: pnlFrom, to: pnlTo }),
         reportsAPI.getTopProducts(8),
         reportsAPI.getSalesperson(),
         reportsAPI.getDaily(),
@@ -67,7 +67,7 @@ const Revenue = () => {
     } finally {
       setLoading(false);
     }
-  }, [from, to, pnlMonth, pnlYear]);
+  }, [from, to, pnlFrom, pnlTo]);
 
   useEffect(() => { fetchAll(); }, [fetchAll]);
 
@@ -173,14 +173,11 @@ const Revenue = () => {
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 28 }}>
                 <h2 style={{ fontSize: 20, fontWeight: 900, color: '#0f172a' }}>P&amp;L Statement</h2>
                 <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-                  <select value={pnlMonth} onChange={e => setPnlMonth(Number(e.target.value))}
-                    style={{ padding: '6px 10px', borderRadius: 10, border: '1.5px solid #e2e8f0', fontFamily: "'Outfit', sans-serif", fontWeight: 700, outline: 'none' }}>
-                    {['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'].map((m, i) => (
-                      <option key={i} value={i + 1}>{m}</option>
-                    ))}
-                  </select>
-                  <input type="number" value={pnlYear} onChange={e => setPnlYear(Number(e.target.value))}
-                    style={{ width: 70, padding: '6px 10px', borderRadius: 10, border: '1.5px solid #e2e8f0', fontFamily: "'Outfit', sans-serif", fontWeight: 700, outline: 'none' }} />
+                  <input type="date" value={pnlFrom} onChange={e => setPnlFrom(e.target.value)}
+                    style={{ padding: '6px 10px', borderRadius: 10, border: '1.5px solid #e2e8f0', fontFamily: "'Outfit', sans-serif", fontWeight: 700, outline: 'none' }} />
+                  <span style={{ color: '#94a3b8', fontWeight: 800 }}>to</span>
+                  <input type="date" value={pnlTo} onChange={e => setPnlTo(e.target.value)}
+                    style={{ padding: '6px 10px', borderRadius: 10, border: '1.5px solid #e2e8f0', fontFamily: "'Outfit', sans-serif", fontWeight: 700, outline: 'none' }} />
                 </div>
               </div>
               {pnl && (
