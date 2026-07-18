@@ -32,7 +32,7 @@ const Sale = sequelize.define('Sale', {
     defaultValue: 0,
   },
   paymentMethod: {
-    type: DataTypes.ENUM('cash', 'card', 'split'),
+    type: DataTypes.ENUM('cash', 'card', 'credit', 'split'),
     defaultValue: 'cash',
   },
   cashAmount: {
