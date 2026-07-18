@@ -1,5 +1,5 @@
-require('dotenv').config({ path: require('path').resolve(__dirname, 'backend/.env') });
-const { sequelize, User } = require('./backend/models');
+require('dotenv').config();
+const { sequelize, User } = require('./models');
 
 async function migrateAll() {
   const queryInterface = sequelize.getQueryInterface();
