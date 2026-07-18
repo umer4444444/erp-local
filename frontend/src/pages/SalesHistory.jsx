@@ -75,7 +75,7 @@ const SalesHistory = () => {
             <p style="color:#64748b; font-weight:600; font-size:13px; margin:4px 0 0 0;">Official Sales Invoice</p>
             <div style="margin-top:12px; font-size:12px; color:#94a3b8; font-weight:500;">
               Txn: ${sale.id.slice(0, 8).toUpperCase()}<br/>
-              Cashier: ${sale.cashierName || 'Staff'}<br/>
+              Cashier: ${sale.cashierName || sale.User?.name || 'Staff'}<br/>
               Date: ${new Date(sale.createdAt).toLocaleString()}
             </div>
           </div>

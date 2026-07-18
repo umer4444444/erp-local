@@ -113,6 +113,31 @@ const Sales = () => {
   const [pendingCount, setPendingCount] = useState(0);
   const [syncingOffline, setSyncingOffline] = useState(false);
 
+  const [leftPanelWidth, setLeftPanelWidth] = useState(480);
+  const isDragging = useRef(false);
+
+  const handleMouseMove = useCallback((e) => {
+    if (!isDragging.current) return;
+    let newWidth = e.clientX;
+    if (newWidth < 350) newWidth = 350;
+    if (newWidth > window.innerWidth * 0.7) newWidth = window.innerWidth * 0.7;
+    setLeftPanelWidth(newWidth);
+  }, []);
+
+  const handleMouseUp = useCallback(() => {
+    isDragging.current = false;
+    document.body.style.cursor = 'default';
+  }, []);
+
+  useEffect(() => {
+    window.addEventListener('mousemove', handleMouseMove);
+    window.addEventListener('mouseup', handleMouseUp);
+    return () => {
+      window.removeEventListener('mousemove', handleMouseMove);
+      window.removeEventListener('mouseup', handleMouseUp);
+    };
+  }, [handleMouseMove, handleMouseUp]);
+
   const searchRef = useRef();
   const customerSearchRef = useRef();
 
@@ -322,7 +347,7 @@ const Sales = () => {
   };
 
   return (
-    <div style={{ display: 'grid', gridTemplateColumns: '480px 1fr', height: '100vh', background: '#f1f5f9', overflow: 'hidden' }}>
+    <div style={{ display: 'grid', gridTemplateColumns: `${leftPanelWidth}px 6px 1fr`, height: '100vh', background: '#f1f5f9', overflow: 'hidden' }}>
       
       {/* Left Side: Cart & Checkout (Centered & Larger) */}
       <div style={{ background: 'white', borderRight: '1px solid #e2e8f0', display: 'flex', flexDirection: 'column', overflowY: 'auto' }}>
@@ -504,10 +529,10 @@ const Sales = () => {
           </div>
 
           {/* Payment Method Selector */}
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr 1fr', gap: 6, marginBottom: 14 }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, minmax(0, 1fr))', gap: 6, marginBottom: 14 }}>
             {['cash', 'card', 'credit', 'split'].map(method => (
               <button key={method} onClick={() => setPaymentMethod(method)}
-                style={{ padding: '10px 4px', borderRadius: 10, fontWeight: 800, fontSize: 11, cursor: 'pointer', border: '2px solid', textTransform: 'capitalize',
+                style={{ padding: '10px 4px', borderRadius: 10, fontWeight: 800, fontSize: 11, cursor: 'pointer', border: '2px solid', textTransform: 'capitalize', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
                   borderColor: paymentMethod === method ? '#0a84ff' : 'transparent',
                   background: paymentMethod === method ? '#eff6ff' : 'white',
                   color: paymentMethod === method ? '#0a84ff' : '#64748b' }}>
@@ -568,6 +593,16 @@ const Sales = () => {
             {processing ? 'Processing...' : `Complete Payment`} <ArrowRight size={18} />
           </button>
         </div>
+      </div>
+
+      {/* Dragger */}
+      <div 
+        onMouseDown={(e) => { e.preventDefault(); isDragging.current = true; document.body.style.cursor = 'col-resize'; }}
+        style={{ cursor: 'col-resize', background: '#cbd5e1', width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 10, transition: 'background 0.2s' }}
+        onMouseEnter={(e) => e.currentTarget.style.background = '#94a3b8'}
+        onMouseLeave={(e) => e.currentTarget.style.background = '#cbd5e1'}
+      >
+        <div style={{ width: 2, height: 24, background: 'white', borderRadius: 2 }} />
       </div>
 
       {/* Right Side: Product Grid */}
