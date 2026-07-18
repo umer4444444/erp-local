@@ -1,3 +1,4 @@
+require('dotenv').config({ path: require('path').resolve(__dirname, 'backend/.env') });
 const { sequelize, Sale } = require('./backend/models');
 
 async function fixEnum() {
