@@ -26,13 +26,15 @@ router.get('/pnl', auth, roleCheck(['admin', 'manager']), async (req, res) => {
   try {
     const { from, to, month, year } = req.query;
     let startDate, endDate;
+    let currentMonth = parseInt(month || new Date().getMonth() + 1);
+    let currentYear = parseInt(year || new Date().getFullYear());
 
     if (from && to) {
       startDate = new Date(from);
       endDate = new Date(to + 'T23:59:59');
+      currentMonth = startDate.getMonth() + 1;
+      currentYear = startDate.getFullYear();
     } else {
-      const currentMonth = parseInt(month || new Date().getMonth() + 1);
-      const currentYear = parseInt(year || new Date().getFullYear());
       startDate = new Date(currentYear, currentMonth - 1, 1);
       endDate = new Date(currentYear, currentMonth, 0, 23, 59, 59);
     }
