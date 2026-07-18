@@ -66,7 +66,7 @@ router.post('/discount', auth, async (req, res) => {
 router.post('/', auth, async (req, res) => {
   const transaction = await sequelize.transaction();
   try {
-    const { items, customerId, totalAmount, discount, tax, grandTotal, paymentMethod, cashAmount, cardAmount, discountType, extraCharges, extraChargeReason, creditReason, customerName, customerPhone, notes } = req.body;
+    const { items, customerId, totalAmount, discount, tax, grandTotal, paymentMethod, cashAmount, cardAmount, discountType, extraCharges, extraChargeReason, creditReason, customerName, customerPhone, cashierName, notes } = req.body;
     
     const sale = await Sale.create({
       customerId,
@@ -84,6 +84,7 @@ router.post('/', auth, async (req, res) => {
       creditReason,
       customerName,
       customerPhone,
+      cashierName,
       notes,
       status: 'active'
     }, { transaction });

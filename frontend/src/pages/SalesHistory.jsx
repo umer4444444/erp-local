@@ -71,10 +71,11 @@ const SalesHistory = () => {
 
           <!-- Header -->
           <div style="text-align:center; margin-bottom:24px;">
-            <h2 style="font-size:28px; font-weight:900; color:#0f172a; margin:0;">ENTERPRISE ERP</h2>
+            <h2 style="font-size:28px; font-weight:900; color:#0f172a; margin:0;">GlobalAI ERP</h2>
             <p style="color:#64748b; font-weight:600; font-size:13px; margin:4px 0 0 0;">Official Sales Invoice</p>
             <div style="margin-top:12px; font-size:12px; color:#94a3b8; font-weight:500;">
               Txn: ${sale.id.slice(0, 8).toUpperCase()}<br/>
+              Cashier: ${sale.cashierName || 'Staff'}<br/>
               Date: ${new Date(sale.createdAt).toLocaleString()}
             </div>
           </div>
@@ -113,7 +114,7 @@ const SalesHistory = () => {
           <div style="background:#f8fafc; padding:16px; border-radius:12px; font-size:13px;">
             <div style="display:flex; justify-content:space-between; margin-bottom:4px; font-weight:600;">
               <span style="color:#64748b;">Payment Method</span>
-              <span style="text-transform:capitalize; color:#0f172a;">${sale.paymentMethod}</span>
+              <span style="text-transform:capitalize; color:#0f172a;">${sale.paymentMethod === 'credit' ? 'Loan / Credit' : sale.paymentMethod}</span>
             </div>
             ${sale.paymentMethod === 'cash' && cashAmount > 0 ? `
             <div style="display:flex; justify-content:space-between; margin-bottom:4px; font-weight:600;">

@@ -284,7 +284,7 @@ const Users = () => {
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 24 }}>
           {[
             { section: 'Store Identity', fields: [
-              { label: 'STORE NAME', key: 'storeName', placeholder: 'Enterprise ERP Store' },
+              { label: 'STORE NAME', key: 'storeName', placeholder: 'GlobalAI ERP Store' },
               { label: 'CURRENCY CODE', key: 'currency', placeholder: 'USD' },
               { label: 'TAX RATE (%)', key: 'taxRate', placeholder: '8', type: 'number' },
             ]},

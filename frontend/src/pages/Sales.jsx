@@ -61,26 +61,26 @@ const ProductCard = React.memo(({ product, onAdd }) => (
     whileTap={{ scale: 0.98 }}
     onClick={() => onAdd(product)}
     style={{
-      background: 'white', borderRadius: 20, padding: 20, cursor: 'pointer',
+      background: 'white', borderRadius: 16, padding: 14, cursor: 'pointer',
       border: '1px solid rgba(0,0,0,0.04)', boxShadow: '0 4px 12px rgba(0,0,0,0.02)',
-      display: 'flex', flexDirection: 'column', gap: 12,
+      display: 'flex', flexDirection: 'column', gap: 10,
       opacity: product.stock <= 0 ? 0.5 : 1,
       pointerEvents: product.stock <= 0 ? 'none' : 'auto'
     }}
   >
     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start' }}>
-      <div style={{ width: 44, height: 44, borderRadius: 12, background: '#f1f5f9', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#64748b' }}>
-        <Package size={22} />
+      <div style={{ width: 36, height: 36, borderRadius: 10, background: '#f1f5f9', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#64748b' }}>
+        <Package size={18} />
       </div>
-      <div style={{ background: product.stock < 10 ? '#fff1f2' : '#f0fdf4', color: product.stock < 10 ? '#e11d48' : '#16a34a', fontSize: 11, fontWeight: 800, padding: '4px 8px', borderRadius: 6 }}>
+      <div style={{ background: product.stock < 10 ? '#fff1f2' : '#f0fdf4', color: product.stock < 10 ? '#e11d48' : '#16a34a', fontSize: 10, fontWeight: 800, padding: '4px 6px', borderRadius: 6 }}>
         {product.stock <= 0 ? 'Out of Stock' : `${product.stock} in stock`}
       </div>
     </div>
     <div>
-      <div style={{ fontSize: 15, fontWeight: 800, color: '#0f172a' }}>{product.name}</div>
-      <div style={{ fontSize: 12, color: '#94a3b8', fontWeight: 600 }}>{product.sku || 'No SKU'}</div>
+      <div style={{ fontSize: 14, fontWeight: 800, color: '#0f172a' }}>{product.name}</div>
+      <div style={{ fontSize: 11, color: '#94a3b8', fontWeight: 600 }}>{product.sku || 'No SKU'}</div>
     </div>
-    <div style={{ fontSize: 20, fontWeight: 900, color: '#0a84ff' }}>${product.price}</div>
+    <div style={{ fontSize: 18, fontWeight: 900, color: '#0a84ff' }}>${product.price}</div>
   </motion.div>
 ));
 
@@ -451,48 +451,52 @@ const Sales = () => {
 
         {/* Totals & Options */}
         <div style={{ padding: '20px 28px', background: '#f8fafc', borderTop: '1px solid #e2e8f0', flexShrink: 0 }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 6, color: '#64748b', fontWeight: 700, fontSize: 13 }}>
-            <span>Subtotal</span><span>${subtotal.toFixed(2)}</span>
-          </div>
-          
-          {/* Discount Field with % or $ toggle */}
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-              <span style={{ color: '#64748b', fontWeight: 700, fontSize: 13 }}>Discount</span>
-              <button 
-                onClick={() => setDiscountType(discountType === 'flat' ? 'percent' : 'flat')}
-                style={{ padding: '2px 8px', borderRadius: 6, border: '1px solid #0a84ff', background: '#eff6ff', color: '#0a84ff', fontSize: 11, fontWeight: 800, cursor: 'pointer' }}>
-                {discountType === 'flat' ? '$ Flat' : '% Percent'}
-              </button>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px 24px', marginBottom: 14 }}>
+            {/* Subtotal */}
+            <div style={{ flex: '1 1 120px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <span style={{ color: '#64748b', fontWeight: 700, fontSize: 13 }}>Subtotal</span>
+              <span style={{ fontWeight: 700, fontSize: 13 }}>${subtotal.toFixed(2)}</span>
             </div>
-            <input type="number" min="0" value={globalDiscount} onChange={e => setGlobalDiscount(e.target.value)} 
-              placeholder={discountType === 'flat' ? '0.00' : '0%'}
-              style={{ width: 80, padding: '6px 10px', borderRadius: 8, border: '1px solid #e2e8f0', textAlign: 'right', fontWeight: 700, fontSize: 13 }} />
-          </div>
-
-          {/* Tax Field */}
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
-            <span style={{ color: '#64748b', fontWeight: 700, fontSize: 13 }}>Tax (%)</span>
-            <input type="number" min="0" value={taxRate} onChange={e => setTaxRate(e.target.value)} 
-              style={{ width: 80, padding: '6px 10px', borderRadius: 8, border: '1px solid #e2e8f0', textAlign: 'right', fontWeight: 700, fontSize: 13 }} />
-          </div>
-
-          {/* Extra Charges Field */}
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
-            <span style={{ color: '#64748b', fontWeight: 700, fontSize: 13 }}>Extra Charges ($)</span>
-            <div style={{ display: 'flex', gap: 6 }}>
-              <input type="text" placeholder="Reason (e.g. Delivery)" value={extraChargeReason} onChange={e => setExtraChargeReason(e.target.value)}
-                style={{ width: 130, padding: '6px 8px', borderRadius: 8, border: '1px solid #e2e8f0', fontSize: 11, fontWeight: 600 }} />
-              <input type="number" min="0" value={extraCharges} onChange={e => setExtraCharges(e.target.value)} 
-                style={{ width: 80, padding: '6px 10px', borderRadius: 8, border: '1px solid #e2e8f0', textAlign: 'right', fontWeight: 700, fontSize: 13 }} placeholder="0.00" />
+            
+            {/* Discount */}
+            <div style={{ flex: '1 1 200px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                <span style={{ color: '#64748b', fontWeight: 700, fontSize: 13 }}>Discount</span>
+                <button 
+                  onClick={() => setDiscountType(discountType === 'flat' ? 'percent' : 'flat')}
+                  style={{ padding: '2px 8px', borderRadius: 6, border: '1px solid #0a84ff', background: '#eff6ff', color: '#0a84ff', fontSize: 11, fontWeight: 800, cursor: 'pointer' }}>
+                  {discountType === 'flat' ? '$ Flat' : '% Percent'}
+                </button>
+              </div>
+              <input type="number" min="0" value={globalDiscount} onChange={e => setGlobalDiscount(e.target.value)} 
+                placeholder={discountType === 'flat' ? '0.00' : '0%'}
+                style={{ width: 70, padding: '6px 8px', borderRadius: 8, border: '1px solid #e2e8f0', textAlign: 'right', fontWeight: 700, fontSize: 13 }} />
             </div>
-          </div>
 
-          {redeemPoints && loyaltyDiscount > 0 && (
-            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 6, color: '#d97706', fontWeight: 700, fontSize: 13 }}>
-              <span>Loyalty Redemption</span><span>-${loyaltyDiscount.toFixed(2)}</span>
+            {/* Tax Field */}
+            <div style={{ flex: '1 1 140px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <span style={{ color: '#64748b', fontWeight: 700, fontSize: 13 }}>Tax (%)</span>
+              <input type="number" min="0" value={taxRate} onChange={e => setTaxRate(e.target.value)} 
+                style={{ width: 70, padding: '6px 8px', borderRadius: 8, border: '1px solid #e2e8f0', textAlign: 'right', fontWeight: 700, fontSize: 13 }} />
             </div>
-          )}
+
+            {/* Extra Charges */}
+            <div style={{ flex: '1 1 260px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <span style={{ color: '#64748b', fontWeight: 700, fontSize: 13 }}>Extra Charges ($)</span>
+              <div style={{ display: 'flex', gap: 6 }}>
+                <input type="text" placeholder="Reason (e.g. Delivery)" value={extraChargeReason} onChange={e => setExtraChargeReason(e.target.value)}
+                  style={{ width: 110, padding: '6px 8px', borderRadius: 8, border: '1px solid #e2e8f0', fontSize: 11, fontWeight: 600 }} />
+                <input type="number" min="0" value={extraCharges} onChange={e => setExtraCharges(e.target.value)} 
+                  style={{ width: 70, padding: '6px 8px', borderRadius: 8, border: '1px solid #e2e8f0', textAlign: 'right', fontWeight: 700, fontSize: 13 }} placeholder="0.00" />
+              </div>
+            </div>
+
+            {redeemPoints && loyaltyDiscount > 0 && (
+              <div style={{ flex: '1 1 100%', display: 'flex', justifyContent: 'space-between', color: '#d97706', fontWeight: 700, fontSize: 13 }}>
+                <span>Loyalty Redemption</span><span>-${loyaltyDiscount.toFixed(2)}</span>
+              </div>
+            )}
+          </div>
 
           <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 14, paddingTop: 10, borderTop: '2px solid #e2e8f0' }}>
             <span style={{ fontSize: 16, fontWeight: 900, color: '#0f172a' }}>Grand Total</span>
@@ -507,7 +511,7 @@ const Sales = () => {
                   borderColor: paymentMethod === method ? '#0a84ff' : 'transparent',
                   background: paymentMethod === method ? '#eff6ff' : 'white',
                   color: paymentMethod === method ? '#0a84ff' : '#64748b' }}>
-                {method === 'credit' ? 'Udhaar/Credit' : method}
+                {method === 'credit' ? 'Loan/Credit' : method}
               </button>
             ))}
           </div>
@@ -600,7 +604,7 @@ const Sales = () => {
           </div>
         </header>
 
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: 24 }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(140px, 1fr))', gap: 16 }}>
           {products
             .filter(p => {
               const term = search.toLowerCase();
@@ -689,7 +693,7 @@ const Sales = () => {
               <div style={{ background: '#f8fafc', padding: 16, borderRadius: 16, fontSize: 13 }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 4, fontWeight: 600 }}>
                   <span style={{ color: '#64748b' }}>Payment Method</span>
-                  <span style={{ textTransform: 'capitalize', color: '#0f172a' }}>{receipt.paymentMethod === 'credit' ? 'Udhaar / Credit' : receipt.paymentMethod}</span>
+                  <span style={{ textTransform: 'capitalize', color: '#0f172a' }}>{receipt.paymentMethod === 'credit' ? 'Loan / Credit' : receipt.paymentMethod}</span>
                 </div>
                 {receipt.creditReason && (
                   <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 4, fontWeight: 600, fontSize: 12 }}>

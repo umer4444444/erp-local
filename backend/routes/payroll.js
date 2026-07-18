@@ -53,10 +53,12 @@ router.post('/run', auth, roleCheck(['admin', 'hr']), audit('payroll'), async (r
         for (const att of attendances) {
           if (att.clockIn && att.clockOut) {
             const diffMs = new Date(att.clockOut) - new Date(att.clockIn);
-            totalHours += Math.max(0, diffMs / (1000 * 60 * 60));
+            let shiftHours = Math.max(0, diffMs / (1000 * 60 * 60));
+            if (shiftHours > 9) shiftHours = 9; // Cap at 9 duty hours
+            totalHours += shiftHours;
           } else if (att.clockIn && !att.clockOut) {
-            // Standard shift cap (9 AM to 11 PM = 14 hours max if forgot clock-out)
-            totalHours += 14;
+            // Standard duty shift cap
+            totalHours += 9;
           }
         }
         base = parseFloat((totalHours * parseFloat(emp.salary || 0)).toFixed(2));

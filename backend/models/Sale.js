@@ -70,6 +70,9 @@ const Sale = sequelize.define('Sale', {
   customerPhone: {
     type: DataTypes.STRING,
   },
+  cashierName: {
+    type: DataTypes.STRING,
+  },
   notes: {
     type: DataTypes.TEXT,
   },

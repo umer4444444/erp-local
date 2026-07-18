@@ -50,7 +50,7 @@ const Sidebar = () => {
         </motion.div>
         <div>
           <div style={{ fontSize: 17, fontWeight: 900, color: '#0f172a' }}>GlobalAI<span style={{ color: '#0a84ff' }}>ERP</span></div>
-          <div style={{ fontSize: 9, fontWeight: 800, color: '#94a3b8', textTransform: 'uppercase' }}>Enterprise v2.0</div>
+          <div style={{ fontSize: 9, fontWeight: 800, color: '#94a3b8', textTransform: 'uppercase' }}>GlobalAI ERP v2.0</div>
         </div>
       </div>
 

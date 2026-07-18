@@ -51,7 +51,7 @@ const Login = () => {
             </div>
             <div>
               <div style={{ fontSize: 20, fontWeight: 900, color: 'white', letterSpacing: '-0.02em' }}>GlobalAI<span style={{ color: '#0a84ff' }}>ERP</span></div>
-              <div style={{ fontSize: 10, color: '#475569', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em' }}>Enterprise v2.0</div>
+              <div style={{ fontSize: 10, color: '#475569', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em' }}>GlobalAI ERP v2.0</div>
             </div>
           </div>
         </motion.div>
@@ -86,7 +86,7 @@ const Login = () => {
 
         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.8 }}
           style={{ fontSize: 12, color: '#334155', fontWeight: 600 }}>
-          © 2026 GlobalAIERP Enterprise Edition
+          © 2026 GlobalAIERP Edition
         </motion.div>
       </div>
 

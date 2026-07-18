@@ -33,7 +33,7 @@ const Landing = () => {
 
   const features = [
     { icon: <BarChart3 />, title: 'Revenue Intelligence', desc: 'Predictive analytics with real-time margin tracking and profit visualization across all channels.', color: '#0a84ff' },
-    { icon: <Shield />, title: 'Role-Based Access', desc: 'Enterprise-grade permission management. Every employee sees only what their department needs.', color: '#6366f1' },
+    { icon: <Shield />, title: 'Role-Based Access', desc: 'GlobalAI ERP-grade permission management. Every employee sees only what their department needs.', color: '#6366f1' },
     { icon: <Globe />, title: 'Omnichannel Ops', desc: 'Seamlessly sync physical stores, pharmacies, and warehouses from a single command center.', color: '#10b981' },
     { icon: <Lock />, title: 'Data Integrity', desc: 'End-to-end encrypted transactions with immutable audit logs for full regulatory compliance.', color: '#f59e0b' },
     { icon: <Package />, title: 'Smart Inventory', desc: 'Automated low-stock alerts, category filtering, and one-click CSV export for all your products.', color: '#ec4899' },
@@ -50,7 +50,7 @@ const Landing = () => {
   const plans = [
     { name: 'Starter', price: '$0', desc: 'Perfect for small teams', features: ['Up to 5 users', 'Core POS & Inventory', 'Basic Reports', 'Email Support'], popular: false, color: '#64748b' },
     { name: 'Professional', price: '$49', desc: 'For growing businesses', features: ['Unlimited users', 'All 9 Portals', 'HR & Payroll Engine', 'Advanced Analytics', 'Priority Support'], popular: true, color: '#0a84ff' },
-    { name: 'Enterprise', price: 'Custom', desc: 'For large organizations', features: ['Custom deployment', 'Dedicated infra', 'SLA Guarantee', 'Onboarding team', 'API Access'], popular: false, color: '#6366f1' },
+    { name: 'GlobalAI ERP', price: 'Custom', desc: 'For large organizations', features: ['Custom deployment', 'Dedicated infra', 'SLA Guarantee', 'Onboarding team', 'API Access'], popular: false, color: '#6366f1' },
   ];
 
   const containerVariants = { hidden: { opacity: 0 }, visible: { opacity: 1, transition: { staggerChildren: 0.15, delayChildren: 0.2 } } };
@@ -107,7 +107,7 @@ const Landing = () => {
       >
         <div>
           <motion.div variants={itemVariants} style={{ display: 'inline-flex', alignItems: 'center', gap: 8, padding: '8px 16px', borderRadius: 100, background: 'rgba(10,132,255,0.1)', color: '#0a84ff', fontSize: 11, fontWeight: 800, marginBottom: 28, border: '1px solid rgba(10,132,255,0.2)', textTransform: 'uppercase', letterSpacing: '0.08em' }}>
-            <Cpu size={13} /> Enterprise Resource Planning v2.0
+            <Cpu size={13} /> GlobalAI ERP Resource Planning v2.0
           </motion.div>
           <motion.h1 variants={itemVariants} style={{ fontSize: 76, fontWeight: 900, lineHeight: 1.05, letterSpacing: '-0.04em', marginBottom: 28 }}>
             The OS for<br /><span style={{ background: 'linear-gradient(135deg, #0a84ff, #6366f1)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>Modern Commerce.</span>
@@ -119,7 +119,7 @@ const Landing = () => {
             <motion.button whileHover={{ scale: 1.04, boxShadow: '0 24px 50px rgba(10,132,255,0.4)' }} whileTap={{ scale: 0.97 }}
               onClick={() => navigate('/login')}
               style={{ padding: '18px 40px', borderRadius: 100, background: 'linear-gradient(135deg, #0a84ff, #6366f1)', color: 'white', fontWeight: 800, fontSize: 17, border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 10, boxShadow: '0 16px 40px rgba(10,132,255,0.3)', fontFamily: "'Outfit', sans-serif" }}>
-              Launch Enterprise <ChevronRight size={20} />
+              Launch GlobalAI ERP <ChevronRight size={20} />
             </motion.button>
             <motion.button whileHover={{ borderColor: 'rgba(255,255,255,0.3)', color: 'white' }}
               onClick={() => scrollTo('solutions')}
@@ -245,7 +245,7 @@ const Landing = () => {
       <section id="docs" style={{ padding: '120px 80px', position: 'relative', zIndex: 1 }}>
         <motion.div initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.6 }}
           style={{ background: 'linear-gradient(135deg, rgba(10,132,255,0.1), rgba(99,102,241,0.1))', borderRadius: 40, padding: '80px', border: '1px solid rgba(10,132,255,0.2)', textAlign: 'center' }}>
-          <div style={{ fontSize: 56, fontWeight: 900, letterSpacing: '-0.03em', marginBottom: 20 }}>Ready to deploy<br /><span style={{ background: 'linear-gradient(135deg, #0a84ff, #6366f1)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>your enterprise?</span></div>
+          <div style={{ fontSize: 56, fontWeight: 900, letterSpacing: '-0.03em', marginBottom: 20 }}>Ready to deploy<br /><span style={{ background: 'linear-gradient(135deg, #0a84ff, #6366f1)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>your GlobalAI ERP?</span></div>
           <p style={{ color: '#64748b', fontSize: 18, marginBottom: 40, fontWeight: 500 }}>One login. All portals. Every department connected.</p>
           <motion.button whileHover={{ scale: 1.05, boxShadow: '0 24px 60px rgba(10,132,255,0.4)' }} whileTap={{ scale: 0.97 }}
             onClick={() => navigate('/login')}
@@ -263,7 +263,7 @@ const Landing = () => {
           </div>
           <span style={{ fontWeight: 900, fontSize: 16 }}>GlobalAIERP</span>
         </div>
-        <div style={{ color: '#475569', fontSize: 13, fontWeight: 600 }}>© 2026 GlobalAIERP. Enterprise Edition.</div>
+        <div style={{ color: '#475569', fontSize: 13, fontWeight: 600 }}>© 2026 GlobalAIERP. GlobalAI ERP Edition.</div>
         <div style={{ display: 'flex', gap: 24 }}>
           {navLinks.map(l => (
             <span key={l.label} onClick={() => scrollTo(l.id)} style={{ color: '#475569', fontSize: 13, fontWeight: 600, cursor: 'pointer' }}>{l.label}</span>
