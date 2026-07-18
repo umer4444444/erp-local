@@ -1,9 +1,10 @@
-const sequelize = require('./backend/config/database.js');
+const { sequelize, Sale } = require('./backend/models');
 
 async function fixEnum() {
   try {
-    await sequelize.query("ALTER TABLE sales MODIFY COLUMN paymentMethod ENUM('cash', 'card', 'split', 'credit') DEFAULT 'cash';");
-    console.log('Database ENUM altered successfully!');
+    const tableName = Sale.getTableName();
+    await sequelize.query(`ALTER TABLE ${tableName} MODIFY COLUMN paymentMethod ENUM('cash', 'card', 'split', 'credit') DEFAULT 'cash';`);
+    console.log('Database ENUM altered successfully on table: ' + tableName);
   } catch (err) {
     console.error('Error altering table:', err.message);
   } finally {
