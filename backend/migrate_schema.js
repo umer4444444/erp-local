@@ -61,8 +61,12 @@ async function migrateAll() {
 
     // Fix User role ENUM
     const userTable = User.getTableName();
-    await sequelize.query(`ALTER TABLE ${userTable} MODIFY COLUMN role ENUM('admin', 'manager', 'cashier', 'hr', 'inventory', 'pharmacist', 'expenses', 'operations', 'finance') DEFAULT 'cashier';`);
+    await sequelize.query(`ALTER TABLE ${userTable} MODIFY COLUMN role ENUM('admin', 'manager', 'cashier', 'hr', 'inventory', 'pharmacist', 'expenses', 'operations', 'finance') DEFAULT 'cashier';`).catch(() => {});
     console.log('Fixed User role ENUM');
+
+    // Fix paymentMethod ENUM
+    await sequelize.query(`ALTER TABLE ${salesTable} MODIFY COLUMN paymentMethod ENUM('cash', 'card', 'split', 'credit') DEFAULT 'cash';`);
+    console.log('Fixed Sales paymentMethod ENUM');
 
     console.log('All migrations completed successfully!');
   } catch (err) {
