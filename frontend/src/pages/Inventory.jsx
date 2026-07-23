@@ -13,7 +13,7 @@ const Inventory = () => {
   const [showBulkModal, setShowBulkModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [editingProduct, setEditingProduct] = useState(null);
-  const [bulkRows, setBulkRows] = useState([{ id: Date.now(), name: '', categoryId: '', price: '', cost: '', stock: '', expiry: '' }]);
+  const [bulkRows, setBulkRows] = useState([{ id: Date.now(), name: '', categoryId: '', price: '', cost: '', stock: '', expiry: '', manufacturer: '' }]);
   const [loading, setLoading] = useState(true);
   const [selectedIds, setSelectedIds] = useState(new Set());
   const [categoryFilter, setCategoryFilter] = useState('');
@@ -233,6 +233,7 @@ const Inventory = () => {
               expiryDate: cleanDate(item.expiry || item.expirydate),
               storeType,
               categoryId,
+              manufacturer: item.company || item.manufacturer || item.companyname || item['company name'] || '',
             });
           }
         }
@@ -340,7 +341,7 @@ const Inventory = () => {
   };
 
   const addBulkRow = () => {
-    setBulkRows([...bulkRows, { id: Date.now(), name: '', categoryId: '', price: '', cost: '', stock: '', expiry: '' }]);
+    setBulkRows([...bulkRows, { id: Date.now(), name: '', categoryId: '', price: '', cost: '', stock: '', expiry: '', manufacturer: '' }]);
   };
 
   const removeBulkRow = (id) => {
@@ -365,11 +366,12 @@ const Inventory = () => {
           costPrice: parseFloat(row.cost),
           stock: parseInt(row.stock) || 0,
           expiryDate: row.expiry || null,
+          manufacturer: row.manufacturer || '',
           sku: `SKU-${Math.random().toString(36).substr(2, 5).toUpperCase()}`
         });
       }
       setShowBulkModal(false);
-      setBulkRows([{ id: Date.now(), name: '', categoryId: '', price: '', cost: '', stock: '', expiry: '' }]);
+      setBulkRows([{ id: Date.now(), name: '', categoryId: '', price: '', cost: '', stock: '', expiry: '', manufacturer: '' }]);
       fetchData();
       alert(`Successfully imported ${validRows.length} items!`);
     } catch (err) {
@@ -585,6 +587,10 @@ const Inventory = () => {
                     <label style={{ display: 'block', fontSize: 12, fontWeight: 800, color: '#64748b', marginBottom: 8 }}>EXPIRY DATE</label>
                     <input type="date" value={editingProduct.expiryDate?.split('T')[0] || ''} onChange={e => setEditingProduct({...editingProduct, expiryDate: e.target.value})} style={{ width: '100%', padding: '14px', borderRadius: 12, border: '1px solid #e2e8f0', fontWeight: 600 }} />
                   </div>
+                  <div style={{ gridColumn: 'span 2' }}>
+                    <label style={{ display: 'block', fontSize: 12, fontWeight: 800, color: '#64748b', marginBottom: 8 }}>COMPANY NAME</label>
+                    <input placeholder="Manufacturer or Brand Name" value={editingProduct.manufacturer || ''} onChange={e => setEditingProduct({...editingProduct, manufacturer: e.target.value})} style={{ width: '100%', padding: '14px', borderRadius: 12, border: '1px solid #e2e8f0', fontWeight: 600 }} />
+                  </div>
                 </div>
 
                 {/* Variations Section */}
@@ -679,6 +685,7 @@ const Inventory = () => {
                     <tr style={{ textAlign: 'left' }}>
                       <th style={{ padding: '0 8px', fontSize: 11, fontWeight: 800, color: '#64748b' }}>PRODUCT NAME</th>
                       <th style={{ padding: '0 8px', fontSize: 11, fontWeight: 800, color: '#64748b' }}>CATEGORY</th>
+                      <th style={{ padding: '0 8px', fontSize: 11, fontWeight: 800, color: '#64748b' }}>COMPANY</th>
                       <th style={{ padding: '0 8px', fontSize: 11, fontWeight: 800, color: '#64748b' }}>PRICE ($)</th>
                       <th style={{ padding: '0 8px', fontSize: 11, fontWeight: 800, color: '#64748b' }}>COST ($)</th>
                       <th style={{ padding: '0 8px', fontSize: 11, fontWeight: 800, color: '#64748b' }}>STOCK</th>
@@ -696,6 +703,7 @@ const Inventory = () => {
                             {categories.map(cat => <option key={cat.id} value={cat.id}>{cat.name}</option>)}
                           </select>
                         </td>
+                        <td><input value={row.manufacturer} onChange={e => updateBulkRow(row.id, 'manufacturer', e.target.value)} placeholder="Company..." style={{ width: '100%', padding: 12, borderRadius: 10, border: '1px solid #e2e8f0', fontSize: 13, fontWeight: 600 }} /></td>
                         <td><input type="number" value={row.price} onChange={e => updateBulkRow(row.id, 'price', e.target.value)} style={{ width: '100%', padding: 12, borderRadius: 10, border: '1px solid #e2e8f0', fontSize: 13, fontWeight: 600 }} /></td>
                         <td><input type="number" value={row.cost} onChange={e => updateBulkRow(row.id, 'cost', e.target.value)} style={{ width: '100%', padding: 12, borderRadius: 10, border: '1px solid #e2e8f0', fontSize: 13, fontWeight: 600 }} /></td>
                         <td><input type="number" value={row.stock} onChange={e => updateBulkRow(row.id, 'stock', e.target.value)} style={{ width: '100%', padding: 12, borderRadius: 10, border: '1px solid #e2e8f0', fontSize: 13, fontWeight: 600 }} /></td>

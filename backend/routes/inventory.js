@@ -255,6 +255,7 @@ router.post('/import', auth, roleCheck(['admin', 'inventory', 'manager']), audit
           stock: cleanInt(item.stock),
           categoryId,
           expiryDate: cleanDate(item.expiryDate || item.expiry),
+          manufacturer: item.manufacturer || item.company || null,
           storeType
         }, { transaction });
         updatedCount++;
@@ -267,6 +268,7 @@ router.post('/import', auth, roleCheck(['admin', 'inventory', 'manager']), audit
           stock: cleanInt(item.stock),
           categoryId,
           expiryDate: cleanDate(item.expiryDate || item.expiry),
+          manufacturer: item.manufacturer || item.company || null,
           storeType
         }, { transaction });
         createdCount++;
