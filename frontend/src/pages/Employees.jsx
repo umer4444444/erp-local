@@ -40,8 +40,9 @@ const Employees = () => {
   const [form, setForm] = useState({
     firstName: '', lastName: '', email: '', phone: '', cnic: '', address: '',
     departmentId: '', designationId: '', joiningDate: '',
-    salaryType: 'monthly', salary: '', bankAccount: '', role: '', gender: ''
+    salaryType: 'monthly', salary: '', bankAccount: '', role: '', gender: '', password: ''
   });
+  const [resetPassModal, setResetPassModal] = useState({ open: false, employee: null, newPassword: '' });
 
   useEffect(() => {
     fetchData();
@@ -109,8 +110,15 @@ const Employees = () => {
 
   const handleSave = async (e) => {
     e.preventDefault();
-    if (!form.firstName || !form.lastName || !form.email || !form.cnic || !form.address) {
-      alert("Please fill in all required basic info (Name, Email, CNIC, Address).");
+    if (!form.firstName || !form.lastName || !form.email || !form.cnic || !form.address || !form.password) {
+      alert("Please fill in all required basic info including Password.");
+      setStep(1); return;
+    }
+    
+    // Validate password for special character
+    const specialCharRegex = /[!@#$%^&*(),.?":{}|<>]/;
+    if (!specialCharRegex.test(form.password)) {
+      alert("Password must contain at least one special character.");
       setStep(1); return;
     }
     if (!form.departmentId || !form.designationId) {
@@ -124,7 +132,7 @@ const Employees = () => {
       setShowModal(false);
       setStep(1);
       setPhoneCode('+92');
-      setForm({ firstName: '', lastName: '', email: '', phone: '', cnic: '', address: '', departmentId: '', designationId: '', joiningDate: '', salaryType: 'monthly', salary: '', bankAccount: '', role: '', gender: '' });
+      setForm({ firstName: '', lastName: '', email: '', phone: '', cnic: '', address: '', departmentId: '', designationId: '', joiningDate: '', salaryType: 'monthly', salary: '', bankAccount: '', role: '', gender: '', password: '' });
       fetchData();
     } catch (e) {
       alert(e.response?.data?.message || 'Error saving employee. Please check all fields.');
@@ -183,6 +191,20 @@ const Employees = () => {
       fetchData();
     } catch (err) {
       alert('Failed to update salary');
+    }
+  };
+
+  const handleResetPassword = async () => {
+    if (!resetPassModal.newPassword) {
+      alert('Please enter a new password.');
+      return;
+    }
+    try {
+      await employeeAPI.resetPassword(resetPassModal.employee.id, resetPassModal.newPassword);
+      alert('Password reset successfully.');
+      setResetPassModal({ open: false, employee: null, newPassword: '' });
+    } catch (err) {
+      alert(err.response?.data?.message || 'Failed to reset password');
     }
   };
 
@@ -344,6 +366,7 @@ const Employees = () => {
                       </select>
                     </div>
                     <input placeholder="Address (Based on ID Card) *" style={inputStyle} value={form.address} onChange={e => setForm({...form, address: e.target.value})} />
+                    <input type="text" placeholder="Account Password (must contain special char) *" style={inputStyle} value={form.password} onChange={e => setForm({...form, password: e.target.value})} />
                     <button type="button" onClick={() => setStep(2)} style={{ padding: 14, borderRadius: 12, background: '#0a84ff', color: 'white', fontWeight: 800, border: 'none', marginTop: 12 }}>Continue</button>
                   </div>
                 )}
@@ -497,6 +520,14 @@ const Employees = () => {
                     <span style={{ padding: '4px 10px', borderRadius: 20, fontSize: 10, fontWeight: 900, background: selectedEmployee.status === 'active' ? '#f0fdf4' : '#fef2f2', color: selectedEmployee.status === 'active' ? '#16a34a' : '#ef4444' }}>{selectedEmployee.status}</span>
                   </div>
                 </div>
+                
+                {(user?.role === 'admin' || user?.role === 'hr') && (
+                  <div style={{ gridColumn: '1 / -1', marginTop: 8 }}>
+                    <button onClick={() => setResetPassModal({ open: true, employee: selectedEmployee, newPassword: '' })} style={{ padding: '8px 12px', borderRadius: 8, background: '#eff6ff', color: '#0a84ff', fontWeight: 800, border: 'none', cursor: 'pointer', fontSize: 12 }}>
+                      Reset Employee Password
+                    </button>
+                  </div>
+                )}
               </div>
               
               {(user?.role === 'admin' || user?.role === 'hr' || user?.role === 'manager') && (
@@ -553,6 +584,25 @@ const Employees = () => {
                   </button>
                 </div>
               )}
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+      {/* Reset Password Modal */}
+      <AnimatePresence>
+        {resetPassModal.open && (
+          <div style={{ position: 'fixed', inset: 0, zIndex: 1100, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 24 }}>
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setResetPassModal({ open: false, employee: null, newPassword: '' })} style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.5)' }} />
+            <motion.div initial={{ scale: 0.9, y: 20 }} animate={{ scale: 1, y: 0 }} exit={{ scale: 0.9 }} style={{ background: 'white', borderRadius: 24, width: '100%', maxWidth: 400, position: 'relative', padding: 32 }}>
+              <h2 style={{ fontSize: 20, fontWeight: 900, marginBottom: 16 }}>Reset Password</h2>
+              <p style={{ color: '#64748b', fontSize: 13, marginBottom: 20 }}>
+                Enter a new password for <strong>{resetPassModal.employee?.firstName} {resetPassModal.employee?.lastName}</strong>.
+              </p>
+              <input type="text" placeholder="New Password" style={{ ...inputStyle, marginBottom: 16 }} value={resetPassModal.newPassword} onChange={e => setResetPassModal({...resetPassModal, newPassword: e.target.value})} />
+              <div style={{ display: 'flex', gap: 10 }}>
+                <button onClick={() => setResetPassModal({ open: false, employee: null, newPassword: '' })} style={{ flex: 1, padding: 14, borderRadius: 12, background: '#f1f5f9', color: '#64748b', fontWeight: 800, border: 'none', cursor: 'pointer' }}>Cancel</button>
+                <button onClick={handleResetPassword} style={{ flex: 1, padding: 14, borderRadius: 12, background: '#0a84ff', color: 'white', fontWeight: 800, border: 'none', cursor: 'pointer' }}>Reset Password</button>
+              </div>
             </motion.div>
           </div>
         )}

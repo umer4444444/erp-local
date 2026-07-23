@@ -18,17 +18,18 @@ router.get('/', auth, roleCheck(['admin', 'hr', 'manager']), async (req, res) =>
 router.post('/', auth, roleCheck(['admin', 'hr', 'manager']), async (req, res) => {
   const transaction = await sequelize.transaction();
   try {
+    const { firstName, lastName, email, phone, cnic, address, departmentId, designationId, joiningDate, salaryType, salary, bankAccount, role, gender, password } = req.body;
+
+    if (!password) {
+      return res.status(400).json({ message: 'Password is required' });
+    }
+
     const employee = await Employee.create(req.body, { transaction });
     let user = await User.findOne({ where: { email: employee.email } });
     if (!user) {
       const salt = await bcrypt.genSalt(10);
-      const passwordHash = await bcrypt.hash('staff123', salt);
-      let role = 'cashier';
-      const pos = employee.position.toLowerCase();
-      if (pos.includes('admin')) role = 'admin';
-      else if (pos.includes('manager')) role = 'manager';
-      else if (pos.includes('inventory') || pos.includes('stock')) role = 'inventory';
-      else if (pos.includes('hr')) role = 'hr';
+      const passwordHash = await bcrypt.hash(password, salt);
+      let userRole = role || 'cashier';
 
       await User.create({
         name: `${employee.firstName} ${employee.lastName}`,

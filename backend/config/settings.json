@@ -1,6 +1,5 @@
 {
-  "storeName": "Enterprise ERP",
-  "taxRate": 5,
-  "currency": "USD",
-  "allowOfflinePOS": true
+  "companyName": "GlobalAI ERP",
+  "officeLat": 31.5204,
+  "officeLng": 74.3587
 }

@@ -6,7 +6,7 @@ import {
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
-import { inventoryAPI, managerAPI, salesAPI, shiftAPI, hrAPI, attendanceAPI } from '../api';
+import { inventoryAPI, managerAPI, salesAPI, shiftAPI, hrAPI, attendanceAPI, settingsAPI } from '../api';
 
 const StatCard = ({ title, value, icon, rgb, delay, onClick }) => (
   <motion.div 
@@ -45,6 +45,9 @@ const Dashboard = ({ user }) => {
   const [activeShift, setActiveShift] = useState(null);
   const [activeAttendance, setActiveAttendance] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [settings, setSettings] = useState({ companyName: 'GlobalAI ERP', officeLat: 31.5204, officeLng: 74.3587 });
+  const [showSettings, setShowSettings] = useState(false);
+  const [settingsForm, setSettingsForm] = useState({ companyName: '', officeLat: '', officeLng: '' });
 
   // Helper to fetch today's stats on button click
   const fetchTodayStats = async () => {
@@ -94,13 +97,17 @@ const handleDownloadReport = async () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [salesRes, prodRes, alertRes, shiftRes, hrRes] = await Promise.all([
+        const [salesRes, prodRes, alertRes, shiftRes, hrRes, settingsRes] = await Promise.all([
           salesAPI.getTodayStats(),
           inventoryAPI.getProducts(),
           inventoryAPI.getAlerts(),
           shiftAPI.getActiveShift(),
-          hrAPI.getStats()
+          hrAPI.getStats(),
+          settingsAPI.get()
         ]);
+        
+        setSettings(settingsRes.data);
+        setSettingsForm(settingsRes.data);
         
         setStats({
           totalSales: salesRes.data.count || 0,
@@ -140,9 +147,16 @@ const handleDownloadReport = async () => {
       <StatCard 
         title="Staff Strength" 
         value={
-          <div style={{ display: 'flex', alignItems: 'baseline', gap: 6 }}>
-            <span>{stats.activeEmployees}</span>
-            <span style={{ fontSize: 13, fontWeight: 700, color: '#94a3b8' }}>({stats.maleEmployees || 0}M / {stats.femaleEmployees || 0}F)</span>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 6, marginTop: 4 }}>
+            <div style={{ fontSize: 24, fontWeight: 900 }}>{stats.activeEmployees} <span style={{ fontSize: 13, fontWeight: 600, color: '#94a3b8' }}>Active</span></div>
+            <div style={{ display: 'flex', gap: 4, height: 6, width: '100%', borderRadius: 4, overflow: 'hidden' }}>
+              <div style={{ background: '#3b82f6', width: `${(stats.maleEmployees / Math.max(1, stats.activeEmployees)) * 100}%` }} title={`Male: ${stats.maleEmployees}`} />
+              <div style={{ background: '#ec4899', width: `${(stats.femaleEmployees / Math.max(1, stats.activeEmployees)) * 100}%` }} title={`Female: ${stats.femaleEmployees}`} />
+            </div>
+            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 11, fontWeight: 700 }}>
+              <span style={{ color: '#3b82f6' }}>{stats.maleEmployees} Male</span>
+              <span style={{ color: '#ec4899' }}>{stats.femaleEmployees} Female</span>
+            </div>
           </div>
         } 
         icon={<Users />} 
@@ -224,12 +238,11 @@ const handleDownloadReport = async () => {
                       clockInWithCoords(position.coords.latitude, position.coords.longitude);
                     },
                     (error) => {
-                      // Fallback to office location if denied or not available
-                      clockInWithCoords(31.5204, 74.3587);
+                      clockInWithCoords(settings.officeLat, settings.officeLng);
                     }
                   );
                 } else {
-                  clockInWithCoords(31.5204, 74.3587);
+                  clockInWithCoords(settings.officeLat, settings.officeLng);
                 }
               }}
               style={{ width: '100%', padding: '16px', borderRadius: 16, background: '#f1f5f9', border: 'none', color: '#0f172a', fontWeight: 800, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10 }}
@@ -252,6 +265,11 @@ const handleDownloadReport = async () => {
           <p style={{ color: '#64748b', marginTop: 4, fontWeight: 500 }}>Here's what's happening with your business today.</p>
         </div>
         <div style={{ display: 'flex', gap: 12 }}>
+          {role === 'admin' && (
+            <button style={{ padding: '12px 20px', borderRadius: 14, border: '1px solid #e2e8f0', background: 'white', fontWeight: 700, cursor: 'pointer' }} onClick={() => setShowSettings(true)}>
+              ⚙️ Settings
+            </button>
+          )}
           <button style={{ padding: '12px 20px', borderRadius: 14, border: '1px solid #e2e8f0', background: 'white', fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 8 }} onClick={() => { fetchTodayStats(); }}>
             <Calendar size={18} /> Today
           </button>
@@ -267,14 +285,14 @@ const handleDownloadReport = async () => {
             initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }}
             style={{ overflow: 'hidden', marginBottom: 24 }}
           >
-            <div style={{ background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.2)', padding: '16px 24px', borderRadius: 20, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+            <div className="pulse-glow" style={{ background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.2)', padding: '16px 24px', borderRadius: 20, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
                 <div style={{ width: 40, height: 40, borderRadius: 12, background: '#ef4444', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                   <AlertTriangle size={20} />
                 </div>
                 <div>
-                  <div style={{ fontWeight: 800, color: '#991b1b' }}>CRITICAL: Expiring Inventory</div>
-                  <div style={{ fontSize: 13, color: '#ef4444', fontWeight: 600 }}>{alerts.expiringSoon.length} products are expiring within 30 days.</div>
+                  <div style={{ fontWeight: 900, color: '#dc2626', fontSize: 16 }}>CRITICAL: Expiring Inventory</div>
+                  <div style={{ fontSize: 14, color: '#b91c1c', fontWeight: 700 }}>{alerts.expiringSoon.length} products are expiring within 30 days.</div>
                 </div>
               </div>
               <button onClick={() => navigate('/inventory', { state: { filter: 'expiringSoon' } })} style={{ background: '#ef4444', color: 'white', border: 'none', padding: '8px 16px', borderRadius: 10, fontWeight: 700, cursor: 'pointer' }}>
@@ -312,6 +330,52 @@ const handleDownloadReport = async () => {
       {role === 'cashier' && <CashierDash />}
       {role === 'manager' && <AdminDash />}
       
+      {/* Settings Modal */}
+      <AnimatePresence>
+        {showSettings && (
+          <div style={{ position: 'fixed', inset: 0, zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 24 }}>
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setShowSettings(false)} style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.3)' }} />
+            <motion.div initial={{ scale: 0.9, y: 20 }} animate={{ scale: 1, y: 0 }} exit={{ scale: 0.9 }} style={{ background: 'white', borderRadius: 24, width: '100%', maxWidth: 400, position: 'relative', padding: 32 }}>
+              <h2 style={{ fontSize: 20, fontWeight: 900, marginBottom: 24 }}>System Settings</h2>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+                <div>
+                  <label style={{ fontSize: 12, fontWeight: 700, color: '#64748b', marginBottom: 4, display: 'block' }}>Company Name</label>
+                  <input value={settingsForm.companyName} onChange={e => setSettingsForm({ ...settingsForm, companyName: e.target.value })} style={{ width: '100%', padding: '10px 14px', borderRadius: 10, border: '1.5px solid #e2e8f0', outline: 'none' }} />
+                </div>
+                <div>
+                  <label style={{ fontSize: 12, fontWeight: 700, color: '#64748b', marginBottom: 4, display: 'block' }}>Office Latitude</label>
+                  <input type="number" step="any" value={settingsForm.officeLat} onChange={e => setSettingsForm({ ...settingsForm, officeLat: e.target.value })} style={{ width: '100%', padding: '10px 14px', borderRadius: 10, border: '1.5px solid #e2e8f0', outline: 'none' }} />
+                </div>
+                <div>
+                  <label style={{ fontSize: 12, fontWeight: 700, color: '#64748b', marginBottom: 4, display: 'block' }}>Office Longitude</label>
+                  <input type="number" step="any" value={settingsForm.officeLng} onChange={e => setSettingsForm({ ...settingsForm, officeLng: e.target.value })} style={{ width: '100%', padding: '10px 14px', borderRadius: 10, border: '1.5px solid #e2e8f0', outline: 'none' }} />
+                </div>
+                <div style={{ display: 'flex', gap: 10, marginTop: 16 }}>
+                  <button onClick={() => setShowSettings(false)} style={{ flex: 1, padding: 12, borderRadius: 10, background: '#f1f5f9', color: '#64748b', fontWeight: 800, border: 'none', cursor: 'pointer' }}>Cancel</button>
+                  <button onClick={async () => {
+                    try {
+                      await settingsAPI.update(settingsForm);
+                      setSettings(settingsForm);
+                      setShowSettings(false);
+                      // reload to update sidebar globally
+                      window.location.reload();
+                    } catch(e) { alert('Failed to save settings'); }
+                  }} style={{ flex: 1, padding: 12, borderRadius: 10, background: '#0a84ff', color: 'white', fontWeight: 800, border: 'none', cursor: 'pointer' }}>Save & Reload</button>
+                </div>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
+      <style>{`
+        @keyframes pulse-glow {
+          0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4); }
+          70% { box-shadow: 0 0 0 15px rgba(239, 68, 68, 0); }
+          100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
+        }
+        .pulse-glow { animation: pulse-glow 2s infinite; }
+      `}</style>
     </div>
   );
 };

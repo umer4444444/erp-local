@@ -3,10 +3,18 @@ import { LayoutDashboard, Package, ShoppingCart, Users, Briefcase, LogOut, User,
 import { NavLink } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { motion } from 'framer-motion';
+import { settingsAPI } from '../api';
 
 const Sidebar = () => {
   const { user, logout } = useAuth();
   const role = user?.role || 'admin';
+  const [companyName, setCompanyName] = React.useState('GlobalAI ERP');
+
+  React.useEffect(() => {
+    settingsAPI.get().then(res => {
+      if (res.data?.companyName) setCompanyName(res.data.companyName);
+    }).catch(e => console.error(e));
+  }, []);
 
   const menuItems = [
     { name: 'Dashboard',     icon: <LayoutDashboard size={18} />, path: '/',         roles: ['admin'] },
@@ -49,8 +57,8 @@ const Sidebar = () => {
           <Zap size={18} fill="currentColor" />
         </motion.div>
         <div>
-          <div style={{ fontSize: 17, fontWeight: 900, color: '#0f172a' }}>GlobalAI<span style={{ color: '#0a84ff' }}>ERP</span></div>
-          <div style={{ fontSize: 9, fontWeight: 800, color: '#94a3b8', textTransform: 'uppercase' }}>GlobalAI ERP v2.0</div>
+          <div style={{ fontSize: 17, fontWeight: 900, color: '#0f172a' }}>{companyName}</div>
+          <div style={{ fontSize: 9, fontWeight: 800, color: '#94a3b8', textTransform: 'uppercase' }}>ERP v2.0</div>
         </div>
       </div>
 

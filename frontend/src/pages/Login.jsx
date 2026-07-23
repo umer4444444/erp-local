@@ -19,6 +19,16 @@ const Login = () => {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [showPass, setShowPass] = useState(false);
+  const [companyName, setCompanyName] = useState('GlobalAI ERP');
+  const [showForgotPass, setShowForgotPass] = useState(false);
+
+  React.useEffect(() => {
+    import('../api').then(module => {
+      module.settingsAPI.get().then(res => {
+        if (res.data?.companyName) setCompanyName(res.data.companyName);
+      }).catch(() => {});
+    });
+  }, []);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -50,8 +60,8 @@ const Login = () => {
               <Zap size={22} fill="white" color="white" />
             </div>
             <div>
-              <div style={{ fontSize: 20, fontWeight: 900, color: 'white', letterSpacing: '-0.02em' }}>GlobalAI<span style={{ color: '#0a84ff' }}>ERP</span></div>
-              <div style={{ fontSize: 10, color: '#475569', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em' }}>GlobalAI ERP v2.0</div>
+              <div style={{ fontSize: 20, fontWeight: 900, color: 'white', letterSpacing: '-0.02em' }}>{companyName}</div>
+              <div style={{ fontSize: 10, color: '#475569', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em' }}>ERP v2.0</div>
             </div>
           </div>
         </motion.div>
@@ -86,7 +96,7 @@ const Login = () => {
 
         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.8 }}
           style={{ fontSize: 12, color: '#334155', fontWeight: 600 }}>
-          © 2026 GlobalAIERP Edition
+          © 2026 {companyName}
         </motion.div>
       </div>
 
@@ -143,6 +153,12 @@ const Login = () => {
               </div>
             </div>
 
+            <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: 8 }}>
+              <button type="button" onClick={() => setShowForgotPass(true)} style={{ background: 'none', border: 'none', color: '#0a84ff', fontWeight: 700, fontSize: 13, cursor: 'pointer' }}>
+                Forgot Password?
+              </button>
+            </div>
+
             <motion.button type="submit" disabled={loading}
               whileHover={!loading ? { scale: 1.02, boxShadow: '0 16px 40px rgba(10,132,255,0.3)' } : {}}
               whileTap={!loading ? { scale: 0.98 } : {}}
@@ -152,16 +168,29 @@ const Login = () => {
               ) : 'Sign In to Portal →'}
             </motion.button>
           </form>
-
-          <div style={{ marginTop: 32, padding: '20px', borderRadius: 16, background: 'rgba(10,132,255,0.05)', border: '1px solid rgba(10,132,255,0.1)' }}>
-            <div style={{ fontSize: 12, color: '#64748b', fontWeight: 700, marginBottom: 8, textTransform: 'uppercase', letterSpacing: '0.06em' }}>New staff credentials</div>
-            <div style={{ fontSize: 14, color: '#0f172a', fontWeight: 700 }}>
-              Password: <code style={{ background: 'rgba(10,132,255,0.08)', padding: '2px 8px', borderRadius: 6, color: '#0a84ff' }}>staff123</code>
-            </div>
-            <div style={{ fontSize: 12, color: '#94a3b8', fontWeight: 500, marginTop: 6 }}>Use the email you were registered with</div>
-          </div>
         </motion.div>
       </div>
+
+      <AnimatePresence>
+        {showForgotPass && (
+          <div style={{ position: 'fixed', inset: 0, zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 24 }}>
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setShowForgotPass(false)} style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.5)' }} />
+            <motion.div initial={{ scale: 0.9, y: 20 }} animate={{ scale: 1, y: 0 }} exit={{ scale: 0.9 }} style={{ background: 'white', borderRadius: 24, width: '100%', maxWidth: 400, position: 'relative', padding: 32 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 16 }}>
+                <div style={{ width: 44, height: 44, borderRadius: 12, background: '#eff6ff', color: '#0a84ff', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><Lock size={20} /></div>
+                <h2 style={{ fontSize: 20, fontWeight: 900 }}>Reset Password</h2>
+              </div>
+              <p style={{ color: '#64748b', fontSize: 14, fontWeight: 500, lineHeight: 1.5, marginBottom: 24 }}>
+                For security reasons, password resets must be authorized by your System Administrator. 
+                Please contact them to receive a new temporary password.
+              </p>
+              <button onClick={() => setShowForgotPass(false)} style={{ width: '100%', padding: '14px', borderRadius: 12, background: '#0a84ff', color: 'white', fontWeight: 800, border: 'none', cursor: 'pointer' }}>
+                Understood
+              </button>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
 
       <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
     </div>

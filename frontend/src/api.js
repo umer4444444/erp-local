@@ -94,6 +94,11 @@ export const managerAPI = {
   getActiveStaff:  () => API.get('/manager/staff/active'),
 };
 
+export const settingsAPI = {
+  get: () => API.get('/settings'),
+  update: (data) => API.post('/settings', data)
+};
+
 // New Day 6 API
 export const employeeAPI = {
   getAll: (params) => API.get('/employees', { params }),
@@ -103,6 +108,7 @@ export const employeeAPI = {
   delete: (id) => API.delete(`/employees/${id}`),
   getDepartments: () => API.get('/employees/departments'),
   getDesignations: () => API.get('/employees/designations'),
+  resetPassword: (id, newPassword) => API.post(`/employees/${id}/reset-password`, { newPassword })
 };
 
 export const usersAPI = {

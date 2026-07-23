@@ -136,8 +136,12 @@ router.post('/', auth, roleCheck(['admin', 'hr', 'manager']), async (req, res) =
       firstName, lastName, email, cnic, phone,
       departmentId, designationId, joiningDate,
       salaryType, salary, baseSalary, payRate, bankAccount,
-      position, status: empStatus
+      position, status: empStatus, password
     } = req.body;
+
+    if (!password) {
+      return res.status(400).json({ message: 'Password is required' });
+    }
 
     // Pre-check: is email already used by another employee?
     const existingEmp = await Employee.findOne({ where: { email }, paranoid: false });
@@ -198,7 +202,7 @@ router.post('/', auth, roleCheck(['admin', 'hr', 'manager']), async (req, res) =
 
     if (!user) {
       const salt = await bcrypt.genSalt(10);
-      const passwordHash = await bcrypt.hash('staff123', salt);
+      const passwordHash = await bcrypt.hash(password, salt);
 
       // Map position/department to role
       let deptName = '';
@@ -340,6 +344,35 @@ router.delete('/:id', auth, roleCheck(['admin', 'hr']), async (req, res) => {
     res.json({ message: 'Employee archived successfully' });
   } catch (err) {
     res.status(500).json({ message: err.message });
+  }
+});
+
+// ─── POST /api/employees/:id/reset-password ─────────────────────────────
+router.post('/:id/reset-password', auth, roleCheck(['admin', 'hr']), async (req, res) => {
+  try {
+    const employee = await Employee.findByPk(req.params.id);
+    if (!employee || !employee.userId) {
+      return res.status(404).json({ message: 'Employee or linked user account not found' });
+    }
+
+    const { newPassword } = req.body;
+    if (!newPassword) {
+      return res.status(400).json({ message: 'New password is required' });
+    }
+
+    const user = await User.findByPk(employee.userId);
+    if (!user) {
+      return res.status(404).json({ message: 'Linked user account not found' });
+    }
+
+    const salt = await bcrypt.genSalt(10);
+    user.passwordHash = await bcrypt.hash(newPassword, salt);
+    await user.save();
+
+    res.json({ message: 'Password reset successfully' });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: 'Server Error' });
   }
 });
 
