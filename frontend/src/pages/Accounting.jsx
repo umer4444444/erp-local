@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import API from '../api';
 import { Book, FileText, Activity, Plus, X, Trash2 } from 'lucide-react';
 
 const Accounting = () => {
@@ -32,17 +32,14 @@ const Accounting = () => {
   const fetchData = async () => {
     setLoading(true);
     try {
-      const headers = { Authorization: `Bearer ${localStorage.getItem('token')}` };
-      const baseUrl = process.env.REACT_APP_API_URL || 'http://localhost:5002';
-      
       if (activeTab === 'chart') {
-        const { data } = await axios.get(`${baseUrl}/api/accounting/accounts`, { headers });
+        const { data } = await API.get('/accounting/accounts');
         setAccounts(data);
       } else if (activeTab === 'journals') {
-        const { data } = await axios.get(`${baseUrl}/api/accounting/journal-entries`, { headers });
+        const { data } = await API.get('/accounting/journal-entries');
         setJournals(data);
       } else if (activeTab === 'trial') {
-        const { data } = await axios.get(`${baseUrl}/api/accounting/trial-balance`, { headers });
+        const { data } = await API.get('/accounting/trial-balance');
         setTrialBalance(data);
       }
     } catch (err) {
@@ -55,9 +52,7 @@ const Accounting = () => {
   const handleCreateAccount = async (e) => {
     e.preventDefault();
     try {
-      const headers = { Authorization: `Bearer ${localStorage.getItem('token')}` };
-      const baseUrl = process.env.REACT_APP_API_URL || 'http://localhost:5002';
-      await axios.post(`${baseUrl}/api/accounting/accounts`, newAccount, { headers });
+      await API.post('/accounting/accounts', newAccount);
       setShowAccountModal(false);
       setNewAccount({ code: '', name: '', type: 'asset' });
       fetchData();
@@ -99,9 +94,7 @@ const Accounting = () => {
     }
 
     try {
-      const headers = { Authorization: `Bearer ${localStorage.getItem('token')}` };
-      const baseUrl = process.env.REACT_APP_API_URL || 'http://localhost:5002';
-      await axios.post(`${baseUrl}/api/accounting/journal-entries`, newJournal, { headers });
+      await API.post('/accounting/journal-entries', newJournal);
       setShowJournalModal(false);
       setNewJournal({
         date: new Date().toISOString().split('T')[0],
@@ -123,9 +116,7 @@ const Accounting = () => {
     if (showJournalModal && accounts.length === 0) {
       const fetchAccounts = async () => {
         try {
-          const headers = { Authorization: `Bearer ${localStorage.getItem('token')}` };
-          const baseUrl = process.env.REACT_APP_API_URL || 'http://localhost:5002';
-          const { data } = await axios.get(`${baseUrl}/api/accounting/accounts`, { headers });
+          const { data } = await API.get('/accounting/accounts');
           setAccounts(data);
         } catch (err) {
           console.error(err);
