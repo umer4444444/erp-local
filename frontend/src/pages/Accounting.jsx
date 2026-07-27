@@ -165,7 +165,7 @@ const Accounting = () => {
   );
 
   return (
-    <div style={{ padding: 24, background: '#f9fafb', minHeight: '100vh', fontFamily: 'Outfit, sans-serif' }}>
+    <div style={{ padding: '80px 24px 24px 24px', background: '#f9fafb', minHeight: '100vh', fontFamily: 'Outfit, sans-serif' }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
         <div>
           <h1 style={{ fontSize: 24, fontWeight: 700, color: '#111827', margin: 0 }}>Accounting</h1>
