@@ -26,7 +26,11 @@ const Supplier = sequelize.define('Supplier', {
   },
   category: {
     type: DataTypes.STRING, // e.g. "Pharmacy", "Groceries"
-  }
+  },
+  companyId: {
+    type: DataTypes.UUID,
+    allowNull: true,
+  },
 }, {
   tableName: 'suppliers',
   freezeTableName: true,

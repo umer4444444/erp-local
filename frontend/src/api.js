@@ -189,6 +189,8 @@ export const reportsAPI = {
   getSalesperson: () => API.get('/reports/salesperson'),
   getDaily: () => API.get('/reports/daily'),
   getCustomerReport: (id) => API.get(`/reports/customer/${id}`),
+  getSalesByArea: () => API.get('/reports/sales-by-area'),
+  getCollections: () => API.get('/reports/collections'),
 };
 
 export const advanceAPI = {

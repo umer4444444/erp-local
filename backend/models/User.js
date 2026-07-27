@@ -31,7 +31,7 @@ const User = sequelize.define('User', {
     allowNull: false,
   },
   role: {
-    type: DataTypes.ENUM('admin', 'manager', 'cashier', 'hr', 'inventory', 'pharmacist', 'expenses', 'operations', 'finance'),
+    type: DataTypes.ENUM('superadmin', 'owner', 'company_admin', 'admin', 'manager', 'cashier', 'hr', 'inventory', 'pharmacist', 'expenses', 'operations', 'finance', 'sales_rep', 'driver', 'auditor'),
     defaultValue: 'cashier',
     allowNull: false,
   },
@@ -59,6 +59,14 @@ const User = sequelize.define('User', {
   isActive: {
     type: DataTypes.BOOLEAN,
     defaultValue: true,
+  },
+  companyId: {
+    type: DataTypes.UUID,
+    allowNull: true,
+  },
+  branchId: {
+    type: DataTypes.UUID,
+    allowNull: true,
   },
 }, {
   tableName: 'users',

@@ -36,6 +36,10 @@ const AuditLog = sequelize.define('AuditLog', {
     type: DataTypes.STRING,
     allowNull: true,
   },
+  companyId: {
+    type: DataTypes.UUID,
+    allowNull: true,
+  },
 }, {
   tableName: 'audit_logs',
   freezeTableName: true,

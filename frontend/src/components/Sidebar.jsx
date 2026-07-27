@@ -6,20 +6,25 @@ import { motion } from 'framer-motion';
 import { settingsAPI } from '../api';
 
 const Sidebar = () => {
-  const { user, logout } = useAuth();
+  const { user, logout, activeCompany } = useAuth();
   const role = user?.role || 'admin';
   const [companyName, setCompanyName] = React.useState('GlobalAI ERP');
 
   React.useEffect(() => {
-    settingsAPI.get().then(res => {
-      if (res.data?.companyName) setCompanyName(res.data.companyName);
-    }).catch(e => console.error(e));
-  }, []);
+    if (activeCompany) {
+      setCompanyName(activeCompany.name);
+    } else {
+      settingsAPI.get().then(res => {
+        if (res.data?.companyName) setCompanyName(res.data.companyName);
+      }).catch(e => console.error(e));
+    }
+  }, [activeCompany]);
 
   const menuItems = [
     { name: 'Dashboard',     icon: <LayoutDashboard size={18} />, path: '/',         roles: ['admin'] },
     { name: 'Manager Hub',   icon: <Shield size={18} />,          path: '/manager',   roles: ['admin', 'manager'] },
     { name: 'Inventory',     icon: <Package size={18} />,          path: '/inventory', roles: ['admin', 'inventory', 'manager'] },
+    { name: 'Accounting',    icon: <DollarSign size={18} />,       path: '/accounting', roles: ['admin', 'manager', 'finance'] },
     { name: 'Sales POS',     icon: <ShoppingCart size={18} />,     path: '/sales',     roles: ['admin', 'cashier', 'manager'] },
     { name: 'Sales History', icon: <DollarSign size={18} />,       path: '/sales/history', roles: ['admin', 'cashier', 'manager'] },
     { name: 'Revenue',       icon: <DollarSign size={18} />,       path: '/revenue',   roles: ['admin', 'manager', 'finance'] },
@@ -62,7 +67,7 @@ const Sidebar = () => {
         </div>
       </div>
 
-      <nav style={{ flex: 1, overflowY: 'auto', paddingRight: 4, scrollbarWidth: 'none' }}>
+      <nav style={{ flex: 1, minHeight: 0, overflowY: 'auto', paddingRight: 4, scrollbarWidth: 'none' }}>
         <ul style={{ listStyle: 'none', margin: 0, padding: 0, display: 'flex', flexDirection: 'column', gap: 2 }}>
           {filtered.map(item => (
             <li key={item.name}>
@@ -77,6 +82,18 @@ const Sidebar = () => {
           ))}
         </ul>
       </nav>
+
+      <button 
+        onClick={() => window.dispatchEvent(new Event('open-ai'))}
+        style={{ 
+          display: 'flex', alignItems: 'center', gap: 10, padding: '12px 14px', 
+          borderRadius: 14, border: 'none', background: 'linear-gradient(135deg, #0a84ff, #4f46e5)', 
+          color: 'white', cursor: 'pointer', fontWeight: 800, marginTop: 16, fontSize: 14,
+          boxShadow: '0 4px 14px rgba(10,132,255,0.3)'
+        }}
+      >
+        <Zap size={16} fill="white" /> Ask AI Assistant
+      </button>
 
       <button onClick={logout} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 14px', borderRadius: 12, border: 'none', background: 'transparent', color: '#94a3b8', cursor: 'pointer', fontWeight: 700, marginTop: 16 }}>
         <LogOut size={16} /> Sign Out

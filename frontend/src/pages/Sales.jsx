@@ -112,6 +112,7 @@ const Sales = () => {
   const [isOnline, setIsOnline] = useState(navigator.onLine);
   const [pendingCount, setPendingCount] = useState(0);
   const [syncingOffline, setSyncingOffline] = useState(false);
+  const [pricingMode, setPricingMode] = useState('retail');
 
   const [leftPanelWidth, setLeftPanelWidth] = useState(480);
   const isDragging = useRef(false);
@@ -234,17 +235,18 @@ const Sales = () => {
         }
         return prev.map(i => i.productId === product.id ? { ...i, quantity: i.quantity + 1 } : i);
       } else {
+        const itemPrice = pricingMode === 'wholesale' && product.wholesalePrice ? parseFloat(product.wholesalePrice) : parseFloat(product.price);
         return [...prev, { 
           productId: product.id, 
           name: product.name, 
-          price: parseFloat(product.price), 
+          price: itemPrice, 
           quantity: 1, 
           stock: product.stock,
           discountAmount: 0 
         }];
       }
     });
-  }, []);
+  }, [pricingMode]);
 
   const removeFromCart = useCallback((productId) => {
     setCart(prev => prev.filter(item => item.productId !== productId));
@@ -354,8 +356,16 @@ const Sales = () => {
         <div style={{ padding: '24px 28px', borderBottom: '1px solid #f1f5f9' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
             <h2 style={{ fontSize: 20, fontWeight: 900, color: '#0f172a', margin: 0 }}>Current Cart</h2>
-            <div style={{ fontSize: 12, fontWeight: 800, color: '#0a84ff', background: '#eff6ff', padding: '4px 10px', borderRadius: 8 }}>
-              Cashier: {currentUser.name || 'Staff'}
+            <div style={{ display: 'flex', gap: 10 }}>
+              <button 
+                onClick={() => setPricingMode(pricingMode === 'retail' ? 'wholesale' : 'retail')}
+                style={{ fontSize: 11, fontWeight: 800, color: pricingMode === 'wholesale' ? '#fff' : '#0a84ff', background: pricingMode === 'wholesale' ? '#8b5cf6' : '#eff6ff', border: 'none', padding: '4px 10px', borderRadius: 8, cursor: 'pointer' }}
+              >
+                {pricingMode === 'retail' ? 'RETAIL' : 'WHOLESALE'} MODE
+              </button>
+              <div style={{ fontSize: 12, fontWeight: 800, color: '#0a84ff', background: '#eff6ff', padding: '4px 10px', borderRadius: 8 }}>
+                Cashier: {currentUser.name || 'Staff'}
+              </div>
             </div>
           </div>
           

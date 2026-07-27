@@ -29,6 +29,10 @@ const Expense = sequelize.define('Expense', {
   userId: {
     type: DataTypes.UUID,
   },
+  companyId: {
+    type: DataTypes.UUID,
+    allowNull: true,
+  },
 }, {
   tableName: 'expenses',
   freezeTableName: true,

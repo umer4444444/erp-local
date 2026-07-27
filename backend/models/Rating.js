@@ -20,6 +20,10 @@ const Rating = sequelize.define('Rating', {
   comment: {
     type: DataTypes.TEXT,
   },
+  companyId: {
+    type: DataTypes.UUID,
+    allowNull: true,
+  },
 }, {
   tableName: 'ratings',
   freezeTableName: true,

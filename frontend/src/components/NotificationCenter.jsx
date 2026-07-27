@@ -71,7 +71,7 @@ const NotificationCenter = ({ user }) => {
   }, [user]);
 
   return (
-    <div style={{ position: 'fixed', top: 24, right: 40, zIndex: 1000, display: 'flex', gap: 12, alignItems: 'center' }}>
+    <div style={{ position: 'absolute', top: 24, right: 40, zIndex: 100, display: 'flex', gap: 12, alignItems: 'center' }}>
       
       {/* Search/User Bar Placeholder or similar if needed, but we just want the Bell */}
       <div style={{ position: 'relative' }}>
@@ -164,6 +164,15 @@ const NotificationCenter = ({ user }) => {
           <div style={{ fontSize: 13, fontWeight: 800, color: '#0f172a' }}>{user?.name}</div>
           <div style={{ fontSize: 10, fontWeight: 700, color: '#94a3b8', textTransform: 'uppercase' }}>{user?.role}</div>
         </div>
+      </div>
+
+      {/* Google Translate Widget */}
+      <div style={{ 
+        height: 48, padding: '0 12px', borderRadius: 16, background: 'white', 
+        border: '1px solid rgba(0,0,0,0.05)', boxShadow: '0 8px 30px rgba(0,0,0,0.06)',
+        display: 'flex', alignItems: 'center', overflow: 'hidden'
+      }}>
+        <div id="google_translate_element" style={{ transform: 'translateY(4px)' }}></div>
       </div>
 
     </div>

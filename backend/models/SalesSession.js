@@ -35,6 +35,10 @@ const SalesSession = sequelize.define('SalesSession', {
     type: DataTypes.ENUM('active', 'completed'),
     defaultValue: 'active',
   },
+  companyId: {
+    type: DataTypes.UUID,
+    allowNull: true,
+  },
 }, {
   tableName: 'sales_sessions',
   freezeTableName: true,

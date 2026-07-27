@@ -40,7 +40,11 @@ const Leave = sequelize.define('Leave', {
   },
   rejectionReason: {
     type: DataTypes.TEXT,
-  }
+  },
+  companyId: {
+    type: DataTypes.UUID,
+    allowNull: true,
+  },
 }, {
   tableName: 'leaves',
   freezeTableName: true,

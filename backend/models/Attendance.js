@@ -42,7 +42,11 @@ const Attendance = sequelize.define('Attendance', {
   },
   notes: {
     type: DataTypes.TEXT,
-  }
+  },
+  companyId: {
+    type: DataTypes.UUID,
+    allowNull: true,
+  },
 }, {
   tableName: 'attendance',
   freezeTableName: true,

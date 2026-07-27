@@ -28,6 +28,10 @@ const ProductVariation = sequelize.define('ProductVariation', {
     type: DataTypes.INTEGER,
     defaultValue: 0,
   },
+  companyId: {
+    type: DataTypes.UUID,
+    allowNull: true,
+  },
 }, {
   tableName: 'product_variations',
   freezeTableName: true,

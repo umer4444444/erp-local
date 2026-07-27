@@ -9,19 +9,30 @@ export const AuthProvider = ({ children }) => {
     return saved ? JSON.parse(saved) : null;
   });
   const [token, setToken] = useState(localStorage.getItem('token'));
+  const [activeCompany, setActiveCompany] = useState(() => {
+    const saved = localStorage.getItem('activeCompany');
+    return saved ? JSON.parse(saved) : null;
+  });
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     if (token) {
       localStorage.setItem('token', token);
-      if (user) localStorage.setItem('user', JSON.stringify(user));
+      if (user) {
+        localStorage.setItem('user', JSON.stringify(user));
+        if (!activeCompany && user.companyId) {
+          setActiveCompany({ id: user.companyId, name: 'Main Company' }); // Will be hydrated with actual data later
+        }
+      }
+      if (activeCompany) localStorage.setItem('activeCompany', JSON.stringify(activeCompany));
       setLoading(false);
     } else {
       localStorage.removeItem('token');
       localStorage.removeItem('user');
+      localStorage.removeItem('activeCompany');
       setLoading(false);
     }
-  }, [token, user]);
+  }, [token, user, activeCompany]);
 
   const login = async (email, password) => {
     const res = await authAPI.login({ email, password });
@@ -33,10 +44,11 @@ export const AuthProvider = ({ children }) => {
   const logout = () => {
     setToken(null);
     setUser(null);
+    setActiveCompany(null);
   };
 
   return (
-    <AuthContext.Provider value={{ user, token, login, logout, loading }}>
+    <AuthContext.Provider value={{ user, token, activeCompany, setActiveCompany, login, logout, loading }}>
       {children}
     </AuthContext.Provider>
   );

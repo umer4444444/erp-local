@@ -35,7 +35,11 @@ const PurchaseOrder = sequelize.define('PurchaseOrder', {
   },
   notes: {
     type: DataTypes.TEXT,
-  }
+  },
+  companyId: {
+    type: DataTypes.UUID,
+    allowNull: true,
+  },
 }, {
   tableName: 'purchase_orders',
   freezeTableName: true,

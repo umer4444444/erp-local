@@ -28,6 +28,22 @@ const Product = sequelize.define('Product', {
     type: DataTypes.INTEGER,
     defaultValue: 0,
   },
+  minStock: {
+    type: DataTypes.INTEGER,
+    defaultValue: 10,
+  },
+  wholesalePrice: {
+    type: DataTypes.DECIMAL(10, 2),
+    allowNull: true,
+  },
+  barcode: {
+    type: DataTypes.STRING,
+    allowNull: true,
+  },
+  unit: {
+    type: DataTypes.ENUM('piece', 'box', 'carton', 'outer', 'pack', 'case', 'hour', 'day', 'month', 'kg', 'ton'),
+    defaultValue: 'piece',
+  },
   categoryId: {
     type: DataTypes.UUID,
   },
@@ -40,6 +56,31 @@ const Product = sequelize.define('Product', {
   },
   manufacturer: {
     type: DataTypes.STRING,
+  },
+  // --- New Sprint 5 Business Unit Fields ---
+  oemNumber: {
+    type: DataTypes.STRING,
+    comment: 'Original Equipment Manufacturer number for Auto Parts',
+  },
+  vehicleCompatibility: {
+    type: DataTypes.JSON,
+    comment: 'List of compatible vehicles for Auto Parts',
+  },
+  equipmentType: {
+    type: DataTypes.STRING,
+    comment: 'Type of equipment for Construction Contracting',
+  },
+  hourlyRate: {
+    type: DataTypes.DECIMAL(10, 2),
+    comment: 'Hourly rate for Labour Hire or Equipment rental',
+  },
+  metadata: {
+    type: DataTypes.JSON,
+    comment: 'Flexible JSON for unstructured data across different business units',
+  },
+  companyId: {
+    type: DataTypes.UUID,
+    allowNull: true,
   },
 }, {
   tableName: 'products',

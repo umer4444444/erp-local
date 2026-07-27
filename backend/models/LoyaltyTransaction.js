@@ -24,6 +24,10 @@ const LoyaltyTransaction = sequelize.define('LoyaltyTransaction', {
     type: DataTypes.UUID,
     allowNull: true,
   },
+  companyId: {
+    type: DataTypes.UUID,
+    allowNull: true,
+  },
 }, {
   tableName: 'loyalty_transactions',
   freezeTableName: true,

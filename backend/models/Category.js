@@ -19,6 +19,10 @@ const Category = sequelize.define('Category', {
   description: {
     type: DataTypes.STRING,
   },
+  companyId: {
+    type: DataTypes.UUID,
+    allowNull: true,
+  },
 }, {
   tableName: 'categories',
   freezeTableName: true,

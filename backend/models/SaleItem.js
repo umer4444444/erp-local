@@ -37,6 +37,10 @@ const SaleItem = sequelize.define('SaleItem', {
     type: DataTypes.DECIMAL(10, 2),
     defaultValue: 0,
   },
+  companyId: {
+    type: DataTypes.UUID,
+    allowNull: true,
+  },
 }, {
   tableName: 'sale_items',
   freezeTableName: true,

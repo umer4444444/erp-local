@@ -21,6 +21,10 @@ const Bid = sequelize.define('Bid', {
     type: DataTypes.ENUM('pending', 'accepted', 'rejected'),
     defaultValue: 'pending',
   },
+  companyId: {
+    type: DataTypes.UUID,
+    allowNull: true,
+  },
 }, {
   tableName: 'bids',
   freezeTableName: true,

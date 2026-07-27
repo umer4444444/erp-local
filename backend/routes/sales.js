@@ -1,5 +1,5 @@
 const express = require('express');
-const { Sale, SaleItem, Product, Customer, StockLog, SalesSession, User, sequelize } = require('../models');
+const { Sale, SaleItem, Product, Customer, StockLog, SalesSession, User, SalesTarget, sequelize } = require('../models');
 const { auth, roleCheck } = require('../middleware/auth');
 const { Op } = require('sequelize');
 const router = express.Router();
@@ -116,6 +116,23 @@ router.post('/', auth, async (req, res) => {
       }, { transaction });
     }
 
+    // Commission Engine: Update Sales Target
+    const currentDate = new Date();
+    const target = await SalesTarget.findOne({
+      where: {
+        userId: req.user.id,
+        month: currentDate.getMonth() + 1,
+        year: currentDate.getFullYear()
+      },
+      transaction
+    });
+
+    if (target) {
+      await target.update({
+        achievedAmount: parseFloat(target.achievedAmount || 0) + parseFloat(grandTotal)
+      }, { transaction });
+    }
+
     await transaction.commit();
     res.status(201).json(sale);
   } catch (err) {
@@ -197,6 +214,23 @@ router.post('/:id/void', auth, roleCheck(['admin', 'manager', 'hr']), async (req
 
     await sale.update({ status: 'voided', voidReason: reason }, { transaction });
 
+    // Deduct from Sales Target
+    const saleDate = new Date(sale.createdAt);
+    const target = await SalesTarget.findOne({
+      where: {
+        userId: sale.userId,
+        month: saleDate.getMonth() + 1,
+        year: saleDate.getFullYear()
+      },
+      transaction
+    });
+
+    if (target) {
+      await target.update({
+        achievedAmount: Math.max(0, parseFloat(target.achievedAmount || 0) - parseFloat(sale.grandTotal || 0))
+      }, { transaction });
+    }
+
     await transaction.commit();
     res.json({ message: 'Sale voided and stock restored' });
   } catch (err) {
@@ -236,6 +270,23 @@ router.post('/:id/refund', auth, roleCheck(['admin', 'manager', 'hr']), async (r
 
     await sale.update({ status: 'refunded', voidReason: reason }, { transaction });
 
+    // Deduct from Sales Target
+    const saleDate = new Date(sale.createdAt);
+    const target = await SalesTarget.findOne({
+      where: {
+        userId: sale.userId,
+        month: saleDate.getMonth() + 1,
+        year: saleDate.getFullYear()
+      },
+      transaction
+    });
+
+    if (target) {
+      await target.update({
+        achievedAmount: Math.max(0, parseFloat(target.achievedAmount || 0) - parseFloat(sale.grandTotal || 0))
+      }, { transaction });
+    }
+
     await transaction.commit();
     res.json({ message: 'Sale refunded and stock restored' });
   } catch (err) {
@@ -250,7 +301,11 @@ router.get('/eod', auth, async (req, res) => {
     const startOfDay = new Date();
     startOfDay.setHours(0,0,0,0);
     const sales = await Sale.findAll({
-      where: { createdAt: { [Op.gte]: startOfDay }, status: 'active' }
+      where: { 
+        createdAt: { [Op.gte]: startOfDay }, 
+        status: 'active',
+        userId: req.user.id
+      }
     });
     const summary = sales.reduce((acc, s) => {
       acc.total += parseFloat(s.grandTotal);
@@ -331,6 +386,46 @@ router.get('/analytics', auth, async (req, res) => {
         total: sales.length
       }
     });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
+// Commission API Endpoint
+router.get('/commissions', auth, async (req, res) => {
+  try {
+    const { month, year } = req.query;
+    const m = parseInt(month) || new Date().getMonth() + 1;
+    const y = parseInt(year) || new Date().getFullYear();
+
+    const targets = await SalesTarget.findAll({
+      where: { month: m, year: y },
+      include: [{ model: User, attributes: ['id', 'name', 'email', 'role'] }]
+    });
+
+    const commissions = targets.map(t => {
+      const achieved = parseFloat(t.achievedAmount || 0);
+      const targetAmt = parseFloat(t.targetAmount || 0);
+      const rate = parseFloat(t.commissionRate || 0);
+      
+      // Basic rules: If target reached, apply commission rate on achieved amount
+      const isMet = achieved >= targetAmt;
+      const commissionEarned = isMet ? (achieved * (rate / 100)) : 0;
+
+      return {
+        id: t.id,
+        user: t.User,
+        targetAmount: targetAmt,
+        achievedAmount: achieved,
+        commissionRate: rate,
+        isMet,
+        commissionEarned,
+        month: t.month,
+        year: t.year
+      };
+    });
+
+    res.json(commissions);
   } catch (err) {
     res.status(500).json({ message: err.message });
   }

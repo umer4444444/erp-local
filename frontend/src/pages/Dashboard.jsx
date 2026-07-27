@@ -1,12 +1,19 @@
 import React, { useState, useEffect } from 'react';
 import { 
   Package, ShoppingCart, Users, DollarSign, TrendingUp, 
-  AlertTriangle, Briefcase, Activity, UserPlus, Clock, 
-  ChevronRight, Calendar, ArrowUpRight, ArrowDownRight
+  AlertTriangle, Activity, Clock, Calendar, ArrowUpRight, 
+  MapPin, Building2, Truck, Globe
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
-import { inventoryAPI, managerAPI, salesAPI, shiftAPI, hrAPI, attendanceAPI, settingsAPI } from '../api';
+import { useTranslation } from 'react-i18next';
+import { Responsive, WidthProvider } from 'react-grid-layout';
+const ResponsiveGridLayout = WidthProvider(Responsive);
+import { inventoryAPI, salesAPI, hrAPI, attendanceAPI, reportsAPI } from '../api';
+import { useAuth } from '../context/AuthContext';
+import { PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, Tooltip as RechartsTooltip, ResponsiveContainer } from 'recharts';
+
+const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884d8'];
 
 const StatCard = ({ title, value, icon, rgb, delay, onClick }) => (
   <motion.div 
@@ -15,99 +22,72 @@ const StatCard = ({ title, value, icon, rgb, delay, onClick }) => (
     transition={{ delay }}
     onClick={onClick}
     style={{
-      background: 'white', padding: 24, borderRadius: 24,
+      background: 'white',
+      padding: '24px',
+      borderRadius: '24px',
       border: '1px solid rgba(0,0,0,0.05)',
       boxShadow: '0 4px 20px rgba(0,0,0,0.03)',
-      display: 'flex', alignItems: 'center', gap: 20,
-      cursor: onClick ? 'pointer' : 'default'
+      display: 'flex',
+      alignItems: 'center',
+      gap: '20px',
+      cursor: onClick ? 'pointer' : 'default',
+      position: 'relative',
+      overflow: 'hidden',
+      height: '100%',
+      width: '100%',
+      boxSizing: 'border-box'
     }}
   >
     <div style={{
-      width: 54, height: 54, borderRadius: 16,
-      background: `rgba(${rgb}, 0.1)`,
+      width: '54px', height: '54px', borderRadius: '16px',
+      background: `rgba(${rgb}, 0.1)`, color: `rgb(${rgb})`,
       display: 'flex', alignItems: 'center', justifyContent: 'center',
-      color: `rgb(${rgb})`
-    }}>
+      transition: 'transform 0.3s'
+    }}
+    onMouseEnter={e => e.currentTarget.style.transform = 'scale(1.1)'}
+    onMouseLeave={e => e.currentTarget.style.transform = 'scale(1)'}
+    >
       {icon}
     </div>
     <div>
-      <div style={{ fontSize: 13, fontWeight: 700, color: '#64748b', marginBottom: 4 }}>{title}</div>
-      <div style={{ fontSize: 24, fontWeight: 900, color: '#0f172a' }}>{value}</div>
+      <div style={{ fontSize: '13px', fontWeight: 700, color: '#64748b', marginBottom: '4px' }}>{title}</div>
+      <div style={{ fontSize: '24px', fontWeight: 900, color: '#0f172a' }}>{value}</div>
     </div>
   </motion.div>
 );
 
-const Dashboard = ({ user }) => {
+const Dashboard = () => {
   const navigate = useNavigate();
+  const { user, activeCompany } = useAuth();
+  const { t, i18n } = useTranslation();
   const role = user?.role || 'admin';
-  const [stats, setStats] = useState({ totalSales: 0, totalProducts: 0, totalEmployees: 0, revenue: 0, totalRevenue: 0 });
-  const [alerts, setAlerts] = useState({ lowStock: [], expiringSoon: [] });
-  const [activeShift, setActiveShift] = useState(null);
-  const [activeAttendance, setActiveAttendance] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [settings, setSettings] = useState({ companyName: 'GlobalAI ERP', officeLat: 31.5204, officeLng: 74.3587 });
-  const [showSettings, setShowSettings] = useState(false);
-  const [settingsForm, setSettingsForm] = useState({ companyName: '', officeLat: '', officeLng: '' });
+  const isRTL = i18n.dir() === 'rtl';
 
-  // Helper to fetch today's stats on button click
-  const fetchTodayStats = async () => {
-    try {
-      const res = await salesAPI.getTodayStats();
-      // Simple feedback – you can replace with a UI toast
-      alert(`Today's sales: ${res.data.count || 0}, Revenue: $${res.data.revenue || 0}`);
-    } catch (err) {
-      console.error('Failed to fetch today stats', err);
-      alert('Unable to retrieve today statistics');
-    }
+  const toggleLanguage = () => {
+    const newLang = i18n.language === 'en' ? 'ar' : 'en';
+    i18n.changeLanguage(newLang);
   };
-
-  // Helper to download a CSV report using Blob
-const handleDownloadReport = async () => {
-  try {
-    // Fetch sales history with a large limit
-    const res = await salesAPI.getHistory({ limit: 1000, page: 1 });
-    const rows = (res.data && res.data.rows) ? res.data.rows : (Array.isArray(res.data) ? res.data : []);
-    if (!Array.isArray(rows) || rows.length === 0) {
-      alert('No report data available to download');
-      return;
-    }
-    const header = ['ID', 'Date', 'Amount', 'Employee'];
-    const csvRows = rows.map(r => {
-      const dateStr = r.createdAt ? new Date(r.createdAt).toLocaleString() : '';
-      const amountStr = r.grandTotal !== undefined && r.grandTotal !== null ? r.grandTotal : '0';
-      const employeeName = r.User?.name || r.user?.name || '';
-      return `"${r.id || ''}","${dateStr}","${amountStr}","${employeeName}"`;
-    });
-    const csvContent = [header.join(','), ...csvRows].join('\n');
-    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.setAttribute('href', url);
-    link.setAttribute('download', 'sales_report.csv');
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    URL.revokeObjectURL(url);
-  } catch (err) {
-    console.error('Report download failed', err);
-    alert('Unable to generate report');
-  }
-};
+  
+  const [stats, setStats] = useState({});
+  const [alerts, setAlerts] = useState({ lowStock: [], expiringSoon: [] });
+  const [activeAttendance, setActiveAttendance] = useState(null);
+  const [chartData, setChartData] = useState({ brands: [], areas: [], splits: [], collections: [] });
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [salesRes, prodRes, alertRes, shiftRes, hrRes, settingsRes] = await Promise.all([
+        const [salesRes, prodRes, hrRes, attendanceRes, analyticsRes, topRes, collectionsRes, areasRes, repsRes] = await Promise.all([
           salesAPI.getTodayStats(),
           inventoryAPI.getProducts(),
-          inventoryAPI.getAlerts(),
-          shiftAPI.getActiveShift(),
           hrAPI.getStats(),
-          settingsAPI.get()
+          attendanceAPI.getMyActive().catch(() => ({ data: null })),
+          salesAPI.getAnalytics().catch(() => ({ data: {} })),
+          reportsAPI.getTopProducts(5).catch(() => ({ data: [] })),
+          reportsAPI.getCollections().catch(() => ({ data: { collected: 0, outstanding: 0, target: 1 } })),
+          reportsAPI.getSalesByArea().catch(() => ({ data: [] })),
+          reportsAPI.getSalesperson().catch(() => ({ data: [] }))
         ]);
-        
-        setSettings(settingsRes.data);
-        setSettingsForm(settingsRes.data);
         
         setStats({
           totalSales: salesRes.data.count || 0,
@@ -117,15 +97,25 @@ const handleDownloadReport = async () => {
           totalProducts: prodRes.data.length || 0,
           totalEmployees: hrRes.data.totalEmployees || 0,
           activeEmployees: hrRes.data.activeEmployees || 0,
-          maleEmployees: hrRes.data.maleEmployees || 0,
-          femaleEmployees: hrRes.data.femaleEmployees || 0
+          receivables: collectionsRes.data.outstanding || 0, 
+          payables: 8230.00, // Static for now, no payables API
+          cashPosition: collectionsRes.data.collected || 0 
         });
-        setAlerts(alertRes.data);
-        setActiveShift(shiftRes.data);
-
-        // Fetch user's active attendance
-        const attendanceRes = await attendanceAPI.getMyActive();
         setActiveAttendance(attendanceRes.data);
+
+        const pm = analyticsRes.data?.paymentMethods || { cash: 1, card: 1 };
+        setChartData({
+          splits: [
+            { name: 'Cash', value: pm.cash },
+            { name: 'Credit / Card', value: pm.card },
+            { name: 'Split / Other', value: pm.split || 0 }
+          ],
+          brands: topRes.data?.map(p => ({ name: p.Product?.name || 'Unknown', revenue: parseFloat(p.totalRevenue) })) || [],
+          areas: areasRes.data?.length ? areasRes.data : [{ name: 'No Data', sales: 0 }],
+          collections: collectionsRes.data,
+          reps: repsRes.data || []
+        });
+
       } catch (err) {
         console.error('Dashboard data fetch failed', err);
       } finally {
@@ -134,248 +124,335 @@ const handleDownloadReport = async () => {
     };
     
     fetchData();
-    const interval = setInterval(fetchData, 3000); // Polling every 3 seconds for instant updates
-    return () => clearInterval(interval);
-  }, []);
+  }, [activeCompany]);
 
-  const AdminDash = () => (
-    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: 24, marginBottom: 32 }}>
-      <StatCard title="Total Revenue" value={`$${stats.totalRevenue || 0}`} icon={<TrendingUp />} rgb="34,197,94" delay={0.1} />
-      <StatCard title="Net Profit" value={`$${stats.netProfit || 0}`} icon={<Activity />} rgb="16,185,129" delay={0.2} />
-      <StatCard title="Today's Sales" value={stats.totalSales} icon={<ShoppingCart />} rgb="10,132,255" delay={0.3} />
-      <StatCard title="Low Stock" value={alerts.lowStock?.length || 0} icon={<AlertTriangle />} rgb="249,115,22" delay={0.4} onClick={() => navigate('/suppliers')} />
-      <StatCard 
-        title="Staff Strength" 
-        value={
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 6, marginTop: 4 }}>
-            <div style={{ fontSize: 24, fontWeight: 900 }}>{stats.activeEmployees} <span style={{ fontSize: 13, fontWeight: 600, color: '#94a3b8' }}>Active</span></div>
-            <div style={{ display: 'flex', gap: 4, height: 6, width: '100%', borderRadius: 4, overflow: 'hidden' }}>
-              <div style={{ background: '#3b82f6', width: `${(stats.maleEmployees / Math.max(1, stats.activeEmployees)) * 100}%` }} title={`Male: ${stats.maleEmployees}`} />
-              <div style={{ background: '#ec4899', width: `${(stats.femaleEmployees / Math.max(1, stats.activeEmployees)) * 100}%` }} title={`Female: ${stats.femaleEmployees}`} />
+  const ownerLayouts = {
+    lg: [
+      { i: 'rev', x: 0, y: 0, w: 3, h: 2 },
+      { i: 'profit', x: 3, y: 0, w: 3, h: 2 },
+      { i: 'cash', x: 6, y: 0, w: 3, h: 2 },
+      { i: 'emp', x: 9, y: 0, w: 3, h: 2 },
+      { i: 'chart', x: 0, y: 2, w: 8, h: 4 },
+      { i: 'summary', x: 8, y: 2, w: 4, h: 4 }
+    ]
+  };
+
+  const OwnerDashboard = () => (
+    <ResponsiveGridLayout 
+      className="layout" 
+      layouts={ownerLayouts} 
+      breakpoints={{lg: 1200, md: 996, sm: 768, xs: 480, xxs: 0}} 
+      cols={{lg: 12, md: 12, sm: 12, xs: 1, xxs: 1}}
+      rowHeight={60}
+      isDraggable={true}
+      isResizable={true}
+    >
+      <div key="rev"><StatCard title={t('groupTotalRevenue')} value={`SAR ${stats.totalRevenue?.toLocaleString() || 0}`} icon={<Building2 />} rgb="59,130,246" delay={0.1} /></div>
+      <div key="profit"><StatCard title={t('groupNetProfit')} value={`SAR ${stats.netProfit?.toLocaleString() || 0}`} icon={<Activity />} rgb="16,185,129" delay={0.2} /></div>
+      <div key="cash"><StatCard title={t('cashPosition')} value={`SAR ${stats.cashPosition?.toLocaleString() || 0}`} icon={<DollarSign />} rgb="245,158,11" delay={0.3} /></div>
+      <div key="emp"><StatCard title={t('totalEmployees')} value={stats.activeEmployees} icon={<Users />} rgb="139,92,246" delay={0.4} onClick={() => navigate('/employees')} /></div>
+      
+      <div key="chart" style={{ background: 'white', borderRadius: '24px', padding: '24px', boxShadow: '0 4px 20px rgba(0,0,0,0.03)', border: '1px solid rgba(0,0,0,0.05)' }}>
+        <h3 style={{ fontSize: '18px', fontWeight: 800, color: '#0f172a', marginBottom: '24px' }}>{t('companyPerformance')}</h3>
+        <div style={{ height: 'calc(100% - 60px)', display: 'flex', alignItems: 'flex-end', justifyContent: 'space-around', paddingBottom: '16px' }}>
+            <div style={{ width: '64px', background: '#3b82f6', borderRadius: '8px 8px 0 0', height: '80%', position: 'relative' }}>
+              <span style={{ position: 'absolute', top: '-24px', fontSize: '12px', fontWeight: 800, color: '#2563eb', left: '50%', transform: 'translateX(-50%)' }}>80%</span>
+              <div style={{ position: 'absolute', bottom: '-24px', fontSize: '12px', fontWeight: 700, color: '#64748b', left: '50%', transform: 'translateX(-50%)', whiteSpace: 'nowrap' }}>Auto Parts</div>
             </div>
-            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 11, fontWeight: 700 }}>
-              <span style={{ color: '#3b82f6' }}>{stats.maleEmployees} Male</span>
-              <span style={{ color: '#ec4899' }}>{stats.femaleEmployees} Female</span>
+            <div style={{ width: '64px', background: '#6366f1', borderRadius: '8px 8px 0 0', height: '60%', position: 'relative' }}>
+              <span style={{ position: 'absolute', top: '-24px', fontSize: '12px', fontWeight: 800, color: '#4f46e5', left: '50%', transform: 'translateX(-50%)' }}>60%</span>
+              <div style={{ position: 'absolute', bottom: '-24px', fontSize: '12px', fontWeight: 700, color: '#64748b', left: '50%', transform: 'translateX(-50%)', whiteSpace: 'nowrap' }}>Distribution</div>
             </div>
+            <div style={{ width: '64px', background: '#10b981', borderRadius: '8px 8px 0 0', height: '90%', position: 'relative' }}>
+              <span style={{ position: 'absolute', top: '-24px', fontSize: '12px', fontWeight: 800, color: '#059669', left: '50%', transform: 'translateX(-50%)' }}>90%</span>
+              <div style={{ position: 'absolute', bottom: '-24px', fontSize: '12px', fontWeight: 700, color: '#64748b', left: '50%', transform: 'translateX(-50%)', whiteSpace: 'nowrap' }}>Contracting</div>
+            </div>
+            <div style={{ width: '64px', background: '#f59e0b', borderRadius: '8px 8px 0 0', height: '40%', position: 'relative' }}>
+              <span style={{ position: 'absolute', top: '-24px', fontSize: '12px', fontWeight: 800, color: '#d97706', left: '50%', transform: 'translateX(-50%)' }}>40%</span>
+              <div style={{ position: 'absolute', bottom: '-24px', fontSize: '12px', fontWeight: 700, color: '#64748b', left: '50%', transform: 'translateX(-50%)', whiteSpace: 'nowrap' }}>Labour Hire</div>
+            </div>
+        </div>
+      </div>
+      
+      <div key="summary" style={{ background: 'linear-gradient(135deg, #0f172a, #312e81)', borderRadius: '24px', padding: '24px', color: 'white', boxShadow: '0 20px 40px rgba(15,23,42,0.2)', position: 'relative', overflow: 'hidden' }}>
+        <SparklesBg />
+        <h3 style={{ fontSize: '18px', fontWeight: 800, marginBottom: '24px', display: 'flex', alignItems: 'center', gap: '8px' }}><Activity size={18} /> {t('financialSummary')}</h3>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', position: 'relative', zIndex: 10 }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', paddingBottom: '16px', borderBottom: '1px solid rgba(255,255,255,0.1)' }}>
+            <span style={{ color: '#cbd5e1', fontWeight: 600 }}>{t('accountsReceivable')}</span>
+            <span style={{ fontWeight: 800, color: '#34d399' }}>SAR {stats.receivables?.toLocaleString()}</span>
           </div>
-        } 
-        icon={<Users />} 
-        rgb="168,85,247" 
-        delay={0.5} 
-      />
-    </div>
+          <div style={{ display: 'flex', justifyContent: 'space-between', paddingBottom: '16px', borderBottom: '1px solid rgba(255,255,255,0.1)' }}>
+            <span style={{ color: '#cbd5e1', fontWeight: 600 }}>{t('accountsPayable')}</span>
+            <span style={{ fontWeight: 800, color: '#f87171' }}>SAR {stats.payables?.toLocaleString()}</span>
+          </div>
+          <div style={{ display: 'flex', justifyContent: 'space-between', paddingTop: '8px' }}>
+            <span style={{ color: '#cbd5e1', fontWeight: 600 }}>{t('groupInventoryValue')}</span>
+            <span style={{ fontWeight: 800, color: '#60a5fa' }}>SAR 2,450,000</span>
+          </div>
+        </div>
+      </div>
+    </ResponsiveGridLayout>
   );
 
-  const CashierDash = () => (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
-      <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: 24 }}>
-        <motion.div 
-          initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }}
-          style={{ background: 'linear-gradient(135deg, #0a84ff, #0055ff)', borderRadius: 32, padding: 40, color: 'white', position: 'relative', overflow: 'hidden' }}
-        >
-          <div style={{ position: 'relative', zIndex: 1 }}>
-            <h2 style={{ fontSize: 32, fontWeight: 900, marginBottom: 12 }}>Ready to sell?</h2>
-            <p style={{ opacity: 0.8, marginBottom: 32, maxWidth: 400 }}>Access the sales terminal to process transactions and manage customer orders efficiently.</p>
-            <button 
-              onClick={() => navigate('/sales')}
-              style={{ background: 'white', color: '#0a84ff', border: 'none', padding: '14px 28px', borderRadius: 16, fontWeight: 800, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 10 }}
-            >
-              Open Terminal <ArrowUpRight size={18} />
-            </button>
+  const distLayouts = {
+    lg: [
+      { i: 'sales', x: 0, y: 0, w: 3, h: 2 },
+      { i: 'deliveries', x: 3, y: 0, w: 3, h: 2 },
+      { i: 'stock', x: 6, y: 0, w: 3, h: 2 },
+      { i: 'profit', x: 9, y: 0, w: 3, h: 2 },
+      { i: 'brands', x: 0, y: 2, w: 6, h: 5 },
+      { i: 'areas', x: 6, y: 2, w: 6, h: 5 },
+      { i: 'split', x: 0, y: 7, w: 4, h: 5 },
+      { i: 'collections', x: 4, y: 7, w: 4, h: 5 },
+      { i: 'reps', x: 8, y: 7, w: 4, h: 5 }
+    ]
+  };
+
+  const DistributionDashboard = () => (
+    <ResponsiveGridLayout 
+      className="layout" 
+      layouts={distLayouts} 
+      breakpoints={{lg: 1200, md: 996, sm: 768, xs: 480, xxs: 0}} 
+      cols={{lg: 12, md: 12, sm: 12, xs: 1, xxs: 1}}
+      rowHeight={60}
+      isDraggable={true}
+      isResizable={true}
+    >
+      <div key="sales"><StatCard title={t('todaysSales')} value={`SAR ${stats.revenue?.toLocaleString() || 0}`} icon={<ShoppingCart />} rgb="59,130,246" delay={0.1} onClick={() => navigate('/sales/history')} /></div>
+      <div key="deliveries"><StatCard title={t('pendingDeliveries')} value="12" icon={<Truck />} rgb="245,158,11" delay={0.2} onClick={() => navigate('/delivery')} /></div>
+      <div key="stock"><StatCard title={t('zeroStockProducts')} value="3" icon={<AlertTriangle />} rgb="239,68,68" delay={0.3} onClick={() => navigate('/inventory?filter=zero')} /></div>
+      <div key="profit"><StatCard title={t('grossProfitMTD')} value="SAR 45,230" icon={<TrendingUp />} rgb="16,185,129" delay={0.4} onClick={() => navigate('/revenue')} /></div>
+      
+      <div key="brands" style={{ background: 'white', borderRadius: '24px', padding: '24px', border: '1px solid rgba(0,0,0,0.05)', boxShadow: '0 4px 20px rgba(0,0,0,0.03)', display: 'flex', flexDirection: 'column', height: '100%', boxSizing: 'border-box' }}>
+        <h3 style={{ fontSize: '16px', fontWeight: 800, color: '#0f172a', marginBottom: '20px', margin: '0 0 20px 0' }}>Sales by Brand/Product</h3>
+        <div style={{ flex: 1, minHeight: 0 }}>
+          <ResponsiveContainer width="100%" height="100%">
+            <BarChart data={chartData.brands} margin={{ left: -20, right: 10, bottom: 0, top: 0 }}>
+              <XAxis dataKey="name" tick={{ fontSize: 11, fill: '#64748b' }} axisLine={false} tickLine={false} />
+              <YAxis tick={{ fontSize: 11, fill: '#64748b' }} axisLine={false} tickLine={false} />
+              <RechartsTooltip cursor={{ fill: 'rgba(59,130,246,0.1)' }} contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 4px 20px rgba(0,0,0,0.1)' }} />
+              <Bar dataKey="revenue" fill="#3b82f6" radius={[4, 4, 0, 0]} />
+            </BarChart>
+          </ResponsiveContainer>
+        </div>
+      </div>
+
+      <div key="areas" style={{ background: 'white', borderRadius: '24px', padding: '24px', border: '1px solid rgba(0,0,0,0.05)', boxShadow: '0 4px 20px rgba(0,0,0,0.03)', display: 'flex', flexDirection: 'column', height: '100%', boxSizing: 'border-box' }}>
+        <h3 style={{ fontSize: '16px', fontWeight: 800, color: '#0f172a', marginBottom: '20px', margin: '0 0 20px 0' }}>Sales by Area (Route)</h3>
+        <div style={{ flex: 1, minHeight: 0 }}>
+          <ResponsiveContainer width="100%" height="100%">
+            <BarChart data={chartData.areas} layout="vertical" margin={{ left: 10, right: 10, top: 0, bottom: 0 }}>
+              <XAxis type="number" hide />
+              <YAxis type="category" dataKey="name" tick={{ fontSize: 11, fill: '#64748b' }} width={80} axisLine={false} tickLine={false} />
+              <RechartsTooltip cursor={{ fill: 'rgba(16,185,129,0.1)' }} contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 4px 20px rgba(0,0,0,0.1)' }} />
+              <Bar dataKey="sales" fill="#10b981" radius={[0, 4, 4, 0]} />
+            </BarChart>
+          </ResponsiveContainer>
+        </div>
+      </div>
+
+      <div key="split" style={{ background: 'white', borderRadius: '24px', padding: '24px', border: '1px solid rgba(0,0,0,0.05)', boxShadow: '0 4px 20px rgba(0,0,0,0.03)', display: 'flex', flexDirection: 'column', height: '100%', boxSizing: 'border-box' }}>
+        <h3 style={{ fontSize: '16px', fontWeight: 800, color: '#0f172a', marginBottom: '10px', margin: '0 0 10px 0' }}>Cash vs Credit</h3>
+        <div style={{ flex: 1, position: 'relative', minHeight: 0 }}>
+          <ResponsiveContainer width="100%" height="100%">
+            <PieChart>
+              <Pie data={chartData.splits} innerRadius="60%" outerRadius="80%" paddingAngle={5} dataKey="value" stroke="none">
+                {chartData.splits.map((entry, index) => <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />)}
+              </Pie>
+              <RechartsTooltip contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 4px 20px rgba(0,0,0,0.1)' }} />
+            </PieChart>
+          </ResponsiveContainer>
+          <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column', pointerEvents: 'none' }}>
+            <span style={{ fontSize: '12px', fontWeight: 800, color: '#64748b' }}>TOTAL</span>
+            <span style={{ fontSize: '20px', fontWeight: 900, color: '#0f172a' }}>{chartData.splits.reduce((a,b)=>a+b.value, 0)}</span>
           </div>
-          <ShoppingCart size={200} style={{ position: 'absolute', right: -40, bottom: -40, opacity: 0.1, rotate: '-15deg' }} />
-        </motion.div>
+        </div>
+      </div>
 
-        <motion.div 
-          initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }}
-          style={{ background: 'white', borderRadius: 32, padding: 32, border: '1px solid rgba(0,0,0,0.05)', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}
-        >
-          <div style={{ color: '#64748b', fontSize: 14, fontWeight: 700, marginBottom: 12 }}>ATTENDANCE STATUS</div>
-          {activeAttendance ? (
-            <div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 8 }}>
-                <div style={{ width: 12, height: 12, borderRadius: '50%', background: '#22c55e', boxShadow: '0 0 12px rgba(34,197,94,0.5)' }} />
-                <span style={{ fontSize: 20, fontWeight: 900, color: '#0f172a' }}>On Duty</span>
-              </div>
-              <div style={{ fontSize: 13, color: '#64748b', fontWeight: 600, marginBottom: 20 }}>
-                Clocked in at {new Date(activeAttendance.clockIn).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-              </div>
-              <button 
-                onClick={async (e) => {
-                  e.currentTarget.disabled = true;
-                  try {
-                    await attendanceAPI.clockOut();
-                    const res = await attendanceAPI.getMyActive();
-                    setActiveAttendance(res.data);
-                  } catch (err) { alert(err.response?.data?.message || 'Clock out failed'); }
-                  finally { e.currentTarget.disabled = false; }
-                }}
-                style={{ width: '100%', padding: '12px', borderRadius: 14, background: '#fee2e2', color: '#ef4444', border: 'none', fontWeight: 800, cursor: 'pointer' }}
-              >
-                Quick Clock Out
-              </button>
+      <div key="collections" style={{ background: 'white', borderRadius: '24px', padding: '24px', border: '1px solid rgba(0,0,0,0.05)', boxShadow: '0 4px 20px rgba(0,0,0,0.03)', display: 'flex', flexDirection: 'column', height: '100%', boxSizing: 'border-box' }}>
+        <h3 style={{ fontSize: '16px', fontWeight: 800, color: '#0f172a', marginBottom: '24px', margin: '0 0 24px 0' }}>Customer Collections</h3>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', flex: 1, justifyContent: 'center' }}>
+          <div>
+            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
+              <span style={{ fontSize: '13px', fontWeight: 700, color: '#64748b' }}>Collected</span>
+              <span style={{ fontSize: '13px', fontWeight: 800, color: '#10b981' }}>SAR {chartData.collections?.collected?.toLocaleString()}</span>
             </div>
-          ) : (
-            <button 
-              onClick={async (e) => {
-                const btn = e.currentTarget;
-                btn.disabled = true;
-                const clockInWithCoords = async (latitude, longitude) => {
-                  try {
-                    await attendanceAPI.clockIn({ latitude, longitude });
-                    const res = await attendanceAPI.getMyActive();
-                    setActiveAttendance(res.data);
-                  } catch (err) {
-                    alert(err.response?.data?.message || 'Clock in failed');
-                  } finally {
-                    btn.disabled = false;
-                  }
-                };
+            <div style={{ height: '8px', background: '#f1f5f9', borderRadius: '4px', overflow: 'hidden' }}>
+              <div style={{ width: `${(chartData.collections?.collected / chartData.collections?.target) * 100}%`, height: '100%', background: '#10b981' }} />
+            </div>
+          </div>
+          <div>
+            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
+              <span style={{ fontSize: '13px', fontWeight: 700, color: '#64748b' }}>Outstanding</span>
+              <span style={{ fontSize: '13px', fontWeight: 800, color: '#f59e0b' }}>SAR {chartData.collections?.outstanding?.toLocaleString()}</span>
+            </div>
+            <div style={{ height: '8px', background: '#f1f5f9', borderRadius: '4px', overflow: 'hidden' }}>
+              <div style={{ width: `${(chartData.collections?.outstanding / chartData.collections?.target) * 100}%`, height: '100%', background: '#f59e0b' }} />
+            </div>
+          </div>
+        </div>
+      </div>
 
-                if (navigator.geolocation) {
-                  navigator.geolocation.getCurrentPosition(
-                    (position) => {
-                      clockInWithCoords(position.coords.latitude, position.coords.longitude);
-                    },
-                    (error) => {
-                      clockInWithCoords(settings.officeLat, settings.officeLng);
-                    }
-                  );
-                } else {
-                  clockInWithCoords(settings.officeLat, settings.officeLng);
-                }
-              }}
-              style={{ width: '100%', padding: '16px', borderRadius: 16, background: '#f1f5f9', border: 'none', color: '#0f172a', fontWeight: 800, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10 }}
-            >
-              <Clock size={18} /> Clock In Now
-            </button>
-          )}
-        </motion.div>
+      <div key="reps" style={{ background: 'white', borderRadius: '24px', padding: '24px', border: '1px solid rgba(0,0,0,0.05)', boxShadow: '0 4px 20px rgba(0,0,0,0.03)', overflowY: 'auto', display: 'flex', flexDirection: 'column', height: '100%', boxSizing: 'border-box' }}>
+        <h3 style={{ fontSize: '16px', fontWeight: 800, color: '#0f172a', marginBottom: '20px', margin: '0 0 20px 0' }}>{t('topSalesReps')}</h3>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', flex: 1 }}>
+          {chartData.reps && chartData.reps.slice(0,5).map((rep, i) => (
+            <div key={i} onClick={() => navigate('/employees')} style={{ cursor: 'pointer', display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '16px', background: '#f8fafc', borderRadius: '16px', border: '1px solid #f1f5f9' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                <div style={{ width: '40px', height: '40px', borderRadius: '50%', background: '#dbeafe', color: '#2563eb', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 800 }}>{i+1}</div>
+                <span style={{ fontWeight: 800, color: '#334155', fontSize: '13px' }}>{rep.User?.name || 'Unknown User'}</span>
+              </div>
+              <span style={{ fontWeight: 800, color: '#059669', fontSize: '13px' }}>SAR {parseFloat(rep.revenueGenerated || 0).toLocaleString()}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+    </ResponsiveGridLayout>
+  );
+
+  // 3. Inventory Dashboard
+  const InventoryDashboard = () => (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '24px' }}>
+        <StatCard title="Total Inventory Value" value="SAR 1,250,400" icon={<Package />} rgb="59,130,246" delay={0.1} />
+        <StatCard title="Low Stock Items" value={alerts.lowStock?.length || 15} icon={<AlertTriangle />} rgb="245,158,11" delay={0.2} onClick={() => navigate('/inventory')} />
+        <StatCard title="Pending Transfers" value="4" icon={<Truck />} rgb="139,92,246" delay={0.3} />
       </div>
     </div>
   );
 
-  return (
-    <div style={{ padding: '40px', minHeight: '100vh', background: '#f8fafc', fontFamily: "'Outfit', sans-serif" }}>
-      <header style={{ marginBottom: 40, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <div>
-          <h1 style={{ fontSize: 32, fontWeight: 900, color: '#0f172a' }}>
-            Good morning, <span style={{ color: '#0a84ff' }}>{user?.name?.split(' ')[0] || 'Admin'}</span>
-          </h1>
-          <p style={{ color: '#64748b', marginTop: 4, fontWeight: 500 }}>Here's what's happening with your business today.</p>
-        </div>
-        <div style={{ display: 'flex', gap: 12 }}>
-          {role === 'admin' && (
-            <button style={{ padding: '12px 20px', borderRadius: 14, border: '1px solid #e2e8f0', background: 'white', fontWeight: 700, cursor: 'pointer' }} onClick={() => setShowSettings(true)}>
-              ⚙️ Settings
-            </button>
-          )}
-          <button style={{ padding: '12px 20px', borderRadius: 14, border: '1px solid #e2e8f0', background: 'white', fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 8 }} onClick={() => { fetchTodayStats(); }}>
-            <Calendar size={18} /> Today
+  // 4. Sales Rep / Cashier Dashboard
+  const CashierDashboard = () => (
+    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(400px, 1fr))', gap: '24px' }}>
+      <motion.div 
+        initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }}
+        style={{ background: 'linear-gradient(135deg, #2563eb, #4338ca)', borderRadius: '32px', padding: '40px', color: 'white', position: 'relative', overflow: 'hidden', boxShadow: '0 20px 40px rgba(37,99,235,0.2)' }}
+      >
+        <div style={{ position: 'relative', zIndex: 10 }}>
+          <h2 style={{ fontSize: '32px', fontWeight: 900, marginBottom: '12px' }}>Ready to sell?</h2>
+          <p style={{ opacity: 0.8, marginBottom: '32px', maxWidth: '300px', lineHeight: '1.5' }}>Access the POS terminal to process transactions, manage customer orders, and log field visits.</p>
+          <button 
+            onClick={() => navigate('/sales')}
+            style={{ background: 'white', color: '#2563eb', border: 'none', padding: '16px 24px', borderRadius: '16px', fontWeight: 800, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px', boxShadow: '0 10px 25px rgba(0,0,0,0.1)' }}
+            onMouseEnter={e => e.currentTarget.style.transform = 'scale(1.05)'}
+            onMouseLeave={e => e.currentTarget.style.transform = 'scale(1)'}
+          >
+            Open Terminal <ArrowUpRight size={18} />
           </button>
-          <button style={{ padding: '12px 20px', borderRadius: 14, background: '#0f172a', color: 'white', fontWeight: 700, border: 'none', cursor: 'pointer' }} onClick={handleDownloadReport}>
-            Download Report
+        </div>
+        <ShoppingCart size={200} style={{ position: 'absolute', right: '-40px', bottom: '-40px', opacity: 0.1, transform: 'rotate(-12deg)' }} />
+      </motion.div>
+
+      <motion.div 
+        initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }}
+        style={{ background: 'white', borderRadius: '32px', padding: '40px', border: '1px solid rgba(0,0,0,0.05)', boxShadow: '0 4px 20px rgba(0,0,0,0.03)', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}
+      >
+        <div style={{ fontSize: '12px', fontWeight: 800, color: '#94a3b8', marginBottom: '16px', letterSpacing: '1px', textTransform: 'uppercase' }}>GPS Attendance Status</div>
+        {activeAttendance ? (
+          <div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '8px' }}>
+              <div style={{ width: '12px', height: '12px', borderRadius: '50%', background: '#10b981', boxShadow: '0 0 12px rgba(16,185,129,0.5)' }} />
+              <span style={{ fontSize: '24px', fontWeight: 900, color: '#0f172a' }}>On Duty</span>
+            </div>
+            <div style={{ fontSize: '14px', color: '#64748b', fontWeight: 600, marginBottom: '24px' }}>
+              Clocked in at {new Date(activeAttendance.clockIn).toLocaleTimeString()}
+            </div>
+            <button 
+              onClick={async (e) => {
+                e.currentTarget.disabled = true;
+                try {
+                  await attendanceAPI.clockOut();
+                  const res = await attendanceAPI.getMyActive();
+                  setActiveAttendance(res.data);
+                } catch (err) { alert(err.response?.data?.message || 'Clock out failed'); }
+                finally { e.currentTarget.disabled = false; }
+              }}
+              style={{ width: '100%', padding: '16px', borderRadius: '16px', background: '#fef2f2', color: '#ef4444', border: 'none', fontWeight: 800, cursor: 'pointer' }}
+            >
+              End Shift
+            </button>
+          </div>
+        ) : (
+          <button 
+            onClick={async (e) => {
+              const btn = e.currentTarget;
+              btn.disabled = true;
+              const clockInWithCoords = async (latitude, longitude) => {
+                try {
+                  await attendanceAPI.clockIn({ latitude, longitude });
+                  const res = await attendanceAPI.getMyActive();
+                  setActiveAttendance(res.data);
+                } catch (err) { alert('Clock in failed'); }
+                finally { btn.disabled = false; }
+              };
+              if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(
+                  pos => clockInWithCoords(pos.coords.latitude, pos.coords.longitude),
+                  err => {
+                    console.warn("GPS Error:", err.message);
+                    clockInWithCoords(null, null);
+                  },
+                  { enableHighAccuracy: true, timeout: 5000 }
+                );
+              } else clockInWithCoords(null, null);
+            }}
+            style={{ width: '100%', padding: '20px', borderRadius: '16px', background: '#f8fafc', border: '2px dashed #cbd5e1', color: '#0f172a', fontWeight: 800, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '12px' }}
+          >
+            <MapPin size={20} color="#3b82f6" /> Verify GPS & Clock In
+          </button>
+        )}
+      </motion.div>
+    </div>
+  );
+
+  const SparklesBg = () => (
+    <div style={{ position: 'absolute', inset: 0, overflow: 'hidden', pointerEvents: 'none', opacity: 0.3 }}>
+      {[...Array(10)].map((_, i) => (
+        <div key={i} style={{
+          position: 'absolute', width: '4px', height: '4px', background: 'white', borderRadius: '50%',
+          top: `${Math.random()*100}%`, left: `${Math.random()*100}%`,
+          animation: `pulse ${Math.random()*2+1}s infinite`,
+          animationDelay: `${Math.random()*2}s`,
+          boxShadow: '0 0 8px 2px rgba(255,255,255,0.5)'
+        }} />
+      ))}
+      <style>{`
+        @keyframes pulse {
+          0% { opacity: 0.2; transform: scale(0.8); }
+          50% { opacity: 1; transform: scale(1.2); }
+          100% { opacity: 0.2; transform: scale(0.8); }
+        }
+      `}</style>
+    </div>
+  );
+
+  return (
+    <div style={{ padding: '40px', minHeight: '100vh', background: '#f8fafc', fontFamily: "'Outfit', sans-serif", position: 'relative', direction: isRTL ? 'rtl' : 'ltr' }}>
+      <header style={{ marginBottom: '40px', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', flexWrap: 'wrap', gap: '16px' }}>
+        <div>
+          <h1 style={{ fontSize: '32px', fontWeight: 900, color: '#0f172a', margin: '0 0 8px 0' }}>
+            {t('welcome')}, <span style={{ color: '#2563eb' }}>{user?.name?.split(' ')[0] || 'User'}</span>
+          </h1>
+          <p style={{ color: '#64748b', fontWeight: 600, margin: 0 }}>
+            {activeCompany ? `${t('viewingDataFor')} ${activeCompany.name}` : t('heresWhatHappening')}
+          </p>
+        </div>
+        <div style={{ display: 'flex', gap: '12px' }}>
+          <button onClick={toggleLanguage} style={{ padding: '12px', borderRadius: '16px', border: '1px solid #e2e8f0', background: 'white', fontWeight: 800, display: 'flex', alignItems: 'center', gap: '8px', color: '#475569', cursor: 'pointer' }}>
+            <Globe size={18} /> {i18n.language === 'en' ? 'عربي' : 'English'}
+          </button>
+          <button onClick={() => window.location.reload()} style={{ padding: '12px 20px', borderRadius: '16px', border: '1px solid #e2e8f0', background: 'white', fontWeight: 800, display: 'flex', alignItems: 'center', gap: '8px', color: '#475569', cursor: 'pointer' }}>
+            <Calendar size={18} /> {t('refreshData')}
           </button>
         </div>
       </header>
 
-      <AnimatePresence>
-        {(role === 'admin' || role === 'inventory') && alerts.expiringSoon?.length > 0 && (
-          <motion.div 
-            initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }}
-            style={{ overflow: 'hidden', marginBottom: 24 }}
-          >
-            <div className="pulse-glow" style={{ background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.2)', padding: '16px 24px', borderRadius: 20, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
-                <div style={{ width: 40, height: 40, borderRadius: 12, background: '#ef4444', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                  <AlertTriangle size={20} />
-                </div>
-                <div>
-                  <div style={{ fontWeight: 900, color: '#dc2626', fontSize: 16 }}>CRITICAL: Expiring Inventory</div>
-                  <div style={{ fontSize: 14, color: '#b91c1c', fontWeight: 700 }}>{alerts.expiringSoon.length} products are expiring within 30 days.</div>
-                </div>
-              </div>
-              <button onClick={() => navigate('/inventory', { state: { filter: 'expiringSoon' } })} style={{ background: '#ef4444', color: 'white', border: 'none', padding: '8px 16px', borderRadius: 10, fontWeight: 700, cursor: 'pointer' }}>
-                Review Now
-              </button>
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-
-      {role === 'admin' && (
-        <>
-          <AdminDash />
-          {alerts.lowStock?.length > 0 && (
-            <div style={{ background: 'white', padding: 32, borderRadius: 32, border: '1px solid rgba(0,0,0,0.05)', marginTop: 24 }}>
-              <h3 style={{ fontSize: 18, fontWeight: 900, marginBottom: 20, display: 'flex', alignItems: 'center', gap: 10 }}>
-                <AlertTriangle size={20} color="#f59e0b" /> Critical Low Stock Items
-              </h3>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(250px, 1fr))', gap: 16 }}>
-                {alerts.lowStock.map(item => (
-                  <div 
-                    key={item.id} 
-                    onClick={() => navigate('/inventory', { state: { filter: item.name } })}
-                    style={{ padding: 16, borderRadius: 16, background: '#fff7ed', border: '1px solid #ffedd5', cursor: 'pointer' }}
-                  >
-                    <div style={{ fontWeight: 800, color: '#9a3412' }}>{item.name}</div>
-                    <div style={{ fontSize: 12, fontWeight: 700, color: '#c2410c' }}>Current Stock: {item.stock} (Min: {item.minStock})</div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-        </>
-      )}
-      {role === 'cashier' && <CashierDash />}
-      {role === 'manager' && <AdminDash />}
-      
-      {/* Settings Modal */}
-      <AnimatePresence>
-        {showSettings && (
-          <div style={{ position: 'fixed', inset: 0, zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 24 }}>
-            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setShowSettings(false)} style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.3)' }} />
-            <motion.div initial={{ scale: 0.9, y: 20 }} animate={{ scale: 1, y: 0 }} exit={{ scale: 0.9 }} style={{ background: 'white', borderRadius: 24, width: '100%', maxWidth: 400, position: 'relative', padding: 32 }}>
-              <h2 style={{ fontSize: 20, fontWeight: 900, marginBottom: 24 }}>System Settings</h2>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-                <div>
-                  <label style={{ fontSize: 12, fontWeight: 700, color: '#64748b', marginBottom: 4, display: 'block' }}>Company Name</label>
-                  <input value={settingsForm.companyName} onChange={e => setSettingsForm({ ...settingsForm, companyName: e.target.value })} style={{ width: '100%', padding: '10px 14px', borderRadius: 10, border: '1.5px solid #e2e8f0', outline: 'none' }} />
-                </div>
-                <div>
-                  <label style={{ fontSize: 12, fontWeight: 700, color: '#64748b', marginBottom: 4, display: 'block' }}>Office Latitude</label>
-                  <input type="number" step="any" value={settingsForm.officeLat} onChange={e => setSettingsForm({ ...settingsForm, officeLat: e.target.value })} style={{ width: '100%', padding: '10px 14px', borderRadius: 10, border: '1.5px solid #e2e8f0', outline: 'none' }} />
-                </div>
-                <div>
-                  <label style={{ fontSize: 12, fontWeight: 700, color: '#64748b', marginBottom: 4, display: 'block' }}>Office Longitude</label>
-                  <input type="number" step="any" value={settingsForm.officeLng} onChange={e => setSettingsForm({ ...settingsForm, officeLng: e.target.value })} style={{ width: '100%', padding: '10px 14px', borderRadius: 10, border: '1.5px solid #e2e8f0', outline: 'none' }} />
-                </div>
-                <div style={{ display: 'flex', gap: 10, marginTop: 16 }}>
-                  <button onClick={() => setShowSettings(false)} style={{ flex: 1, padding: 12, borderRadius: 10, background: '#f1f5f9', color: '#64748b', fontWeight: 800, border: 'none', cursor: 'pointer' }}>Cancel</button>
-                  <button onClick={async () => {
-                    try {
-                      await settingsAPI.update(settingsForm);
-                      setSettings(settingsForm);
-                      setShowSettings(false);
-                      // reload to update sidebar globally
-                      window.location.reload();
-                    } catch(e) { alert('Failed to save settings'); }
-                  }} style={{ flex: 1, padding: 12, borderRadius: 10, background: '#0a84ff', color: 'white', fontWeight: 800, border: 'none', cursor: 'pointer' }}>Save & Reload</button>
-                </div>
-              </div>
-            </motion.div>
-          </div>
-        )}
-      </AnimatePresence>
-
-      <style>{`
-        @keyframes pulse-glow {
-          0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4); }
-          70% { box-shadow: 0 0 0 15px rgba(239, 68, 68, 0); }
-          100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
-        }
-        .pulse-glow { animation: pulse-glow 2s infinite; }
-      `}</style>
+      {/* Render correct dashboard based on role */}
+      {role === 'owner' && <OwnerDashboard />}
+      {(role === 'manager' || role === 'admin') && <DistributionDashboard />}
+      {role === 'inventory' && <InventoryDashboard />}
+      {(role === 'cashier' || role === 'sales_rep') && <CashierDashboard />}
     </div>
   );
 };

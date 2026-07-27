@@ -29,7 +29,11 @@ const PayrollRun = sequelize.define('PayrollRun', {
   },
   processedAt: {
     type: DataTypes.DATE,
-  }
+  },
+  companyId: {
+    type: DataTypes.UUID,
+    allowNull: true,
+  },
 }, {
   tableName: 'payroll_runs',
   freezeTableName: true,

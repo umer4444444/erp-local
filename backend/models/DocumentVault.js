@@ -28,6 +28,10 @@ const DocumentVault = sequelize.define('DocumentVault', {
     type: DataTypes.UUID,
     allowNull: true,
   },
+  companyId: {
+    type: DataTypes.UUID,
+    allowNull: true,
+  },
 }, {
   tableName: 'document_vaults',
   freezeTableName: true,

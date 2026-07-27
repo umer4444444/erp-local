@@ -21,6 +21,10 @@ const Department = sequelize.define('Department', {
     type: DataTypes.ENUM('active', 'inactive'),
     defaultValue: 'active',
   },
+  companyId: {
+    type: DataTypes.UUID,
+    allowNull: true,
+  },
 }, {
   tableName: 'departments',
   freezeTableName: true,

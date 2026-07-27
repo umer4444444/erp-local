@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { AnimatePresence, motion } from 'framer-motion';
+
+// Desktop layout components
 import Sidebar from './components/Sidebar';
 import Dashboard from './pages/Dashboard';
 import Inventory from './pages/Inventory';
@@ -16,17 +18,28 @@ import Attendance from './pages/Attendance';
 import Leaves from './pages/Leaves';
 import Payroll from './pages/Payroll';
 import ShiftAudit from './pages/ShiftAudit';
-
+import SalaryAdvance from './pages/SalaryAdvance';
+import Accounting from './pages/Accounting';
 import Suppliers from './pages/Suppliers';
 import EODReport from './pages/EODReport';
 import Expenses from './pages/Expenses';
 import Delivery from './pages/Delivery';
+
+// Mobile PWA layout components
+import MobileLayout from './components/MobileLayout';
+import MobileHome from './pages/MobileHome';
+import MobileRoute from './pages/MobileRoute';
+import MobileOrder from './pages/MobileOrder';
+import MobileProfile from './pages/MobileProfile';
+
+// Auth and Public
 import Login from './pages/Login';
 import Landing from './pages/Landing';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import PrivateRoute from './components/PrivateRoute';
 import { getDefaultRoute } from './utils/routing';
 import NotificationCenter from './components/NotificationCenter';
+import GlobalAIAssistant from './components/GlobalAIAssistant';
 
 const PageTransition = ({ children }) => (
   <motion.div
@@ -53,6 +66,24 @@ function AppContent() {
     );
   }
 
+  // If the user is a field worker, give them the PWA mobile experience natively.
+  const isMobileRole = user?.role === 'sales_rep' || user?.role === 'driver';
+
+  if (isMobileRole) {
+    return (
+      <Routes>
+        <Route path="/mobile" element={<PrivateRoute roles={['sales_rep', 'driver']}><MobileLayout /></PrivateRoute>}>
+          <Route path="home" element={<MobileHome />} />
+          <Route path="route" element={<MobileRoute />} />
+          <Route path="order" element={<MobileOrder />} />
+          <Route path="profile" element={<MobileProfile />} />
+        </Route>
+        <Route path="*" element={<Navigate to="/mobile/home" />} />
+      </Routes>
+    );
+  }
+
+  // Otherwise, Desktop ERP Experience
   return (
     <div className="flex bg-gray-50 min-h-screen relative text-gray-900 font-sans overflow-hidden">
       <div className="orb-container">
@@ -61,12 +92,12 @@ function AppContent() {
       </div>
       
       <Sidebar onLogout={logout} user={user} />
-      <NotificationCenter user={user} />
       <div className="flex-1 flex flex-col relative z-0" style={{ marginLeft: 260 + 32, width: 'calc(100% - 292px)' }}>
-        <div className="flex-1 overflow-y-auto">
+        <div className="flex-1 overflow-y-auto relative">
+          <NotificationCenter user={user} />
           <AnimatePresence mode="wait">
             <Routes location={location} key={location.pathname}>
-              <Route path="/" element={<PrivateRoute roles={['admin']}><PageTransition><Dashboard user={user} /></PageTransition></PrivateRoute>} />
+              <Route path="/" element={<PrivateRoute roles={['admin', 'superadmin', 'owner', 'company_admin']}><PageTransition><Dashboard user={user} /></PageTransition></PrivateRoute>} />
               <Route path="/manager" element={<PrivateRoute roles={['admin', 'manager']}><PageTransition><Manager /></PageTransition></PrivateRoute>} />
               <Route path="/inventory" element={<PrivateRoute roles={['admin', 'inventory', 'manager']}><PageTransition><Inventory user={user} /></PageTransition></PrivateRoute>} />
               <Route path="/sales" element={<PrivateRoute roles={['admin', 'cashier', 'manager']}><PageTransition><Sales /></PageTransition></PrivateRoute>} />
@@ -85,11 +116,14 @@ function AppContent() {
               <Route path="/users" element={<PrivateRoute roles={['admin', 'manager']}><PageTransition><Users /></PageTransition></PrivateRoute>} />
               <Route path="/eod" element={<PrivateRoute roles={['admin', 'manager', 'cashier', 'operations']}><PageTransition><EODReport /></PageTransition></PrivateRoute>} />
               <Route path="/delivery" element={<PrivateRoute roles={['admin', 'manager', 'operations']}><PageTransition><Delivery /></PageTransition></PrivateRoute>} />
+              <Route path="/accounting" element={<PrivateRoute roles={['admin', 'finance', 'manager']}><PageTransition><Accounting /></PageTransition></PrivateRoute>} />
+              
               <Route path="*" element={<Navigate to={getDefaultRoute(user?.role)} />} />
             </Routes>
           </AnimatePresence>
         </div>
       </div>
+      <GlobalAIAssistant />
     </div>
   );
 }

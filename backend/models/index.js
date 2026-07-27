@@ -22,6 +22,13 @@ const LeaveBalance = require('./LeaveBalance');
 const PayrollRun = require('./PayrollRun');
 const Payslip = require('./Payslip');
 
+const Company = require('./Company');
+const Branch = require('./Branch');
+const Warehouse = require('./Warehouse');
+const SalesTarget = require('./SalesTarget');
+const Delivery = require('./Delivery');
+const DeliveryProof = require('./DeliveryProof');
+
 const Supplier = require('./Supplier');
 const PurchaseOrder = require('./PurchaseOrder');
 const AuditLog = require('./AuditLog');
@@ -29,6 +36,11 @@ const LoyaltyTransaction = require('./LoyaltyTransaction');
 const POItem = require('./POItem');
 const SalaryAdvance = require('./SalaryAdvance');
 const DocumentVault = require('./DocumentVault');
+
+// Accounting Models
+const ChartOfAccount = require('./ChartOfAccount');
+const JournalEntry = require('./JournalEntry');
+const JournalEntryLine = require('./JournalEntryLine');
 
 // Inventory Associations
 Category.hasMany(Product, { foreignKey: 'categoryId' });
@@ -39,6 +51,22 @@ StockLog.belongsTo(Product, { foreignKey: 'productId' });
 
 Product.hasMany(ProductVariation, { as: 'Variations', foreignKey: 'productId' });
 ProductVariation.belongsTo(Product, { foreignKey: 'productId' });
+
+// Multi-Tenant Associations
+Company.hasMany(Branch, { foreignKey: 'companyId' });
+Branch.belongsTo(Company, { foreignKey: 'companyId' });
+
+Company.hasMany(Warehouse, { foreignKey: 'companyId' });
+Warehouse.belongsTo(Company, { foreignKey: 'companyId' });
+
+Branch.hasMany(Warehouse, { foreignKey: 'branchId' });
+Warehouse.belongsTo(Branch, { foreignKey: 'branchId' });
+
+Company.hasMany(User, { foreignKey: 'companyId' });
+User.belongsTo(Company, { foreignKey: 'companyId' });
+
+Branch.hasMany(User, { foreignKey: 'branchId' });
+User.belongsTo(Branch, { foreignKey: 'branchId' });
 
 User.hasMany(StockLog, { foreignKey: 'userId', onDelete: 'RESTRICT', onUpdate: 'CASCADE' });
 StockLog.belongsTo(User, { foreignKey: 'userId' });
@@ -108,6 +136,21 @@ Payslip.belongsTo(Employee, { foreignKey: 'employeeId' });
 User.hasMany(Expense, { foreignKey: 'userId' });
 Expense.belongsTo(User, { foreignKey: 'userId' });
 
+User.hasMany(Sale, { foreignKey: 'userId' });
+Sale.belongsTo(User, { foreignKey: 'userId' });
+
+User.hasMany(SalesTarget, { foreignKey: 'userId' });
+SalesTarget.belongsTo(User, { foreignKey: 'userId' });
+
+Sale.hasMany(Delivery, { foreignKey: 'saleId', as: 'deliveries' });
+Delivery.belongsTo(Sale, { foreignKey: 'saleId' });
+
+User.hasMany(Delivery, { foreignKey: 'driverId', as: 'assignedDeliveries' });
+Delivery.belongsTo(User, { foreignKey: 'driverId', as: 'driver' });
+
+Delivery.hasMany(DeliveryProof, { foreignKey: 'deliveryId', as: 'proofs' });
+DeliveryProof.belongsTo(Delivery, { foreignKey: 'deliveryId' });
+
 
 // Supplier Associations (Day 12)
 Supplier.hasMany(PurchaseOrder, { foreignKey: 'supplierId' });
@@ -134,6 +177,13 @@ Employee.hasMany(SalaryAdvance, { foreignKey: 'employeeId' });
 SalaryAdvance.belongsTo(Employee, { foreignKey: 'employeeId' });
 Employee.hasMany(DocumentVault, { foreignKey: 'employeeId' });
 DocumentVault.belongsTo(Employee, { foreignKey: 'employeeId' });
+
+// Accounting Associations
+JournalEntry.hasMany(JournalEntryLine, { as: 'Lines', foreignKey: 'journalEntryId', onDelete: 'CASCADE' });
+JournalEntryLine.belongsTo(JournalEntry, { foreignKey: 'journalEntryId' });
+
+ChartOfAccount.hasMany(JournalEntryLine, { foreignKey: 'accountId', onDelete: 'RESTRICT' });
+JournalEntryLine.belongsTo(ChartOfAccount, { foreignKey: 'accountId' });
 
 // Global Hook to convert empty strings to NULL
 sequelize.addHook('beforeValidate', (instance) => {
@@ -177,5 +227,15 @@ module.exports = {
   LoyaltyTransaction,
   POItem,
   SalaryAdvance,
-  DocumentVault
+  DocumentVault,
+  Company,
+  Branch,
+  Warehouse,
+  SalesSession,
+  SalesTarget,
+  Delivery,
+  DeliveryProof,
+  ChartOfAccount,
+  JournalEntry,
+  JournalEntryLine
 };

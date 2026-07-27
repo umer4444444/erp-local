@@ -24,6 +24,10 @@ const WorkShift = sequelize.define('WorkShift', {
     type: DataTypes.JSON, // e.g. ["Mon", "Tue", "Wed", "Thu", "Fri"]
     defaultValue: [],
   },
+  companyId: {
+    type: DataTypes.UUID,
+    allowNull: true,
+  },
 }, {
   tableName: 'work_shifts',
   freezeTableName: true,

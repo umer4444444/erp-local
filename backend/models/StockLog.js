@@ -20,12 +20,24 @@ const StockLog = sequelize.define('StockLog', {
     type: DataTypes.INTEGER,
   },
   type: {
-    type: DataTypes.ENUM('sale', 'restock', 'adjustment', 'return', 'void', 'prescription'),
+    type: DataTypes.ENUM('sale', 'restock', 'adjustment', 'return', 'void', 'prescription', 'transfer_out', 'transfer_in'),
+  },
+  warehouseId: {
+    type: DataTypes.UUID,
+    allowNull: true,
+  },
+  targetWarehouseId: {
+    type: DataTypes.UUID,
+    allowNull: true,
   },
   notes: {
     type: DataTypes.STRING,
   },
   reference: {
+    type: DataTypes.UUID,
+    allowNull: true,
+  },
+  companyId: {
     type: DataTypes.UUID,
     allowNull: true,
   },

@@ -76,6 +76,10 @@ const Sale = sequelize.define('Sale', {
   notes: {
     type: DataTypes.TEXT,
   },
+  companyId: {
+    type: DataTypes.UUID,
+    allowNull: true,
+  },
 }, {
   tableName: 'sales',
   freezeTableName: true,

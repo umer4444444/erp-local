@@ -81,6 +81,10 @@ const Employee = sequelize.define('Employee', {
     type: DataTypes.UUID,
     allowNull: true,
   },
+  companyId: {
+    type: DataTypes.UUID,
+    allowNull: true,
+  },
 }, {
   tableName: 'employees',
   freezeTableName: true,

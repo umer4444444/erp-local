@@ -35,7 +35,11 @@ const Payslip = sequelize.define('Payslip', {
   status: {
     type: DataTypes.ENUM('unpaid', 'paid', 'voided'),
     defaultValue: 'unpaid',
-  }
+  },
+  companyId: {
+    type: DataTypes.UUID,
+    allowNull: true,
+  },
 }, {
   tableName: 'payslips',
   freezeTableName: true,

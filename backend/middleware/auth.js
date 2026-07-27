@@ -23,7 +23,12 @@ const auth = async (req, res, next) => {
     if (user.isActive === false) {
       return res.status(403).json({ message: 'Your account has been deactivated. Please contact administration.' });
     }
-    req.user = { id: user.id, role: user.role };
+    req.user = { 
+      id: user.id, 
+      role: user.role,
+      companyId: user.companyId,
+      branchId: user.branchId 
+    };
     next();
   } catch (err) {
     console.error('JWT verify error:', err.message);

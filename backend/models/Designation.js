@@ -21,6 +21,10 @@ const Designation = sequelize.define('Designation', {
     type: DataTypes.UUID,
     allowNull: true,
   },
+  companyId: {
+    type: DataTypes.UUID,
+    allowNull: true,
+  },
 }, {
   tableName: 'designations',
   freezeTableName: true,

@@ -29,7 +29,11 @@ const LeaveBalance = sequelize.define('LeaveBalance', {
     get() {
       return this.total - this.used;
     }
-  }
+  },
+  companyId: {
+    type: DataTypes.UUID,
+    allowNull: true,
+  },
 }, {
   tableName: 'leave_balances',
   freezeTableName: true,

@@ -37,6 +37,10 @@ const SalaryAdvance = sequelize.define('SalaryAdvance', {
     type: DataTypes.UUID,
     allowNull: true,
   },
+  companyId: {
+    type: DataTypes.UUID,
+    allowNull: true,
+  },
 }, {
   tableName: 'salary_advances',
   freezeTableName: true,

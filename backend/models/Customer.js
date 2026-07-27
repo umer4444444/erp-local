@@ -22,6 +22,14 @@ const Customer = sequelize.define('Customer', {
   address: {
     type: DataTypes.STRING,
   },
+  latitude: {
+    type: DataTypes.DECIMAL(10, 8),
+    allowNull: true,
+  },
+  longitude: {
+    type: DataTypes.DECIMAL(11, 8),
+    allowNull: true,
+  },
   creditBalance: {
     type: DataTypes.DECIMAL(12, 2),
     defaultValue: 0,
@@ -33,6 +41,10 @@ const Customer = sequelize.define('Customer', {
   tier: {
     type: DataTypes.ENUM('Bronze', 'Silver', 'Gold', 'VIP'),
     defaultValue: 'Bronze',
+  },
+  companyId: {
+    type: DataTypes.UUID,
+    allowNull: true,
   },
 }, {
   tableName: 'customers',

@@ -48,6 +48,10 @@ const Ride = sequelize.define('Ride', {
   fare: {
     type: DataTypes.DECIMAL(10, 2),
   },
+  companyId: {
+    type: DataTypes.UUID,
+    allowNull: true,
+  },
 }, {
   tableName: 'rides',
   freezeTableName: true,

@@ -26,6 +26,10 @@ const POItem = sequelize.define('POItem', {
     allowNull: false,
     defaultValue: 0,
   },
+  companyId: {
+    type: DataTypes.UUID,
+    allowNull: true,
+  },
 }, {
   tableName: 'po_items',
   freezeTableName: true,
