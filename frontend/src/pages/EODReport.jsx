@@ -88,7 +88,7 @@ const EODReport = () => {
           <div class="row"><span>Card Expected:</span> <strong>SAR ${summary.card.toFixed(2)}</strong></div>
           <div class="row total"><span>Total Expected:</span> <span>SAR ${summary.total.toFixed(2)}</span></div>
           <div class="divider"></div>
-          <div class="row"><span>Actual Cash:</span> <strong>SAR SAR {parseFloat(cashCount || 0).toFixed(2)}</strong></div>
+          <div class="row"><span>Actual Cash:</span> <strong>SAR ${parseFloat(cashCount || 0).toFixed(2)}</strong></div>
           <div class="variance" style="color: ${variance === 0 ? '#16a34a' : '#e11d48'}">
             <span>Variance:</span>
             <span>${variance > 0 ? '+' : ''}SAR ${variance.toFixed(2)}</span>

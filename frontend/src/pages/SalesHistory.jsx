@@ -60,8 +60,8 @@ const SalesHistory = () => {
       <div style="display:grid; grid-template-columns:2.5fr 1fr 1fr 1fr; gap:8px; font-size:13px; align-items:center; padding:8px 0; border-bottom:1px solid #f8fafc;">
         <span style="font-weight:600; color:#0f172a; word-break:break-all;">${item.Product?.name || 'Item'}</span>
         <span style="text-align:center; font-weight:800; color:#0f172a;">${item.quantity}</span>
-        <span style="text-align:right; color:#64748b;">SAR SAR {parseFloat(item.price || 0).toFixed(2)}</span>
-        <span style="text-align:right; font-weight:800; color:#0f172a;">SAR SAR {parseFloat(item.total || 0).toFixed(2)}</span>
+        <span style="text-align:right; color:#64748b;">SAR ${parseFloat(item.price || 0).toFixed(2)}</span>
+        <span style="text-align:right; font-weight:800; color:#0f172a;">SAR ${parseFloat(item.total || 0).toFixed(2)}</span>
       </div>
     `).join('');
 
