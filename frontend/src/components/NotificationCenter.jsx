@@ -67,6 +67,23 @@ const NotificationCenter = ({ user }) => {
 
     fetchNotifications();
     const interval = setInterval(fetchNotifications, 10000); // Check every 10s
+
+    // Load Google Translate script
+    let script = document.getElementById('google-translate-script');
+    if (!script) {
+      window.googleTranslateElementInit = () => {
+        new window.google.translate.TranslateElement(
+          { pageLanguage: 'en', includedLanguages: 'ar,en', layout: window.google.translate.TranslateElement.InlineLayout.SIMPLE },
+          'google_translate_element'
+        );
+      };
+      script = document.createElement('script');
+      script.id = 'google-translate-script';
+      script.src = '//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit';
+      script.async = true;
+      document.body.appendChild(script);
+    }
+
     return () => clearInterval(interval);
   }, [user]);
 
