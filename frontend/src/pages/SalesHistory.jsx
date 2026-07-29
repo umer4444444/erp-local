@@ -6,6 +6,13 @@ import { salesAPI } from '../api';
 const SalesHistory = () => {
   const [sales, setSales] = useState([]);
   const [search, setSearch] = useState('');
+  
+  // Filter states
+  const [showFilters, setShowFilters] = useState(false);
+  const [startDate, setStartDate] = useState('');
+  const [endDate, setEndDate] = useState('');
+  const [statusFilter, setStatusFilter] = useState('');
+
   const [loading, setLoading] = useState(true);
   const [selectedSale, setSelectedSale] = useState(null);
 
@@ -16,7 +23,12 @@ const SalesHistory = () => {
   const fetchHistory = async () => {
     setLoading(true);
     try {
-      const res = await salesAPI.getHistory({ search });
+      const res = await salesAPI.getHistory({ 
+        search, 
+        startDate, 
+        endDate, 
+        status: statusFilter 
+      });
       setSales(res.data.rows || res.data);
     } catch (err) {
       console.error(err);
@@ -24,6 +36,11 @@ const SalesHistory = () => {
       setLoading(false);
     }
   };
+
+  // Re-fetch when filters change (except search which is on Enter)
+  useEffect(() => {
+    fetchHistory();
+  }, [startDate, endDate, statusFilter]);
 
   const getStatusStyle = (status) => {
     switch (status) {
@@ -177,9 +194,43 @@ const SalesHistory = () => {
               style={{ padding: '12px 12px 12px 44px', borderRadius: 14, border: '1px solid #e2e8f0', width: 300, fontWeight: 600 }}
             />
           </div>
-          <button style={{ padding: '12px 24px', borderRadius: 14, background: 'white', border: '1px solid #e2e8f0', fontWeight: 800, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 8 }}>
-            <Filter size={18} /> Filters
-          </button>
+          <div style={{ position: 'relative' }}>
+            <button 
+              onClick={() => setShowFilters(!showFilters)}
+              style={{ padding: '12px 24px', borderRadius: 14, background: showFilters ? '#f1f5f9' : 'white', border: '1px solid #e2e8f0', fontWeight: 800, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 8 }}
+            >
+              <Filter size={18} /> Filters
+            </button>
+            
+            {showFilters && (
+              <div style={{ position: 'absolute', top: '100%', right: 0, marginTop: 8, background: 'white', borderRadius: 16, padding: 20, width: 300, boxShadow: '0 10px 40px rgba(0,0,0,0.1)', border: '1px solid #e2e8f0', zIndex: 100 }}>
+                <div style={{ marginBottom: 16 }}>
+                  <label style={{ display: 'block', fontSize: 12, fontWeight: 700, color: '#64748b', marginBottom: 6 }}>Start Date</label>
+                  <input type="date" value={startDate} onChange={e => setStartDate(e.target.value)} style={{ width: '100%', padding: 10, borderRadius: 8, border: '1px solid #e2e8f0', fontFamily: 'inherit' }} />
+                </div>
+                <div style={{ marginBottom: 16 }}>
+                  <label style={{ display: 'block', fontSize: 12, fontWeight: 700, color: '#64748b', marginBottom: 6 }}>End Date</label>
+                  <input type="date" value={endDate} onChange={e => setEndDate(e.target.value)} style={{ width: '100%', padding: 10, borderRadius: 8, border: '1px solid #e2e8f0', fontFamily: 'inherit' }} />
+                </div>
+                <div style={{ marginBottom: 16 }}>
+                  <label style={{ display: 'block', fontSize: 12, fontWeight: 700, color: '#64748b', marginBottom: 6 }}>Status</label>
+                  <select value={statusFilter} onChange={e => setStatusFilter(e.target.value)} style={{ width: '100%', padding: 10, borderRadius: 8, border: '1px solid #e2e8f0', fontFamily: 'inherit' }}>
+                    <option value="">All Statuses</option>
+                    <option value="active">Active</option>
+                    <option value="voided">Voided</option>
+                    <option value="refunded">Refunded</option>
+                    <option value="held">Held</option>
+                  </select>
+                </div>
+                <button 
+                  onClick={() => { setStartDate(''); setEndDate(''); setStatusFilter(''); setSearch(''); fetchHistory(); }}
+                  style={{ width: '100%', padding: 10, borderRadius: 8, background: '#f1f5f9', border: 'none', color: '#64748b', fontWeight: 700, cursor: 'pointer' }}
+                >
+                  Clear Filters
+                </button>
+              </div>
+            )}
+          </div>
         </div>
       </header>
 

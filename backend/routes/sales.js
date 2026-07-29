@@ -7,15 +7,31 @@ const router = express.Router();
 // Get sales history (paginated)
 router.get('/history', auth, async (req, res) => {
   try {
-    const { page = 1, limit = 10, search = '' } = req.query;
+    const { page = 1, limit = 10, search = '', startDate, endDate, status } = req.query;
     const offset = (page - 1) * limit;
     const where = {};
+    
     if (search) {
       where[Op.or] = [
         { id: { [Op.like]: `%${search}%` } },
         { status: { [Op.like]: `%${search}%` } }
       ];
     }
+    
+    if (status) {
+      where.status = status;
+    }
+    
+    if (startDate || endDate) {
+      where.createdAt = {};
+      if (startDate) where.createdAt[Op.gte] = new Date(startDate);
+      if (endDate) {
+        const end = new Date(endDate);
+        end.setHours(23, 59, 59, 999);
+        where.createdAt[Op.lte] = end;
+      }
+    }
+    
     const sales = await Sale.findAndCountAll({
       where,
       include: [{ model: SaleItem, as: 'Items', include: [Product] }, Customer, User],
