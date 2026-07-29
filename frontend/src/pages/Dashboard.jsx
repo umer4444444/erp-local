@@ -62,11 +62,6 @@ const Dashboard = () => {
   const { t, i18n } = useTranslation();
   const role = user?.role || 'admin';
   const isRTL = i18n.dir() === 'rtl';
-
-  const toggleLanguage = () => {
-    const newLang = i18n.language === 'en' ? 'ar' : 'en';
-    i18n.changeLanguage(newLang);
-  };
   
   const [stats, setStats] = useState({});
   const [alerts, setAlerts] = useState({ lowStock: [], expiringSoon: [] });
@@ -439,9 +434,6 @@ const Dashboard = () => {
           </p>
         </div>
         <div style={{ display: 'flex', gap: '12px' }}>
-          <button onClick={toggleLanguage} style={{ padding: '12px', borderRadius: '16px', border: '1px solid #e2e8f0', background: 'white', fontWeight: 800, display: 'flex', alignItems: 'center', gap: '8px', color: '#475569', cursor: 'pointer' }}>
-            <Globe size={18} /> {i18n.language === 'en' ? 'عربي' : 'English'}
-          </button>
           <button onClick={() => window.location.reload()} style={{ padding: '12px 20px', borderRadius: '16px', border: '1px solid #e2e8f0', background: 'white', fontWeight: 800, display: 'flex', alignItems: 'center', gap: '8px', color: '#475569', cursor: 'pointer' }}>
             <Calendar size={18} /> {t('refreshData')}
           </button>
