@@ -20,7 +20,7 @@ const MobileHome = () => {
         </div>
         <div style={{ background: '#ecfdf5', padding: 16, borderRadius: 16 }}>
           <DollarSign size={24} color="#10b981" style={{ marginBottom: 8 }} />
-          <div style={{ fontSize: 20, fontWeight: 700, color: '#065f46' }}>$4,250</div>
+          <div style={{ fontSize: 20, fontWeight: 700, color: '#065f46' }}>SAR 4,250</div>
           <div style={{ fontSize: 12, color: '#059669', fontWeight: 600 }}>COLLECTED</div>
         </div>
       </div>
@@ -36,8 +36,8 @@ const MobileHome = () => {
           <div style={{ width: '82%', height: '100%', background: 'linear-gradient(90deg, #8b5cf6, #d946ef)' }} />
         </div>
         <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 8, fontSize: 12, color: '#64748b' }}>
-          <span>$41,000</span>
-          <span>$50,000</span>
+          <span>SAR 41,000</span>
+          <span>SAR 50,000</span>
         </div>
       </div>
 

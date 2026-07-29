@@ -13,7 +13,7 @@ const inputStyle = {
   fontWeight: 700, color: '#0f172a', background: '#f8fafc', width: 90,
 };
 
-const fmtMoney = (n) => `$${parseFloat(n || 0).toFixed(2)}`;
+const fmtMoney = (n) => `SAR ${parseFloat(n || 0).toFixed(2)}`;
 
 const TABS = ['payroll', 'advances'];
 
@@ -169,13 +169,13 @@ const Payroll = () => {
       </div>
       <table>
         <tr><th>Description</th><th>Amount</th></tr>
-        <tr><td>Base Salary</td><td>$${parseFloat(ps.baseSalary).toFixed(2)}</td></tr>
-        <tr><td style="color:#10b981">+ Allowances</td><td style="color:#10b981">$${parseFloat(ps.allowances).toFixed(2)}</td></tr>
-        <tr><td style="color:#ef4444">- Deductions</td><td style="color:#ef4444">$${parseFloat(ps.deductions).toFixed(2)}</td></tr>
+        <tr><td>Base Salary</td><td>SAR ${parseFloat(ps.baseSalary).toFixed(2)}</td></tr>
+        <tr><td style="color:#10b981">+ Allowances</td><td style="color:#10b981">SAR ${parseFloat(ps.allowances).toFixed(2)}</td></tr>
+        <tr><td style="color:#ef4444">- Deductions</td><td style="color:#ef4444">SAR ${parseFloat(ps.deductions).toFixed(2)}</td></tr>
       </table>
       <div class="net-salary">
         <div class="label">NET SALARY</div>
-        <div class="amount">$${net}</div>
+        <div class="amount">SAR ${net}</div>
       </div>
       <div class="footer">This is a computer-generated payslip. No signature required.</div>
     </body></html>`;

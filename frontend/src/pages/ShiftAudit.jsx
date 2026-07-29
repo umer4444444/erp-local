@@ -90,7 +90,7 @@ const ShiftAudit = () => {
 
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 24, marginBottom: 40 }}>
         {[
-          { label: 'Total Estimated Payroll', value: `$${totalEarnings.toFixed(2)}`, color: '#0a84ff', icon: <DollarSign size={20} /> },
+          { label: 'Total Estimated Payroll', value: `SAR ${totalEarnings.toFixed(2)}`, color: '#0a84ff', icon: <DollarSign size={20} /> },
           { label: 'Total Hours Worked', value: `${totalHours.toFixed(2)}h`, color: '#10b981', icon: <Clock size={20} /> },
           { label: 'Total Overtime', value: `${totalOvertime.toFixed(2)}h`, color: '#f59e0b', icon: <AlertTriangle size={20} /> },
           { label: 'Employees Active', value: [...new Set(auditData.map(a => a.empCode))].length, color: '#a855f7', icon: <Users size={20} /> },
@@ -183,8 +183,8 @@ const ShiftAudit = () => {
                   ['Clock Out', selectedRow.clockOut ? new Date(selectedRow.clockOut).toLocaleTimeString('en-PK', { hour: '2-digit', minute: '2-digit', hour12: true }) : 'Still Active'],
                   ['Total Hours', `${selectedRow.hours}h`],
                   ['Overtime', `${Math.max(0, (selectedRow.hours || 0) - STANDARD_DAILY_HOURS).toFixed(2)}h`],
-                  ['Salary Rate', `$${selectedRow.rate} / ${selectedRow.salaryType === 'hourly' ? 'hr' : 'month'}`],
-                  ['Estimated Earned', `$${(selectedRow.earned || 0).toFixed(2)}`],
+                  ['Salary Rate', `SAR ${selectedRow.rate} / ${selectedRow.salaryType === 'hourly' ? 'hr' : 'month'}`],
+                  ['Estimated Earned', `SAR ${(selectedRow.earned || 0).toFixed(2)}`],
                   ['Status', selectedRow.status || '—'],
                 ].map(([label, value]) => (
                   <div key={label} style={{ display: 'flex', justifyContent: 'space-between', padding: '12px 16px', borderRadius: 12, background: '#f8fafc' }}>

@@ -8,7 +8,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { advanceAPI } from '../api';
 import { useAuth } from '../context/AuthContext';
 
-const fmtMoney = (n) => `PKR ${parseFloat(n || 0).toLocaleString('en-PK', { minimumFractionDigits: 2 })}`;
+const fmtMoney = (n) => `SAR ${parseFloat(n || 0).toLocaleString('en-PK', { minimumFractionDigits: 2 })}`;
 const fmtDate = (d) => d ? new Date(d).toLocaleDateString('en-PK', { day: '2-digit', month: 'short', year: 'numeric' }) : '—';
 
 const STATUS_MAP = {
@@ -506,7 +506,7 @@ const SalaryAdvancePage = () => {
                     <div style={{ fontSize: 13, fontWeight: 700, color: '#0369a1' }}>
                       💡 Monthly deduction:{' '}
                       <strong>
-                        PKR {(parseFloat(form.amount) / parseInt(form.deductionMonths || 1)).toLocaleString('en-PK', { minimumFractionDigits: 2 })}
+                        SAR {(parseFloat(form.amount) / parseInt(form.deductionMonths || 1)).toLocaleString('en-PK', { minimumFractionDigits: 2 })}
                       </strong>{' '}
                       for {form.deductionMonths} month{parseInt(form.deductionMonths) > 1 ? 's' : ''}
                     </div>

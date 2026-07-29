@@ -73,7 +73,7 @@ const HR = () => {
           subtitle="Live attendance count" onClick={() => navigate('/attendance')} />
         <StatBox title="Avg. Hours" value={`${(stats.avgHours || 0).toFixed(0)}h`} icon={<Clock size={24} />} color="#f59e0b"
           subtitle="Based on shift audit" />
-        <StatBox title="Est. Payroll" value={`$${(stats.estPayroll || 0).toLocaleString()}`} icon={<DollarSign size={24} />} color="#a855f7"
+        <StatBox title="Est. Payroll" value={`SAR ${(stats.estPayroll || 0).toLocaleString()}`} icon={<DollarSign size={24} />} color="#a855f7"
           subtitle="This month" onClick={() => navigate('/payroll')} />
       </div>
 

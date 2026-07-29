@@ -180,7 +180,7 @@ const Customers = () => {
           {[
             { label: 'Total Customers', value: stats.total, icon: <Users size={18} />, color: '#0a84ff', bg: '#eff6ff' },
             { label: 'Gold+ Members', value: stats.gold, icon: <Crown size={18} />, color: '#f59e0b', bg: '#fffbeb' },
-            { label: 'Outstanding Balance', value: `$${stats.outstanding.toFixed(2)}`, icon: <DollarSign size={18} />, color: '#ef4444', bg: '#fff1f2' },
+            { label: 'Outstanding Balance', value: `SAR ${stats.outstanding.toFixed(2)}`, icon: <DollarSign size={18} />, color: '#ef4444', bg: '#fff1f2' },
             { label: 'Total Loyalty Points', value: stats.totalPoints.toLocaleString(), icon: <Star size={18} />, color: '#8b5cf6', bg: '#f5f3ff' },
           ].map(s => (
             <div key={s.label} style={{ background: 'white', borderRadius: 20, padding: '20px 24px', display: 'flex', alignItems: 'center', gap: 16, border: '1px solid rgba(0,0,0,0.04)' }}>
@@ -381,7 +381,7 @@ const Customers = () => {
                             <div key={i} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', flex: 1, minWidth: 28, gap: 6 }}>
                               <span style={{ fontSize: 10, fontWeight: 800, color: '#0a84ff' }}>${val.toFixed(0)}</span>
                               <div 
-                                title={`$${val.toFixed(2)} on ${new Date(h.createdAt).toLocaleDateString()}`}
+                                title={`SAR ${val.toFixed(2)} on ${new Date(h.createdAt).toLocaleDateString()}`}
                                 style={{ 
                                   width: '100%', 
                                   height: `${heightPct}%`, 

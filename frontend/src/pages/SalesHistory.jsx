@@ -43,8 +43,8 @@ const SalesHistory = () => {
       <div style="display:grid; grid-template-columns:2.5fr 1fr 1fr 1fr; gap:8px; font-size:13px; align-items:center; padding:8px 0; border-bottom:1px solid #f8fafc;">
         <span style="font-weight:600; color:#0f172a; word-break:break-all;">${item.Product?.name || 'Item'}</span>
         <span style="text-align:center; font-weight:800; color:#0f172a;">${item.quantity}</span>
-        <span style="text-align:right; color:#64748b;">$${parseFloat(item.price || 0).toFixed(2)}</span>
-        <span style="text-align:right; font-weight:800; color:#0f172a;">$${parseFloat(item.total || 0).toFixed(2)}</span>
+        <span style="text-align:right; color:#64748b;">SAR ${parseFloat(item.price || 0).toFixed(2)}</span>
+        <span style="text-align:right; font-weight:800; color:#0f172a;">SAR ${parseFloat(item.total || 0).toFixed(2)}</span>
       </div>
     `).join('');
 
@@ -99,14 +99,14 @@ const SalesHistory = () => {
           <!-- Totals -->
           <div style="display:flex; flex-direction:column; gap:8px; margin-bottom:24px;">
             <div style="display:flex; justify-content:space-between; font-size:14px; color:#64748b; font-weight:600;">
-              <span>Subtotal</span><span>$${subtotal.toFixed(2)}</span>
+              <span>Subtotal</span><span>SAR ${subtotal.toFixed(2)}</span>
             </div>
             ${discount > 0 ? `
             <div style="display:flex; justify-content:space-between; font-size:14px; color:#ef4444; font-weight:700;">
-              <span>Discount</span><span>-$${discount.toFixed(2)}</span>
+              <span>Discount</span><span>-SAR ${discount.toFixed(2)}</span>
             </div>` : ''}
             <div style="display:flex; justify-content:space-between; font-size:18px; color:#0f172a; font-weight:900; margin-top:8px; padding-top:8px; border-top:1px solid #f1f5f9;">
-              <span>Grand Total</span><span style="color:#0a84ff;">$${grandTotal.toFixed(2)}</span>
+              <span>Grand Total</span><span style="color:#0a84ff;">SAR ${grandTotal.toFixed(2)}</span>
             </div>
           </div>
 
@@ -119,11 +119,11 @@ const SalesHistory = () => {
             ${sale.paymentMethod === 'cash' && cashAmount > 0 ? `
             <div style="display:flex; justify-content:space-between; margin-bottom:4px; font-weight:600;">
               <span style="color:#64748b;">Tendered</span>
-              <span style="color:#0f172a;">$${cashAmount.toFixed(2)}</span>
+              <span style="color:#0f172a;">SAR ${cashAmount.toFixed(2)}</span>
             </div>
             <div style="display:flex; justify-content:space-between; font-weight:800;">
               <span style="color:#64748b;">Change</span>
-              <span style="color:#16a34a;">$${change.toFixed(2)}</span>
+              <span style="color:#16a34a;">SAR ${change.toFixed(2)}</span>
             </div>` : ''}
           </div>
 

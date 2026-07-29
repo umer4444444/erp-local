@@ -112,7 +112,7 @@ const Manager = () => {
       </header>
 
       <div style={{ display: 'flex', gap: 24, marginBottom: 40, flexWrap: 'wrap' }}>
-        <StatBox title="Net Revenue" value={`$${(parseFloat(overview.revenue || 0)).toLocaleString()}`} sub="Current billing cycle" icon={<DollarSign />} rgb="34,197,94" />
+        <StatBox title="Net Revenue" value={`SAR ${(parseFloat(overview.revenue || 0)).toLocaleString()}`} sub="Current billing cycle" icon={<DollarSign />} rgb="34,197,94" />
         <StatBox title="Transaction Volume" value={overview.salesCount || 0} sub="Last 24 hours" icon={<Zap />} rgb="10,132,255" />
         <StatBox title="Staff Engagement" value={overview.activeStaff || 0} sub="Members currently clocked in" icon={<Users />} rgb="168,85,247" />
         <StatBox title="Pending Leaves" value={overview.pendingLeaves || 0} sub="Awaiting manager approval" icon={<Target />} rgb="249,115,22" />

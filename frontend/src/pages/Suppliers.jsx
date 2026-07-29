@@ -329,7 +329,7 @@ const Suppliers = () => {
                 {[
                   { label: 'Orders', value: s.orderCount },
                   { label: 'Received', value: s.receivedCount },
-                  { label: 'Total Spend', value: `$${(s.totalSpend/1000).toFixed(1)}k` },
+                  { label: 'Total Spend', value: `SAR ${(s.totalSpend/1000).toFixed(1)}k` },
                 ].map(m => (
                   <div key={m.label} style={{ textAlign: 'center', padding: '10px 6px', borderRadius: 12, background: '#f8fafc' }}>
                     <div style={{ fontSize: 18, fontWeight: 900, color: '#0f172a' }}>{m.value}</div>

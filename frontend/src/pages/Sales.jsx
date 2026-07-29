@@ -267,7 +267,7 @@ const Sales = () => {
 
   const subtotal = cart.reduce((sum, i) => sum + (i.price * i.quantity) - i.discountAmount, 0);
   
-  // Loyalty redemption: 100 pts = $1
+  // Loyalty redemption: 100 pts = SAR 1
   const loyaltyPoints = selectedCustomer?.loyaltyPoints || 0;
   const maxRedeem = Math.min(loyaltyPoints / 100, subtotal * 0.2); // max 20% off via points
   const loyaltyDiscount = redeemPoints ? maxRedeem : 0;
@@ -500,7 +500,7 @@ const Sales = () => {
                 <button 
                   onClick={() => setDiscountType(discountType === 'flat' ? 'percent' : 'flat')}
                   style={{ padding: '2px 8px', borderRadius: 6, border: '1px solid #0a84ff', background: '#eff6ff', color: '#0a84ff', fontSize: 11, fontWeight: 800, cursor: 'pointer' }}>
-                  {discountType === 'flat' ? '$ Flat' : '% Percent'}
+                  {discountType === 'flat' ? 'SAR  Flat' : '% Percent'}
                 </button>
               </div>
               <input type="number" min="0" value={globalDiscount} onChange={e => setGlobalDiscount(e.target.value)} 

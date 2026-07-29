@@ -84,14 +84,14 @@ const EODReport = () => {
           <div class="row"><strong>Time:</strong> <span>${new Date().toLocaleTimeString()}</span></div>
           <div class="row"><strong>Shift / Slot:</strong> <span>${activeSession?.id ? 'Shift #' + activeSession.id.slice(0, 8).toUpperCase() : 'Day Shift'}</span></div>
           <div class="divider"></div>
-          <div class="row"><span>Cash Expected:</span> <strong>$${summary.cash.toFixed(2)}</strong></div>
-          <div class="row"><span>Card Expected:</span> <strong>$${summary.card.toFixed(2)}</strong></div>
-          <div class="row total"><span>Total Expected:</span> <span>$${summary.total.toFixed(2)}</span></div>
+          <div class="row"><span>Cash Expected:</span> <strong>SAR ${summary.cash.toFixed(2)}</strong></div>
+          <div class="row"><span>Card Expected:</span> <strong>SAR ${summary.card.toFixed(2)}</strong></div>
+          <div class="row total"><span>Total Expected:</span> <span>SAR ${summary.total.toFixed(2)}</span></div>
           <div class="divider"></div>
-          <div class="row"><span>Actual Cash:</span> <strong>$${parseFloat(cashCount || 0).toFixed(2)}</strong></div>
+          <div class="row"><span>Actual Cash:</span> <strong>SAR ${parseFloat(cashCount || 0).toFixed(2)}</strong></div>
           <div class="variance" style="color: ${variance === 0 ? '#16a34a' : '#e11d48'}">
             <span>Variance:</span>
-            <span>${variance > 0 ? '+' : ''}$${variance.toFixed(2)}</span>
+            <span>${variance > 0 ? '+' : ''}SAR ${variance.toFixed(2)}</span>
           </div>
           ${notes ? `<div class="divider"></div><div style="font-size: 13px;"><strong>Notes:</strong><p style="text-align: left; margin-top: 5px; font-style: italic;">${notes}</p></div>` : ''}
           <div class="divider" style="margin-top: 30px;"></div>

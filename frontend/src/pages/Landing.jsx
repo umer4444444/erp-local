@@ -48,8 +48,8 @@ const Landing = () => {
   ];
 
   const plans = [
-    { name: 'Starter', price: '$0', desc: 'Perfect for small teams', features: ['Up to 5 users', 'Core POS & Inventory', 'Basic Reports', 'Email Support'], popular: false, color: '#64748b' },
-    { name: 'Professional', price: '$49', desc: 'For growing businesses', features: ['Unlimited users', 'All 9 Portals', 'HR & Payroll Engine', 'Advanced Analytics', 'Priority Support'], popular: true, color: '#0a84ff' },
+    { name: 'Starter', price: 'SAR 0', desc: 'Perfect for small teams', features: ['Up to 5 users', 'Core POS & Inventory', 'Basic Reports', 'Email Support'], popular: false, color: '#64748b' },
+    { name: 'Professional', price: 'SAR 49', desc: 'For growing businesses', features: ['Unlimited users', 'All 9 Portals', 'HR & Payroll Engine', 'Advanced Analytics', 'Priority Support'], popular: true, color: '#0a84ff' },
     { name: 'GlobalAI ERP', price: 'Custom', desc: 'For large organizations', features: ['Custom deployment', 'Dedicated infra', 'SLA Guarantee', 'Onboarding team', 'API Access'], popular: false, color: '#6366f1' },
   ];
 
@@ -145,7 +145,7 @@ const Landing = () => {
               <div style={{ display: 'flex', gap: 6 }}>{['#ef4444','#f59e0b','#10b981'].map(c => <div key={c} style={{ width: 10, height: 10, borderRadius: '50%', background: c }} />)}</div>
             </div>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginBottom: 20 }}>
-              {[['Total Revenue', '$124,500', '+12.4%', '#10b981'], ['Active Staff', '48', '+3', '#0a84ff'], ['Today Sales', '284', '+8.2%', '#a855f7'], ['Low Stock', '7', '-2', '#f59e0b']].map(([t, v, c, color]) => (
+              {[['Total Revenue', 'SAR 124,500', '+12.4%', '#10b981'], ['Active Staff', '48', '+3', '#0a84ff'], ['Today Sales', '284', '+8.2%', '#a855f7'], ['Low Stock', '7', '-2', '#f59e0b']].map(([t, v, c, color]) => (
                 <div key={t} style={{ background: 'rgba(255,255,255,0.04)', borderRadius: 18, padding: 20, border: '1px solid rgba(255,255,255,0.06)' }}>
                   <div style={{ fontSize: 11, color: '#64748b', fontWeight: 700, textTransform: 'uppercase', marginBottom: 8 }}>{t}</div>
                   <div style={{ fontSize: 24, fontWeight: 900 }}>{v}</div>
