@@ -406,7 +406,7 @@ const Inventory = () => {
   };
 
   return (
-    <div style={{ padding: 40, minHeight: '100vh', background: '#f8fafc', fontFamily: "'Outfit', sans-serif" }}>
+    <div style={{ padding: '100px 40px 40px 40px', minHeight: '100vh', background: '#f8fafc', fontFamily: "'Outfit', sans-serif" }}>
       <header style={{ marginBottom: 40, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <div>
           <h1 style={{ fontSize: 32, fontWeight: 900, color: '#0f172a' }}>Inventory Ledger</h1>

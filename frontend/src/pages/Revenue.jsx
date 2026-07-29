@@ -103,7 +103,7 @@ const Revenue = () => {
   const maxRevenue = topProducts.reduce((m, p) => Math.max(m, parseFloat(p.totalRevenue || 0)), 1);
 
   return (
-    <div style={{ padding: 40, minHeight: '100vh', background: '#f8fafc', fontFamily: "'Outfit', sans-serif" }}>
+    <div style={{ padding: '100px 40px 40px 40px', minHeight: '100vh', background: '#f8fafc', fontFamily: "'Outfit', sans-serif" }}>
       {/* Header */}
       <header style={{ marginBottom: 32, display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: 16 }}>
         <div>

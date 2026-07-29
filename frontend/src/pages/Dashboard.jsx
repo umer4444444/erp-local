@@ -428,7 +428,7 @@ const Dashboard = () => {
   );
 
   return (
-    <div style={{ padding: '40px', minHeight: '100vh', background: '#f8fafc', fontFamily: "'Outfit', sans-serif", position: 'relative', direction: isRTL ? 'rtl' : 'ltr' }}>
+    <div style={{ padding: '100px 40px 40px 40px', minHeight: '100vh', background: '#f8fafc', fontFamily: "'Outfit', sans-serif", position: 'relative', direction: isRTL ? 'rtl' : 'ltr' }}>
       <header style={{ marginBottom: '40px', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', flexWrap: 'wrap', gap: '16px' }}>
         <div>
           <h1 style={{ fontSize: '32px', fontWeight: 900, color: '#0f172a', margin: '0 0 8px 0' }}>
