@@ -117,6 +117,7 @@ function AppContent() {
               <Route path="/eod" element={<PrivateRoute roles={['admin', 'manager', 'cashier', 'operations']}><PageTransition><EODReport /></PageTransition></PrivateRoute>} />
               <Route path="/delivery" element={<PrivateRoute roles={['admin', 'manager', 'operations']}><PageTransition><Delivery /></PageTransition></PrivateRoute>} />
               <Route path="/accounting" element={<PrivateRoute roles={['admin', 'finance', 'manager']}><PageTransition><Accounting /></PageTransition></PrivateRoute>} />
+              <Route path="/salary-advance" element={<PrivateRoute roles={['admin', 'hr', 'manager', 'cashier', 'inventory', 'finance', 'staff', 'operations', 'pharmacist', 'expenses']}><PageTransition><SalaryAdvance /></PageTransition></PrivateRoute>} />
               
               <Route path="*" element={<Navigate to={getDefaultRoute(user?.role)} />} />
             </Routes>

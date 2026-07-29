@@ -5,7 +5,7 @@ import { attendanceAPI } from '../api';
 
 const OFFICE_LAT = 31.571398336628878;  // Configure your office lat/lng here
 const OFFICE_LNG = 74.41214762086345;
-const GEOFENCE_RADIUS_M = 500; // 500 meter radius
+const GEOFENCE_RADIUS_M = 100; // Must match backend MAX_DISTANCE_M enforcement
 
 function haversineDistance(lat1, lng1, lat2, lng2) {
   const R = 6371000; // metres

@@ -7,7 +7,7 @@ const PDFDocument = require('pdfkit');
 const router = express.Router();
 
 // GET /api/reports/revenue?from=&to=
-router.get('/revenue', auth, roleCheck(['admin', 'manager']), async (req, res) => {
+router.get('/revenue', auth, roleCheck(['admin', 'manager', 'finance']), async (req, res) => {
   try {
     const { from, to } = req.query;
     const where = { status: 'active' };
@@ -24,7 +24,7 @@ router.get('/revenue', auth, roleCheck(['admin', 'manager']), async (req, res) =
 });
 
 // GET /api/reports/pnl?month=&year=
-router.get('/pnl', auth, roleCheck(['admin', 'manager']), async (req, res) => {
+router.get('/pnl', auth, roleCheck(['admin', 'manager', 'finance']), async (req, res) => {
   try {
     const { from, to, month, year } = req.query;
     let startDate, endDate;
@@ -113,7 +113,7 @@ router.get('/pnl', auth, roleCheck(['admin', 'manager']), async (req, res) => {
 });
 
 // GET /api/reports/trialbalance
-router.get('/trialbalance', auth, roleCheck(['admin', 'manager']), async (req, res) => {
+router.get('/trialbalance', auth, roleCheck(['admin', 'manager', 'finance']), async (req, res) => {
   try {
     // A simplified Trial Balance based on current tables:
     // Debits: Cash/Bank (Mocked or from SalesSession), Receivables (mocked), Inventory Value, Expenses
@@ -200,7 +200,7 @@ router.get('/topproducts', auth, async (req, res) => {
 });
 
 // GET /api/reports/salesperson
-router.get('/salesperson', auth, roleCheck(['admin', 'manager']), async (req, res) => {
+router.get('/salesperson', auth, roleCheck(['admin', 'manager', 'finance']), async (req, res) => {
   try {
     const sales = await Sale.findAll({
       where: { status: 'active' },

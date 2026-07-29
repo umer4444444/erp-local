@@ -1,5 +1,5 @@
 const express = require('express');
-const { Product, ProductVariation, Category, StockLog, sequelize, PurchaseOrder, POItem, Supplier } = require('../models');
+const { Product, ProductVariation, Category, StockLog, sequelize, PurchaseOrder, POItem, Supplier, User } = require('../models');
 const { auth, roleCheck } = require('../middleware/auth');
 const audit = require('../middleware/audit');
 const router = express.Router();
