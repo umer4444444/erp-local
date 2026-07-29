@@ -200,4 +200,14 @@ export const advanceAPI = {
   approve: (id, status) => API.put(`/payroll/advance/${id}/approve`, { status }),
 };
 
+export const accountingAPI = {
+  getAccounts: () => API.get('/accounting/accounts'),
+  createAccount: (data) => API.post('/accounting/accounts', data),
+  getJournals: () => API.get('/accounting/journal-entries'),
+  createJournal: (data) => API.post('/accounting/journal-entries', data),
+  getTrialBalance: () => API.get('/accounting/trial-balance'),
+  getLedger: (accountId) => API.get(`/accounting/ledger/${accountId}`),
+  getStatements: () => API.get('/accounting/statements'),
+};
+
 export default API;

@@ -1,12 +1,19 @@
 import React, { useState, useEffect } from 'react';
-import API from '../api';
-import { Book, FileText, Activity, Plus, X, Trash2 } from 'lucide-react';
+import { accountingAPI } from '../api';
+import { Book, FileText, Activity, Plus, X, Trash2, List, TrendingUp, DollarSign } from 'lucide-react';
 
 const Accounting = () => {
   const [activeTab, setActiveTab] = useState('chart');
   const [accounts, setAccounts] = useState([]);
+  useEffect(() => {
+    // Initial fetch of accounts for ledger dropdown
+    accountingAPI.getAccounts().then(res => setAccounts(res.data)).catch(console.error);
+  }, []);
   const [journals, setJournals] = useState([]);
   const [trialBalance, setTrialBalance] = useState([]);
+  const [ledger, setLedger] = useState(null);
+  const [selectedAccountId, setSelectedAccountId] = useState('');
+  const [statements, setStatements] = useState({ profitAndLoss: null, balanceSheet: null });
   const [loading, setLoading] = useState(true);
 
   // Modals state
@@ -27,19 +34,19 @@ const Accounting = () => {
 
   useEffect(() => {
     fetchData();
-  }, [activeTab]);
+  }, [activeTab, selectedAccountId]);
 
   const fetchData = async () => {
     setLoading(true);
     try {
       if (activeTab === 'chart') {
-        const { data } = await API.get('/accounting/accounts');
+        const { data } = await accountingAPI.getAccounts();
         setAccounts(data);
       } else if (activeTab === 'journals') {
-        const { data } = await API.get('/accounting/journal-entries');
+        const { data } = await accountingAPI.getJournals();
         setJournals(data);
       } else if (activeTab === 'trial') {
-        const { data } = await API.get('/accounting/trial-balance');
+        const { data } = await accountingAPI.getTrialBalance();
         setTrialBalance(data);
       }
     } catch (err) {
@@ -52,7 +59,7 @@ const Accounting = () => {
   const handleCreateAccount = async (e) => {
     e.preventDefault();
     try {
-      await API.post('/accounting/accounts', newAccount);
+      await accountingAPI.createAccount(newAccount);
       setShowAccountModal(false);
       setNewAccount({ code: '', name: '', type: 'asset' });
       fetchData();
@@ -94,7 +101,7 @@ const Accounting = () => {
     }
 
     try {
-      await API.post('/accounting/journal-entries', newJournal);
+      await accountingAPI.createJournal(newJournal);
       setShowJournalModal(false);
       setNewJournal({
         date: new Date().toISOString().split('T')[0],
@@ -116,7 +123,7 @@ const Accounting = () => {
     if (showJournalModal && accounts.length === 0) {
       const fetchAccounts = async () => {
         try {
-          const { data } = await API.get('/accounting/accounts');
+          const { data } = await accountingAPI.getAccounts();
           setAccounts(data);
         } catch (err) {
           console.error(err);
