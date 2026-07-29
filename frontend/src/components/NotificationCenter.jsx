@@ -71,7 +71,7 @@ const NotificationCenter = ({ user }) => {
   }, [user]);
 
   return (
-    <div style={{ position: 'absolute', top: 24, right: 40, zIndex: 100, display: 'flex', gap: 12, alignItems: 'center' }}>
+    <div style={{ zIndex: 100, display: 'flex', gap: 12, alignItems: 'center' }}>
       
       {/* Search/User Bar Placeholder or similar if needed, but we just want the Bell */}
       <div style={{ position: 'relative' }}>

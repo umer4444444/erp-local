@@ -93,8 +93,10 @@ function AppContent() {
       
       <Sidebar onLogout={logout} user={user} />
       <div className="flex-1 flex flex-col relative z-0" style={{ marginLeft: 260 + 32, width: 'calc(100% - 292px)' }}>
-        <div className="flex-1 overflow-y-auto relative">
+        <div style={{ display: 'flex', justifyContent: 'flex-end', padding: '24px 40px 0 40px', zIndex: 50 }}>
           <NotificationCenter user={user} />
+        </div>
+        <div className="flex-1 overflow-y-auto relative">
           <AnimatePresence mode="wait">
             <Routes location={location} key={location.pathname}>
               <Route path="/" element={<PrivateRoute roles={['admin', 'superadmin', 'owner', 'company_admin']}><PageTransition><Dashboard user={user} /></PageTransition></PrivateRoute>} />
