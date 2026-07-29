@@ -8,7 +8,7 @@ import { motion } from 'framer-motion';
 import { reportsAPI } from '../api';
 
 const fmtCurrency = (n) =>
-  `SAR ${parseFloat(n || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+  `SAR SAR {parseFloat(n || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 
 const MetricCard = ({ title, value, sub, trend, color = '#0a84ff', delay = 0 }) => (
   <motion.div

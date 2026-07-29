@@ -414,7 +414,7 @@ const Suppliers = () => {
                         </span>
                       </td>
                       <td style={{ padding: '16px 18px', fontWeight: 900, color: '#0f172a', fontSize: 15 }}>
-                        ${parseFloat(o.totalAmount || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                        SAR {parseFloat(o.totalAmount || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                       </td>
                       <td style={{ padding: '16px 18px' }}>
                         <StatusBadge status={o.status} />
@@ -451,7 +451,7 @@ const Suppliers = () => {
                                         Qty: <strong style={{ color: '#0f172a' }}>{item.quantity}</strong>
                                       </div>
                                       <div style={{ fontSize: 12, color: '#64748b', fontWeight: 600 }}>
-                                        Unit: <strong style={{ color: '#0f172a' }}>${parseFloat(item.unitCost || 0).toFixed(2)}</strong>
+                                        Unit: <strong style={{ color: '#0f172a' }}>SAR {parseFloat(item.unitCost || 0).toFixed(2)}</strong>
                                       </div>
                                       <div style={{ fontWeight: 900, fontSize: 14, color: '#0f172a', minWidth: 90, textAlign: 'right' }}>
                                         ${(item.quantity * parseFloat(item.unitCost || 0)).toFixed(2)}

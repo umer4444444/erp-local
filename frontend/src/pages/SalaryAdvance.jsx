@@ -8,7 +8,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { advanceAPI } from '../api';
 import { useAuth } from '../context/AuthContext';
 
-const fmtMoney = (n) => `SAR ${parseFloat(n || 0).toLocaleString('en-PK', { minimumFractionDigits: 2 })}`;
+const fmtMoney = (n) => `SAR SAR {parseFloat(n || 0).toLocaleString('en-PK', { minimumFractionDigits: 2 })}`;
 const fmtDate = (d) => d ? new Date(d).toLocaleDateString('en-PK', { day: '2-digit', month: 'short', year: 'numeric' }) : '—';
 
 const STATUS_MAP = {

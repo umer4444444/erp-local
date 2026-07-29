@@ -243,7 +243,7 @@ const Customers = () => {
                 {outstanding > 0 && (
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '10px 14px', borderRadius: 12, background: '#fff1f2', marginBottom: 12 }}>
                     <div style={{ fontSize: 12, fontWeight: 700, color: '#ef4444', display: 'flex', alignItems: 'center', gap: 6 }}>
-                      <DollarSign size={13} /> Outstanding: ${outstanding.toFixed(2)}
+                      <DollarSign size={13} /> Outstanding: SAR {outstanding.toFixed(2)}
                     </div>
                     <button onClick={() => { setSelectedCustomer(c); setShowPaymentModal(true); }}
                       style={{ padding: '4px 12px', borderRadius: 8, background: '#ef4444', color: 'white', border: 'none', fontWeight: 800, fontSize: 11, cursor: 'pointer' }}>
@@ -318,7 +318,7 @@ const Customers = () => {
               </div>
               <div style={{ background: '#fff1f2', borderRadius: 16, padding: 16, marginBottom: 24, fontSize: 14 }}>
                 <div style={{ fontWeight: 800, color: '#0f172a', marginBottom: 4 }}>{selectedCustomer.name}</div>
-                <div style={{ color: '#ef4444', fontWeight: 700 }}>Outstanding: ${parseFloat(selectedCustomer.outstandingBalance || 0).toFixed(2)}</div>
+                <div style={{ color: '#ef4444', fontWeight: 700 }}>Outstanding: SAR {parseFloat(selectedCustomer.outstandingBalance || 0).toFixed(2)}</div>
               </div>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
                 <div>
@@ -354,7 +354,7 @@ const Customers = () => {
                     <span>🏆 {getTier(selectedCustomer.loyaltyPoints || 0).label}</span>
                     <span>⭐ {selectedCustomer.loyaltyPoints || 0} pts</span>
                     {parseFloat(selectedCustomer.outstandingBalance || 0) > 0 && (
-                      <span style={{ color: '#ef4444' }}>💳 ${parseFloat(selectedCustomer.outstandingBalance).toFixed(2)} outstanding</span>
+                      <span style={{ color: '#ef4444' }}>💳 SAR {parseFloat(selectedCustomer.outstandingBalance).toFixed(2)} outstanding</span>
                     )}
                   </div>
                 </div>
@@ -379,7 +379,7 @@ const Customers = () => {
                           const heightPct = Math.max((val / maxVal) * 100, 10);
                           return (
                             <div key={i} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', flex: 1, minWidth: 28, gap: 6 }}>
-                              <span style={{ fontSize: 10, fontWeight: 800, color: '#0a84ff' }}>${val.toFixed(0)}</span>
+                              <span style={{ fontSize: 10, fontWeight: 800, color: '#0a84ff' }}>SAR {val.toFixed(0)}</span>
                               <div 
                                 title={`SAR ${val.toFixed(2)} on ${new Date(h.createdAt).toLocaleDateString()}`}
                                 style={{ 
@@ -407,7 +407,7 @@ const Customers = () => {
                             <div style={{ fontSize: 12, color: '#64748b', fontWeight: 600, marginTop: 2 }}>{new Date(item.createdAt).toLocaleDateString()} · {item.paymentMethod}</div>
                           </div>
                           <div style={{ textAlign: 'right' }}>
-                            <div style={{ fontWeight: 900, fontSize: 16, color: '#0f172a' }}>${parseFloat(item.grandTotal).toFixed(2)}</div>
+                            <div style={{ fontWeight: 900, fontSize: 16, color: '#0f172a' }}>SAR {parseFloat(item.grandTotal).toFixed(2)}</div>
                             {item.discount > 0 && <div style={{ fontSize: 11, color: '#10b981', fontWeight: 700 }}>-${item.discount} off</div>}
                           </div>
                         </div>

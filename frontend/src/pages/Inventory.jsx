@@ -531,8 +531,8 @@ const Inventory = () => {
                   <td style={{ padding: '16px 24px' }}>
                      <span style={{ fontWeight: 900, color: getStatusColor(product.stock) }}>{product.stock}</span>
                   </td>
-                  <td style={{ padding: '16px 24px', fontWeight: 800, color: '#0f172a' }}>${product.price}</td>
-                  <td style={{ padding: '16px 24px', fontWeight: 700, color: '#64748b' }}>${product.costPrice || 0}</td>
+                  <td style={{ padding: '16px 24px', fontWeight: 800, color: '#0f172a' }}>SAR {product.price}</td>
+                  <td style={{ padding: '16px 24px', fontWeight: 700, color: '#64748b' }}>SAR {product.costPrice || 0}</td>
                   <td style={{ padding: '16px 24px' }}>
                     <span style={{ color: '#10b981', fontWeight: 800, fontSize: 12 }}>{margin}%</span>
                   </td>
@@ -706,8 +706,8 @@ const Inventory = () => {
                       <th style={{ padding: '0 8px', fontSize: 11, fontWeight: 800, color: '#64748b' }}>PRODUCT NAME</th>
                       <th style={{ padding: '0 8px', fontSize: 11, fontWeight: 800, color: '#64748b' }}>CATEGORY</th>
                       <th style={{ padding: '0 8px', fontSize: 11, fontWeight: 800, color: '#64748b' }}>COMPANY</th>
-                      <th style={{ padding: '0 8px', fontSize: 11, fontWeight: 800, color: '#64748b' }}>PRICE ($)</th>
-                      <th style={{ padding: '0 8px', fontSize: 11, fontWeight: 800, color: '#64748b' }}>COST ($)</th>
+                      <th style={{ padding: '0 8px', fontSize: 11, fontWeight: 800, color: '#64748b' }}>PRICE (SAR)</th>
+                      <th style={{ padding: '0 8px', fontSize: 11, fontWeight: 800, color: '#64748b' }}>COST (SAR)</th>
                       <th style={{ padding: '0 8px', fontSize: 11, fontWeight: 800, color: '#64748b' }}>STOCK</th>
                       <th style={{ padding: '0 8px', fontSize: 11, fontWeight: 800, color: '#64748b' }}>EXPIRY</th>
                       <th style={{ width: 40 }}></th>
@@ -949,8 +949,8 @@ const Inventory = () => {
                         <tr key={item.id} style={{ borderBottom: '1px solid #f1f5f9', fontSize: 13 }}>
                           <td style={{ padding: '12px 20px', fontWeight: 800, color: '#0f172a' }}>{item.name}</td>
                           <td style={{ padding: '12px 20px', fontWeight: 900, color: '#ef4444' }}>{item.daysToExpiry} days left</td>
-                          <td style={{ padding: '12px 20px', fontWeight: 700, color: '#64748b', textDecoration: 'line-through' }}>${item.originalPrice}</td>
-                          <td style={{ padding: '12px 20px', fontWeight: 900, color: '#10b981' }}>${item.promoPrice}</td>
+                          <td style={{ padding: '12px 20px', fontWeight: 700, color: '#64748b', textDecoration: 'line-through' }}>SAR {item.originalPrice}</td>
+                          <td style={{ padding: '12px 20px', fontWeight: 900, color: '#10b981' }}>SAR {item.promoPrice}</td>
                           <td style={{ padding: '12px 20px' }}>
                             <span style={{ padding: '4px 8px', borderRadius: 6, fontSize: 11, fontWeight: 800, background: 'rgba(16,185,129,0.08)', color: '#10b981' }}>
                               Auto-Applied

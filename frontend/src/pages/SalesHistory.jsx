@@ -60,8 +60,8 @@ const SalesHistory = () => {
       <div style="display:grid; grid-template-columns:2.5fr 1fr 1fr 1fr; gap:8px; font-size:13px; align-items:center; padding:8px 0; border-bottom:1px solid #f8fafc;">
         <span style="font-weight:600; color:#0f172a; word-break:break-all;">${item.Product?.name || 'Item'}</span>
         <span style="text-align:center; font-weight:800; color:#0f172a;">${item.quantity}</span>
-        <span style="text-align:right; color:#64748b;">SAR ${parseFloat(item.price || 0).toFixed(2)}</span>
-        <span style="text-align:right; font-weight:800; color:#0f172a;">SAR ${parseFloat(item.total || 0).toFixed(2)}</span>
+        <span style="text-align:right; color:#64748b;">SAR SAR {parseFloat(item.price || 0).toFixed(2)}</span>
+        <span style="text-align:right; font-weight:800; color:#0f172a;">SAR SAR {parseFloat(item.total || 0).toFixed(2)}</span>
       </div>
     `).join('');
 
@@ -264,7 +264,7 @@ const SalesHistory = () => {
                       <span style={{ fontWeight: 700, color: '#64748b', fontSize: 14 }}>{sale.Customer?.name || 'Walk-in'}</span>
                     </div>
                   </td>
-                  <td style={{ padding: '16px 24px', fontWeight: 900, color: '#0f172a' }}>${sale.grandTotal}</td>
+                  <td style={{ padding: '16px 24px', fontWeight: 900, color: '#0f172a' }}>SAR {sale.grandTotal}</td>
                   <td style={{ padding: '16px 24px' }}>
                     <span style={{ padding: '6px 12px', borderRadius: 8, background: style.bg, color: style.color, fontSize: 12, fontWeight: 800, textTransform: 'capitalize' }}>
                       {sale.status}
@@ -305,16 +305,16 @@ const SalesHistory = () => {
                     <div key={item.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                       <div>
                         <div style={{ fontWeight: 800, color: '#0f172a', fontSize: 14 }}>{item.Product?.name}</div>
-                        <div style={{ fontSize: 12, color: '#94a3b8', fontWeight: 600 }}>${item.price} × {item.quantity}</div>
+                        <div style={{ fontSize: 12, color: '#94a3b8', fontWeight: 600 }}>SAR {item.price} × {item.quantity}</div>
                       </div>
-                      <div style={{ fontWeight: 900, color: '#0f172a' }}>${item.total}</div>
+                      <div style={{ fontWeight: 900, color: '#0f172a' }}>SAR {item.total}</div>
                     </div>
                   ))}
                 </div>
                 <div style={{ borderTop: '2px dashed #f1f5f9', paddingTop: 24 }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 12 }}>
                     <span style={{ fontWeight: 700, color: '#64748b' }}>Total Amount</span>
-                    <span style={{ fontWeight: 900, color: '#0f172a', fontSize: 24 }}>${selectedSale.grandTotal}</span>
+                    <span style={{ fontWeight: 900, color: '#0f172a', fontSize: 24 }}>SAR {selectedSale.grandTotal}</span>
                   </div>
                   <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 14 }}>
                     <span style={{ fontWeight: 700, color: '#64748b' }}>Payment Method</span>

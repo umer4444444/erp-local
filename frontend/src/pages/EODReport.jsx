@@ -88,7 +88,7 @@ const EODReport = () => {
           <div class="row"><span>Card Expected:</span> <strong>SAR ${summary.card.toFixed(2)}</strong></div>
           <div class="row total"><span>Total Expected:</span> <span>SAR ${summary.total.toFixed(2)}</span></div>
           <div class="divider"></div>
-          <div class="row"><span>Actual Cash:</span> <strong>SAR ${parseFloat(cashCount || 0).toFixed(2)}</strong></div>
+          <div class="row"><span>Actual Cash:</span> <strong>SAR SAR {parseFloat(cashCount || 0).toFixed(2)}</strong></div>
           <div class="variance" style="color: ${variance === 0 ? '#16a34a' : '#e11d48'}">
             <span>Variance:</span>
             <span>${variance > 0 ? '+' : ''}SAR ${variance.toFixed(2)}</span>
@@ -198,7 +198,7 @@ const EODReport = () => {
                   </div>
                   <span style={{ fontWeight: 700, color: '#64748b' }}>Cash Sales</span>
                 </div>
-                <span style={{ fontSize: 18, fontWeight: 900, color: '#0f172a' }}>${summary.cash.toFixed(2)}</span>
+                <span style={{ fontSize: 18, fontWeight: 900, color: '#0f172a' }}>SAR {summary.cash.toFixed(2)}</span>
               </div>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
@@ -207,11 +207,11 @@ const EODReport = () => {
                   </div>
                   <span style={{ fontWeight: 700, color: '#64748b' }}>Card Sales</span>
                 </div>
-                <span style={{ fontSize: 18, fontWeight: 900, color: '#0f172a' }}>${summary.card.toFixed(2)}</span>
+                <span style={{ fontSize: 18, fontWeight: 900, color: '#0f172a' }}>SAR {summary.card.toFixed(2)}</span>
               </div>
               <div style={{ borderTop: '2px dashed #f1f5f9', paddingTop: 24, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <span style={{ fontWeight: 800, color: '#0f172a' }}>Total Expected</span>
-                <span style={{ fontSize: 24, fontWeight: 900, color: '#0f172a' }}>${summary.total.toFixed(2)}</span>
+                <span style={{ fontSize: 24, fontWeight: 900, color: '#0f172a' }}>SAR {summary.total.toFixed(2)}</span>
               </div>
             </div>
           </div>

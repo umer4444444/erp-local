@@ -96,7 +96,7 @@ const Accounting = () => {
     const totalCredit = newJournal.lines.reduce((sum, line) => sum + Number(line.credit || 0), 0);
     
     if (Math.abs(totalDebit - totalCredit) > 0.01) {
-      alert(`Journal entry must balance! Debits: ${totalDebit}, Credits: ${totalCredit}`);
+      alert(`Journal entry must balance! Debits: SAR ${totalDebit}, Credits: SAR ${totalCredit}`);
       return;
     }
 

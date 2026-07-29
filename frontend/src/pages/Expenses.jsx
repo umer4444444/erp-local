@@ -180,7 +180,7 @@ const Expenses = () => {
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 24, marginBottom: 40 }}>
         <div style={{ background: 'white', padding: 32, borderRadius: 32, border: '1px solid rgba(0,0,0,0.05)', gridColumn: 'span 2' }}>
           <div style={{ fontSize: 14, fontWeight: 700, color: '#64748b', marginBottom: 8 }}>TOTAL ACCUMULATED BURN</div>
-          <div style={{ fontSize: 48, fontWeight: 900, color: '#0f172a' }}>${totalExpense.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</div>
+          <div style={{ fontSize: 48, fontWeight: 900, color: '#0f172a' }}>SAR {totalExpense.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</div>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8, color: stats.monthOverMonthChange > 0 ? '#ef4444' : '#10b981', fontSize: 14, fontWeight: 800, marginTop: 12 }}>
             <TrendingDown size={18} style={{ transform: stats.monthOverMonthChange > 0 ? 'scaleY(-1)' : 'none' }} /> 
             {stats.monthOverMonthChange > 0 ? '+' : ''}{stats.monthOverMonthChange.toFixed(1)}% from last month
@@ -219,7 +219,7 @@ const Expenses = () => {
                   <div style={{ fontSize: 12, color: '#64748b', fontWeight: 600 }}>{expense.category} • {expense.date ? parseExpenseDate(expense.date).toLocaleDateString() : 'N/A'}</div>
                 </div>
                 <div style={{ textAlign: 'right', display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 4 }}>
-                  <div style={{ fontWeight: 900, color: '#ef4444' }}>-${parseFloat(expense.amount).toFixed(2)}</div>
+                  <div style={{ fontWeight: 900, color: '#ef4444' }}>-SAR {parseFloat(expense.amount).toFixed(2)}</div>
                   <div style={{ fontSize: 11, color: expense.status === 'approved' ? '#10b981' : expense.status === 'rejected' ? '#ef4444' : '#f59e0b', fontWeight: 800, textTransform: 'uppercase' }}>{expense.status || 'pending'}</div>
                 </div>
                 <div style={{ display: 'flex', gap: 8, marginLeft: 16 }}>

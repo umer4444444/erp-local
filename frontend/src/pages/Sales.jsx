@@ -80,7 +80,7 @@ const ProductCard = React.memo(({ product, onAdd }) => (
       <div style={{ fontSize: 14, fontWeight: 800, color: '#0f172a' }}>{product.name}</div>
       <div style={{ fontSize: 11, color: '#94a3b8', fontWeight: 600 }}>{product.sku || 'No SKU'}</div>
     </div>
-    <div style={{ fontSize: 18, fontWeight: 900, color: '#0a84ff' }}>${product.price}</div>
+    <div style={{ fontSize: 18, fontWeight: 900, color: '#0a84ff' }}>SAR {product.price}</div>
   </motion.div>
 ));
 
@@ -461,14 +461,14 @@ const Sales = () => {
                 >
                   <div style={{ flex: 1 }}>
                     <div style={{ fontSize: 14, fontWeight: 800, color: '#0f172a' }}>{item.name}</div>
-                    <div style={{ fontSize: 11, color: '#64748b', fontWeight: 600 }}>${item.price} each</div>
+                    <div style={{ fontSize: 11, color: '#64748b', fontWeight: 600 }}>SAR {item.price} each</div>
                   </div>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                     <button onClick={() => updateQty(item.productId, -1)} style={{ width: 26, height: 26, borderRadius: 8, border: '1px solid #e2e8f0', background: 'white', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><Minus size={12} /></button>
                     <span style={{ fontSize: 14, fontWeight: 900, minWidth: 20, textAlign: 'center' }}>{item.quantity}</span>
                     <button onClick={() => updateQty(item.productId, 1)} style={{ width: 26, height: 26, borderRadius: 8, border: '1px solid #e2e8f0', background: 'white', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><Plus size={12} /></button>
                   </div>
-                  <div style={{ fontSize: 14, fontWeight: 900, color: '#0f172a', minWidth: 65, textAlign: 'right' }}>${(item.price * item.quantity).toFixed(2)}</div>
+                  <div style={{ fontSize: 14, fontWeight: 900, color: '#0f172a', minWidth: 65, textAlign: 'right' }}>SAR {(item.price * item.quantity).toFixed(2)}</div>
                   <button onClick={() => removeFromCart(item.productId)} style={{ border: 'none', background: 'transparent', color: '#ef4444', cursor: 'pointer' }}>
                     <Trash size={16} />
                   </button>
@@ -490,7 +490,7 @@ const Sales = () => {
             {/* Subtotal */}
             <div style={{ flex: '1 1 120px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <span style={{ color: '#64748b', fontWeight: 700, fontSize: 13 }}>Subtotal</span>
-              <span style={{ fontWeight: 700, fontSize: 13 }}>${subtotal.toFixed(2)}</span>
+              <span style={{ fontWeight: 700, fontSize: 13 }}>SAR {subtotal.toFixed(2)}</span>
             </div>
             
             {/* Discount */}
@@ -535,7 +535,7 @@ const Sales = () => {
 
           <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 14, paddingTop: 10, borderTop: '2px solid #e2e8f0' }}>
             <span style={{ fontSize: 16, fontWeight: 900, color: '#0f172a' }}>Grand Total</span>
-            <span style={{ fontSize: 24, fontWeight: 900, color: '#0a84ff' }}>${total.toFixed(2)}</span>
+            <span style={{ fontSize: 24, fontWeight: 900, color: '#0a84ff' }}>SAR {total.toFixed(2)}</span>
           </div>
 
           {/* Payment Method Selector */}
@@ -573,7 +573,7 @@ const Sales = () => {
               {cashTendered && parseFloat(cashTendered) >= total && (
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: '#dcfce7', padding: 10, borderRadius: 10 }}>
                   <span style={{ color: '#16a34a', fontWeight: 800, fontSize: 13 }}>Change Due</span>
-                  <span style={{ color: '#16a34a', fontWeight: 900, fontSize: 16 }}>${changeDue.toFixed(2)}</span>
+                  <span style={{ color: '#16a34a', fontWeight: 900, fontSize: 16 }}>SAR {changeDue.toFixed(2)}</span>
                 </div>
               )}
             </div>
@@ -705,33 +705,33 @@ const Sales = () => {
                   <div key={idx} style={{ display: 'grid', gridTemplateColumns: '2.5fr 1fr 1fr 1fr', gap: 8, fontSize: 13, alignItems: 'center' }}>
                     <span style={{ fontWeight: 600, color: '#0f172a', wordBreak: 'break-all' }}>{item.name}</span>
                     <span style={{ textAlign: 'center', fontWeight: 800, color: '#0f172a' }}>{item.quantity}</span>
-                    <span style={{ textAlign: 'right', color: '#64748b' }}>${parseFloat(item.price || 0).toFixed(2)}</span>
-                    <span style={{ textAlign: 'right', fontWeight: 800, color: '#0f172a' }}>${(item.price * item.quantity).toFixed(2)}</span>
+                    <span style={{ textAlign: 'right', color: '#64748b' }}>SAR {parseFloat(item.price || 0).toFixed(2)}</span>
+                    <span style={{ textAlign: 'right', fontWeight: 800, color: '#0f172a' }}>SAR {(item.price * item.quantity).toFixed(2)}</span>
                   </div>
                 ))}
               </div>
 
               <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBottom: 24 }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 14, color: '#64748b', fontWeight: 600 }}>
-                  <span>Subtotal</span><span>${parseFloat(receipt.totalAmount || 0).toFixed(2)}</span>
+                  <span>Subtotal</span><span>SAR {parseFloat(receipt.totalAmount || 0).toFixed(2)}</span>
                 </div>
                 {parseFloat(receipt.discount) > 0 && (
                   <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 14, color: '#ef4444', fontWeight: 700 }}>
-                    <span>Discount</span><span>-${parseFloat(receipt.discount).toFixed(2)}</span>
+                    <span>Discount</span><span>-SAR {parseFloat(receipt.discount).toFixed(2)}</span>
                   </div>
                 )}
                 {parseFloat(receipt.extraCharges) > 0 && (
                   <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 14, color: '#0a84ff', fontWeight: 700 }}>
-                    <span>Extra ({receipt.extraChargeReason || 'Charges'})</span><span>+${parseFloat(receipt.extraCharges).toFixed(2)}</span>
+                    <span>Extra ({receipt.extraChargeReason || 'Charges'})</span><span>+SAR {parseFloat(receipt.extraCharges).toFixed(2)}</span>
                   </div>
                 )}
                 {parseFloat(receipt.tax) > 0 && (
                   <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 14, color: '#64748b', fontWeight: 600 }}>
-                    <span>Tax</span><span>+${parseFloat(receipt.tax).toFixed(2)}</span>
+                    <span>Tax</span><span>+SAR {parseFloat(receipt.tax).toFixed(2)}</span>
                   </div>
                 )}
                 <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 18, color: '#0f172a', fontWeight: 900, marginTop: 8, paddingTop: 8, borderTop: '1px solid #f1f5f9' }}>
-                  <span>Grand Total</span><span>${parseFloat(receipt.grandTotal || 0).toFixed(2)}</span>
+                  <span>Grand Total</span><span>SAR {parseFloat(receipt.grandTotal || 0).toFixed(2)}</span>
                 </div>
               </div>
 
@@ -750,11 +750,11 @@ const Sales = () => {
                   <>
                     <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 4, fontWeight: 600 }}>
                       <span style={{ color: '#64748b' }}>Tendered</span>
-                      <span style={{ color: '#0f172a' }}>${parseFloat(receipt.cashTendered || 0).toFixed(2)}</span>
+                      <span style={{ color: '#0f172a' }}>SAR {parseFloat(receipt.cashTendered || 0).toFixed(2)}</span>
                     </div>
                     <div style={{ display: 'flex', justifyContent: 'space-between', fontWeight: 800 }}>
                       <span style={{ color: '#64748b' }}>Change</span>
-                      <span style={{ color: '#16a34a' }}>${parseFloat(receipt.changeDue || 0).toFixed(2)}</span>
+                      <span style={{ color: '#16a34a' }}>SAR {parseFloat(receipt.changeDue || 0).toFixed(2)}</span>
                     </div>
                   </>
                 )}

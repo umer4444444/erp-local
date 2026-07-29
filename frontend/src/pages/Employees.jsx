@@ -511,7 +511,7 @@ const Employees = () => {
                       </select>
                     </div>
                   ) : (
-                    <div style={{ fontWeight: 600, color: '#0f172a', marginTop: 4 }}>${parseFloat(selectedEmployee.salary || 0).toLocaleString()} <span style={{ fontSize: 12, color: '#64748b', textTransform: 'capitalize' }}>({selectedEmployee.salaryType})</span></div>
+                    <div style={{ fontWeight: 600, color: '#0f172a', marginTop: 4 }}>SAR {parseFloat(selectedEmployee.salary || 0).toLocaleString()} <span style={{ fontSize: 12, color: '#64748b', textTransform: 'capitalize' }}>({selectedEmployee.salaryType})</span></div>
                   )}
                 </div>
                 <div>
