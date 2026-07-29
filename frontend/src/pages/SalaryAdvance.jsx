@@ -135,7 +135,6 @@ const SalaryAdvancePage = () => {
   const pendingCount = allAdvances.filter(a => a.status === 'pending').length;
 
   return (
-  return (
     <div className="sa-container" style={{ minHeight: '100vh', background: '#f8fafc', fontFamily: "'Outfit', sans-serif" }}>
       <style>{`
         .sa-container { padding: 40px; }
