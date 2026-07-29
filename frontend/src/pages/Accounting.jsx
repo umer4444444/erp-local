@@ -69,24 +69,15 @@ const Accounting = () => {
   };
 
   const addJournalLine = () => {
-    setNewJournal({
-      ...newJournal,
-      lines: [...newJournal.lines, { id: Date.now(), accountId: '', debit: '', credit: '', description: '' }]
-    });
+    setNewJournal(prev => ({ ...prev, lines: [...prev.lines, { id: Date.now(), accountId: '', debit: '', credit: '', description: '' }] }));
   };
 
   const removeJournalLine = (id) => {
-    setNewJournal({
-      ...newJournal,
-      lines: newJournal.lines.filter(l => l.id !== id)
-    });
+    setNewJournal(prev => ({ ...prev, lines: prev.lines.filter(l => l.id !== id) }));
   };
 
   const updateJournalLine = (id, field, value) => {
-    setNewJournal({
-      ...newJournal,
-      lines: newJournal.lines.map(l => l.id === id ? { ...l, [field]: value } : l)
-    });
+    setNewJournal(prev => ({ ...prev, lines: prev.lines.map(l => l.id === id ? { ...l, [field]: value } : l) }));
   };
 
   const handleCreateJournal = async (e) => {
