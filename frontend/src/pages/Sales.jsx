@@ -517,7 +517,7 @@ const Sales = () => {
 
             {/* Extra Charges */}
             <div style={{ flex: '1 1 260px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <span style={{ color: '#64748b', fontWeight: 700, fontSize: 13 }}>Extra Charges ($)</span>
+              <span style={{ color: '#64748b', fontWeight: 700, fontSize: 13 }}>Extra Charges (SAR)</span>
               <div style={{ display: 'flex', gap: 6 }}>
                 <input type="text" placeholder="Reason (e.g. Delivery)" value={extraChargeReason} onChange={e => setExtraChargeReason(e.target.value)}
                   style={{ width: 110, padding: '6px 8px', borderRadius: 8, border: '1px solid #e2e8f0', fontSize: 11, fontWeight: 600 }} />
@@ -566,7 +566,7 @@ const Sales = () => {
           {paymentMethod === 'cash' && (
             <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBottom: 14 }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <span style={{ color: '#64748b', fontWeight: 700, fontSize: 13 }}>Cash Tendered ($)</span>
+                <span style={{ color: '#64748b', fontWeight: 700, fontSize: 13 }}>Cash Tendered (SAR)</span>
                 <input type="number" min="0" value={cashTendered} onChange={e => setCashTendered(e.target.value)} 
                   style={{ width: 110, padding: '8px 10px', borderRadius: 8, border: '1px solid #0a84ff', textAlign: 'right', fontWeight: 800, fontSize: 14 }} placeholder="0.00" />
               </div>

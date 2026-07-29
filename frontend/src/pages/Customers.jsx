@@ -322,7 +322,7 @@ const Customers = () => {
               </div>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
                 <div>
-                  <label style={{ display: 'block', fontSize: 12, fontWeight: 800, color: '#64748b', marginBottom: 8 }}>PAYMENT AMOUNT ($)</label>
+                  <label style={{ display: 'block', fontSize: 12, fontWeight: 800, color: '#64748b', marginBottom: 8 }}>PAYMENT AMOUNT (SAR)</label>
                   <input type="number" value={paymentAmount} onChange={e => setPaymentAmount(e.target.value)} placeholder="0.00"
                     style={{ width: '100%', padding: '14px', borderRadius: 12, border: '1px solid #e2e8f0', fontWeight: 700, fontSize: 18 }} />
                 </div>
@@ -370,7 +370,7 @@ const Customers = () => {
                     {/* Visual Purchase Trend Chart */}
                     <div style={{ background: '#f8fafc', padding: 20, borderRadius: 20, marginBottom: 24, border: '1px solid #e2e8f0' }}>
                       <div style={{ fontSize: 13, fontWeight: 800, color: '#0f172a', marginBottom: 16, display: 'flex', alignItems: 'center', gap: 6 }}>
-                        <TrendingUp size={16} color="#0a84ff" /> Purchase History Trend ($)
+                        <TrendingUp size={16} color="#0a84ff" /> Purchase History Trend (SAR)
                       </div>
                       <div style={{ display: 'flex', alignItems: 'flex-end', gap: 12, height: 120, paddingBottom: 8, borderBottom: '1px dashed #cbd5e1', overflowX: 'auto' }}>
                         {history.slice(0, 15).reverse().map((h, i) => {

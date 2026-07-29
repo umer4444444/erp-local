@@ -377,7 +377,7 @@ const Payroll = () => {
               </h2>
               <div style={{ display: 'grid', gridTemplateColumns: '180px 1fr auto', gap: 16, alignItems: 'flex-end' }}>
                 <div>
-                  <label style={{ display: 'block', fontSize: 12, fontWeight: 800, color: '#64748b', marginBottom: 8 }}>AMOUNT ($)</label>
+                  <label style={{ display: 'block', fontSize: 12, fontWeight: 800, color: '#64748b', marginBottom: 8 }}>AMOUNT (SAR)</label>
                   <div style={{ position: 'relative' }}>
                     <DollarSign size={16} style={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)', color: '#94a3b8' }} />
                     <input type="number" min="0" value={advForm.amount} onChange={e => setAdvForm(f => ({ ...f, amount: e.target.value }))}
