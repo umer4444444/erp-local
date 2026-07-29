@@ -135,10 +135,28 @@ const SalaryAdvancePage = () => {
   const pendingCount = allAdvances.filter(a => a.status === 'pending').length;
 
   return (
-    <div style={{ padding: 40, minHeight: '100vh', background: '#f8fafc', fontFamily: "'Outfit', sans-serif" }}>
+  return (
+    <div className="sa-container" style={{ minHeight: '100vh', background: '#f8fafc', fontFamily: "'Outfit', sans-serif" }}>
+      <style>{`
+        .sa-container { padding: 40px; }
+        .sa-header { flex-direction: row; align-items: flex-start; }
+        .sa-cards { grid-template-columns: repeat(3, 1fr); gap: 20px; }
+        .sa-history-item { grid-template-columns: 1fr 2fr 140px 140px; }
+        .sa-hr-item { flex-direction: row; align-items: flex-start; }
+        .sa-modal { padding: 44px; }
+        @media (max-width: 768px) {
+          .sa-container { padding: 20px; }
+          .sa-header { flex-direction: column; gap: 16px; align-items: stretch; }
+          .sa-header button { width: 100%; justify-content: center; }
+          .sa-cards { grid-template-columns: 1fr; }
+          .sa-history-item { grid-template-columns: 1fr; gap: 12px; }
+          .sa-hr-item { flex-direction: column; align-items: stretch; }
+          .sa-modal { padding: 24px; }
+        }
+      `}</style>
 
       {/* Header */}
-      <header style={{ marginBottom: 36, display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+      <header className="sa-header" style={{ marginBottom: 36, display: 'flex', justifyContent: 'space-between' }}>
         <div>
           <h1 style={{ fontSize: 32, fontWeight: 900, color: '#0f172a', margin: 0 }}>Salary Advance</h1>
           <p style={{ color: '#64748b', fontWeight: 600, marginTop: 6 }}>
@@ -212,7 +230,7 @@ const SalaryAdvancePage = () => {
       {(!isHR || activeTab === 'my') && (
         <div>
           {/* Summary cards */}
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 20, marginBottom: 28 }}>
+          <div className="sa-cards" style={{ display: 'grid', marginBottom: 28 }}>
             {[
               { label: 'Total Requested', value: fmtMoney(myAdvances.reduce((s, a) => s + parseFloat(a.amount || 0), 0)), color: '#0a84ff', icon: <DollarSign size={22} /> },
               { label: 'Approved', value: myAdvances.filter(a => a.status === 'approved').length, color: '#10b981', icon: <CheckCircle size={22} /> },
@@ -256,7 +274,8 @@ const SalaryAdvancePage = () => {
               <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
                 {myAdvances.map(adv => (
                   <motion.div key={adv.id} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}
-                    style={{ display: 'grid', gridTemplateColumns: '1fr 2fr 140px 140px', alignItems: 'center',
+                    className="sa-history-item"
+                    style={{ display: 'grid', alignItems: 'center',
                       gap: 24, padding: '22px 28px', borderRadius: 20,
                       border: `1.5px solid ${adv.status === 'approved' ? '#bbf7d0' : adv.status === 'rejected' ? '#fecaca' : '#fde68a'}`,
                       background: adv.status === 'approved' ? '#f0fdf4' : adv.status === 'rejected' ? '#fff5f5' : '#fffbeb' }}>
@@ -319,7 +338,7 @@ const SalaryAdvancePage = () => {
                       border: `1.5px solid ${adv.status === 'pending' ? '#fde68a' : adv.status === 'approved' ? '#bbf7d0' : '#fecaca'}`,
                       background: adv.status === 'pending' ? '#fffbeb' : adv.status === 'approved' ? '#f0fdf4' : '#fff5f5' }}>
 
-                    <div style={{ display: 'flex', alignItems: 'flex-start', gap: 20 }}>
+                    <div className="sa-hr-item" style={{ display: 'flex', gap: 20 }}>
                       {/* Avatar */}
                       <div style={{ width: 48, height: 48, borderRadius: 14, background: '#0f172a',
                         color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center',
@@ -337,7 +356,7 @@ const SalaryAdvancePage = () => {
                               background: '#fef3c7', borderRadius: 8, border: '1px solid #fde68a' }}>⚠ Your own request</span>
                           )}
                         </div>
-                        <div style={{ display: 'flex', gap: 24, flexWrap: 'wrap' }}>
+                        <div className="sa-hr-info" style={{ display: 'flex', gap: 24, flexWrap: 'wrap' }}>
                           <div>
                             <div style={{ fontSize: 11, fontWeight: 800, color: '#94a3b8', marginBottom: 2 }}>AMOUNT</div>
                             <div style={{ fontWeight: 900, color: '#0f172a', fontSize: 18 }}>{fmtMoney(adv.amount)}</div>
@@ -364,7 +383,7 @@ const SalaryAdvancePage = () => {
                         <div style={{ display: 'flex', flexDirection: 'column', gap: 8, flexShrink: 0 }}>
                           {isSelf ? (
                             <div style={{ padding: '10px 16px', borderRadius: 12, background: '#f1f5f9',
-                              color: '#94a3b8', textAlign: 'center', fontWeight: 700, fontSize: 12, whiteSpace: 'nowrap' }}>
+                              color: '#94a3b8', textAlign: 'center', fontWeight: 700, fontSize: 12 }}>
                               ⛔ Cannot self-approve
                             </div>
                           ) : (
@@ -410,7 +429,8 @@ const SalaryAdvancePage = () => {
               animate={{ scale: 1, opacity: 1, y: 0 }}
               exit={{ scale: 0.9, opacity: 0, y: 20 }}
               transition={{ type: 'spring', damping: 20, stiffness: 300 }}
-              style={{ background: 'white', borderRadius: 32, padding: 44, width: '100%', maxWidth: 500,
+              className="sa-modal"
+              style={{ background: 'white', borderRadius: 32, width: '100%', maxWidth: 500,
                 boxShadow: '0 32px 80px rgba(0,0,0,0.22)' }}
             >
               <div style={{ display: 'flex', alignItems: 'center', gap: 16, marginBottom: 8 }}>
