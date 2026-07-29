@@ -112,7 +112,7 @@ function AppContent() {
 
               <Route path="/suppliers" element={<PrivateRoute roles={['admin', 'inventory', 'manager']}><PageTransition><Suppliers /></PageTransition></PrivateRoute>} />
               <Route path="/customers" element={<PrivateRoute><PageTransition><Customers /></PageTransition></PrivateRoute>} />
-              <Route path="/expenses" element={<PrivateRoute roles={['admin', 'manager', 'expenses']}><PageTransition><Expenses /></PageTransition></PrivateRoute>} />
+              <Route path="/expenses" element={<PrivateRoute roles={['admin', 'manager', 'expenses', 'finance']}><PageTransition><Expenses /></PageTransition></PrivateRoute>} />
               <Route path="/users" element={<PrivateRoute roles={['admin', 'manager']}><PageTransition><Users /></PageTransition></PrivateRoute>} />
               <Route path="/eod" element={<PrivateRoute roles={['admin', 'manager', 'cashier', 'operations']}><PageTransition><EODReport /></PageTransition></PrivateRoute>} />
               <Route path="/delivery" element={<PrivateRoute roles={['admin', 'manager', 'operations']}><PageTransition><Delivery /></PageTransition></PrivateRoute>} />
