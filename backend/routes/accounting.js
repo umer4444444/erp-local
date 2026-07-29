@@ -28,6 +28,7 @@ router.post('/accounts', auth, async (req, res) => {
     });
     res.status(201).json(account);
   } catch (error) {
+    console.error('Account Creation Error:', error);
     res.status(500).json({ error: error.message });
   }
 });
@@ -127,6 +128,104 @@ router.get('/trial-balance', auth, async (req, res) => {
     });
     
     res.json(trialBalance);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// GET /api/accounting/ledger/:accountId
+router.get('/ledger/:accountId', auth, async (req, res) => {
+  try {
+    const account = await ChartOfAccount.findOne({
+      where: { id: req.params.accountId, companyId: req.user.companyId }
+    });
+    if (!account) return res.status(404).json({ error: 'Account not found' });
+
+    const lines = await JournalEntryLine.findAll({
+      where: { accountId: account.id },
+      include: [{
+        model: JournalEntry,
+        where: { companyId: req.user.companyId, status: 'posted' },
+        attributes: ['date', 'reference', 'description']
+      }],
+      order: [[JournalEntry, 'date', 'ASC'], ['createdAt', 'ASC']]
+    });
+
+    let runningBalance = 0;
+    const ledger = lines.map(line => {
+      const debit = Number(line.debit);
+      const credit = Number(line.credit);
+      if (['asset', 'expense'].includes(account.type)) {
+        runningBalance += (debit - credit);
+      } else {
+        runningBalance += (credit - debit);
+      }
+      return {
+        id: line.id,
+        date: line.JournalEntry.date,
+        reference: line.JournalEntry.reference,
+        description: line.description || line.JournalEntry.description,
+        debit,
+        credit,
+        balance: runningBalance
+      };
+    });
+
+    res.json({ account, ledger });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// GET /api/accounting/statements
+router.get('/statements', auth, async (req, res) => {
+  try {
+    const accounts = await ChartOfAccount.findAll({
+      where: { companyId: req.user.companyId },
+      order: [['code', 'ASC']]
+    });
+    
+    const lines = await JournalEntryLine.findAll({
+      include: [{
+        model: JournalEntry,
+        where: { companyId: req.user.companyId, status: 'posted' },
+        attributes: []
+      }]
+    });
+    
+    const balanceMap = {};
+    for (const line of lines) {
+      if (!balanceMap[line.accountId]) balanceMap[line.accountId] = { debit: 0, credit: 0 };
+      balanceMap[line.accountId].debit += Number(line.debit);
+      balanceMap[line.accountId].credit += Number(line.credit);
+    }
+    
+    const pnl = { revenue: [], expense: [], netIncome: 0 };
+    const bs = { asset: [], liability: [], equity: [], totalAssets: 0, totalLiabilities: 0, totalEquity: 0 };
+
+    for (const acc of accounts) {
+      const bals = balanceMap[acc.id] || { debit: 0, credit: 0 };
+      let balance = 0;
+      if (['asset', 'expense'].includes(acc.type)) {
+        balance = bals.debit - bals.credit;
+      } else {
+        balance = bals.credit - bals.debit;
+      }
+
+      const accountData = { ...acc.toJSON(), balance };
+
+      if (acc.type === 'revenue') { pnl.revenue.push(accountData); pnl.netIncome += balance; }
+      else if (acc.type === 'expense') { pnl.expense.push(accountData); pnl.netIncome -= balance; }
+      else if (acc.type === 'asset') { bs.asset.push(accountData); bs.totalAssets += balance; }
+      else if (acc.type === 'liability') { bs.liability.push(accountData); bs.totalLiabilities += balance; }
+      else if (acc.type === 'equity') { bs.equity.push(accountData); bs.totalEquity += balance; }
+    }
+
+    // Add net income to equity for balance sheet to balance
+    bs.equity.push({ id: 'net_income', name: 'Current Year Earnings', type: 'equity', balance: pnl.netIncome });
+    bs.totalEquity += pnl.netIncome;
+
+    res.json({ profitAndLoss: pnl, balanceSheet: bs });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
