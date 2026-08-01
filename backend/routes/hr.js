@@ -75,4 +75,33 @@ router.get('/stats', auth, async (req, res) => {
   }
 });
 
+router.get('/alerts', auth, roleCheck(['admin', 'hr', 'manager']), async (req, res) => {
+  try {
+    const { Op } = require('sequelize');
+    const today = new Date();
+    const thirtyDaysFromNow = new Date();
+    thirtyDaysFromNow.setDate(today.getDate() + 30);
+
+    const condition = {
+      [Op.between]: [today, thirtyDaysFromNow]
+    };
+
+    const expiringEmployees = await Employee.findAll({
+      where: {
+        status: 'active',
+        [Op.or]: [
+          { iqamaExpiryDate: condition },
+          { contractExpiryDate: condition },
+          { vehicleRentExpiryDate: condition },
+          { simExpiryDate: condition }
+        ]
+      }
+    });
+
+    res.json(expiringEmployees);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
 module.exports = router;

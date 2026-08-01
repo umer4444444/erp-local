@@ -77,6 +77,28 @@ const Employee = sequelize.define('Employee', {
     type: DataTypes.ENUM('active', 'inactive', 'on_leave', 'resigned'),
     defaultValue: 'active',
   },
+  nameAr: {
+    type: DataTypes.STRING,
+  },
+  iqamaNumber: {
+    type: DataTypes.STRING,
+  },
+  iqamaExpiryDate: {
+    type: DataTypes.DATEONLY,
+  },
+  contractExpiryDate: {
+    type: DataTypes.DATEONLY,
+  },
+  vehicleRentExpiryDate: {
+    type: DataTypes.DATEONLY,
+  },
+  simExpiryDate: {
+    type: DataTypes.DATEONLY,
+  },
+  faceDescriptor: {
+    type: DataTypes.TEXT, // Store as JSON string of the float array
+    allowNull: true,
+  },
   userId: {
     type: DataTypes.UUID,
     allowNull: true,

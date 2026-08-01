@@ -12,6 +12,9 @@ const Customer = sequelize.define('Customer', {
     type: DataTypes.STRING,
     allowNull: false,
   },
+  nameAr: {
+    type: DataTypes.STRING,
+  },
   email: {
     type: DataTypes.STRING,
     unique: true,

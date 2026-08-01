@@ -59,6 +59,24 @@ const NotificationCenter = ({ user }) => {
           }
         }
 
+        // 4. Check HR Document Expiries
+        if (['admin', 'hr', 'manager'].includes(user?.role)) {
+          try {
+            const { employeeAPI } = require('../api');
+            const hrRes = await employeeAPI.getAlerts();
+            if (hrRes.data?.length > 0) {
+              newNotifs.push({
+                id: 'hr-expiry-' + Date.now(),
+                type: 'hr',
+                title: 'Document Expiries',
+                message: `${hrRes.data.length} employees have documents expiring within 30 days.`,
+                icon: <AlertTriangle size={18} color="#e11d48" />,
+                link: '/employees'
+              });
+            }
+          } catch(e) { console.error("Error fetching hr alerts", e) }
+        }
+
         setNotifications(newNotifs);
       } catch (err) {
         console.error('Notification fetch failed', err);

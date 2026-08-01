@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Clock, LogIn, LogOut, CheckCircle, AlertCircle, Users, Calendar, ArrowRight, UserCheck, ShieldCheck, MapPin, Navigation, History } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { attendanceAPI } from '../api';
+import FaceScanner from '../components/FaceScanner';
 
 const OFFICE_LAT = 31.571398336628878;  // Configure your office lat/lng here
 const OFFICE_LNG = 74.41214762086345;
@@ -34,6 +35,8 @@ const Attendance = () => {
   const [userCoords, setUserCoords] = useState(null);
   const [clockInLoading, setClockInLoading] = useState(false);
   const [liveTime, setLiveTime] = useState(new Date());
+  const [showScanner, setShowScanner] = useState(false);
+  const [myProfile, setMyProfile] = useState(null);
   const [onBreak, setOnBreak] = useState(false);
   const [breakStart, setBreakStart] = useState(null);
 
@@ -70,14 +73,16 @@ const Attendance = () => {
 
   const fetchData = async () => {
     try {
-      const [myActiveRes, activeRes, todayRes] = await Promise.all([
+      const [myActiveRes, activeRes, todayRes, profileRes] = await Promise.all([
         attendanceAPI.getMyActive(),
         attendanceAPI.getActive(),
-        attendanceAPI.getToday()
+        attendanceAPI.getToday(),
+        attendanceAPI.getMyProfile()
       ]);
       setActiveAttendance(myActiveRes.data);
       setManagerView(activeRes.data);
       setTodayLogs(todayRes.data);
+      setMyProfile(profileRes.data);
     } catch (err) {
       console.error('Attendance fetch failed', err);
     } finally {
@@ -133,19 +138,38 @@ const Attendance = () => {
   });
 
   const handleClockIn = async () => {
+    try {
+      if (gpsStatus !== 'inside') {
+        const gps = await checkGPS();
+        if (!gps.inside) {
+          alert(`You are ${gps.distance}m from the office. Geofence radius is ${GEOFENCE_RADIUS_M}m. Clock-in denied.`);
+          return;
+        }
+      }
+
+      if (!myProfile?.faceDescriptor) {
+        alert('You have not registered your face for attendance yet. Please ask HR to update your profile.');
+        return;
+      }
+      setShowScanner(true);
+    } catch (err) {
+      alert(err.message || 'GPS check failed.');
+    }
+  };
+
+  const executeClockIn = async (photoUrl) => {
     setClockInLoading(true);
     try {
-      const gps = await checkGPS();
-      await attendanceAPI.clockIn({ latitude: gps.latitude, longitude: gps.longitude });
+      await attendanceAPI.clockIn({
+        latitude: userCoords.lat,
+        longitude: userCoords.lng,
+        photoUrl: photoUrl
+      });
       fetchData();
+      setGpsStatus('idle');
+      setGpsDistance(null);
     } catch (err) {
-      if (err.message === 'Geolocation not supported') {
-        alert('Your browser does not support location services. Clock-in requires GPS access.');
-      } else if (gpsStatus === 'outside') {
-        alert(`You are ${gpsDistance}m from the office. Geofence radius is ${GEOFENCE_RADIUS_M}m. Clock-in denied.`);
-      } else {
-        alert(err.message || err.response?.data?.message || 'Clock-in failed. Please enable location services and reload.');
-      }
+      alert(err.response?.data?.message || 'Clock-in failed');
     } finally {
       setClockInLoading(false);
     }
@@ -208,6 +232,14 @@ const Attendance = () => {
         {activeTab === 'clock' && (
           <motion.div key="clock" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
             style={{ display: 'grid', gridTemplateColumns: '1fr 2fr', gap: 32 }}>
+            
+            {showScanner && (
+              <FaceScanner 
+                onClose={() => setShowScanner(false)} 
+                onVerify={executeClockIn}
+              />
+            )}
+
             {/* Left Column: Personal Actions */}
             <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
               
@@ -240,19 +272,19 @@ const Attendance = () => {
                 
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
                   <button 
-                    disabled={!!activeAttendance || clockInLoading}
+                    disabled={!!activeAttendance || clockInLoading || gpsStatus === 'outside'}
                     onClick={handleClockIn}
                     style={{ 
                       padding: '16px', borderRadius: 16, 
                       background: activeAttendance ? '#e2e8f0' : gpsStatus === 'outside' ? '#fee2e2' : '#10b981', 
                       color: activeAttendance ? '#94a3b8' : gpsStatus === 'outside' ? '#ef4444' : 'white', 
                       border: 'none', fontWeight: 800, fontSize: 16, 
-                      cursor: (activeAttendance || clockInLoading) ? 'default' : 'pointer',
-                      display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10
+                      cursor: (activeAttendance || clockInLoading || gpsStatus === 'outside') ? 'default' : 'pointer',
+                      display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, transition: 'all 0.2s'
                     }}
                   >
                     <LogIn size={20} />
-                    {clockInLoading ? 'Checking location...' : activeAttendance ? 'Already Clocked In' : 'Clock In Now'}
+                    {clockInLoading ? 'Processing...' : activeAttendance ? 'Clocked In' : 'Clock In with Face'}
                   </button>
                   <button 
                     disabled={!activeAttendance}
@@ -545,6 +577,19 @@ const Attendance = () => {
           </motion.div>
         )}
       </AnimatePresence>
+      {showScanner && (
+        <FaceScanner 
+          mode="verify"
+          referenceDescriptor={myProfile?.faceDescriptor}
+          onCapture={(success, photoUrl) => {
+            setShowScanner(false);
+            if (success) {
+              executeClockIn(photoUrl);
+            }
+          }}
+          onClose={() => setShowScanner(false)}
+        />
+      )}
     </div>
   );
 };

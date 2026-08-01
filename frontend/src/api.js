@@ -109,7 +109,8 @@ export const employeeAPI = {
   delete: (id) => API.delete(`/employees/${id}`),
   getDepartments: () => API.get('/employees/departments'),
   getDesignations: () => API.get('/employees/designations'),
-  resetPassword: (id, newPassword) => API.post(`/employees/${id}/reset-password`, { newPassword })
+  resetPassword: (id, newPassword) => API.post(`/employees/${id}/reset-password`, { newPassword }),
+  getAlerts: () => API.get('/hr/alerts')
 };
 
 export const usersAPI = {
@@ -127,6 +128,7 @@ export const attendanceAPI = {
   getActive: () => API.get('/attendance/active'),
   getMyActive: () => API.get('/attendance/my-active'),
   getMyHistory: (page = 1) => API.get('/attendance/my-history', { params: { page, limit: 30 } }),
+  getMyProfile: () => API.get('/attendance/my-profile'),
   getAudit: (params) => API.get('/attendance/audit', { params }),
 };
 

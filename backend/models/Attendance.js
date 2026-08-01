@@ -43,6 +43,9 @@ const Attendance = sequelize.define('Attendance', {
   notes: {
     type: DataTypes.TEXT,
   },
+  photoUrl: {
+    type: DataTypes.TEXT,
+  },
   companyId: {
     type: DataTypes.UUID,
     allowNull: true,

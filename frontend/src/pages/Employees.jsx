@@ -4,6 +4,7 @@ import { UserPlus, Search, Filter, Briefcase, Mail, Phone, Calendar, DollarSign,
 import { motion, AnimatePresence } from 'framer-motion';
 import { useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import FaceScanner from '../components/FaceScanner';
 
 const cardStyle = {
   background: 'white', borderRadius: 20, padding: 24,
@@ -36,11 +37,13 @@ const Employees = () => {
   const [empLeaveBalance, setEmpLeaveBalance] = useState([]);
   const [loadingLeaves, setLoadingLeaves] = useState(false);
   const [step, setStep] = useState(1);
+  const [showFaceScanner, setShowFaceScanner] = useState(false);
   const [phoneCode, setPhoneCode] = useState('+92');
   const [form, setForm] = useState({
     firstName: '', lastName: '', email: '', phone: '', cnic: '', address: '',
     departmentId: '', designationId: '', joiningDate: '',
-    salaryType: 'monthly', salary: '', bankAccount: '', role: '', gender: '', password: ''
+    salaryType: 'monthly', salary: '', bankAccount: '', role: '', gender: '', password: '',
+    nameAr: '', iqamaNumber: '', iqamaExpiryDate: '', contractExpiryDate: '', vehicleRentExpiryDate: '', simExpiryDate: ''
   });
   const [resetPassModal, setResetPassModal] = useState({ open: false, employee: null, newPassword: '' });
 
@@ -132,7 +135,7 @@ const Employees = () => {
       setShowModal(false);
       setStep(1);
       setPhoneCode('+92');
-      setForm({ firstName: '', lastName: '', email: '', phone: '', cnic: '', address: '', departmentId: '', designationId: '', joiningDate: '', salaryType: 'monthly', salary: '', bankAccount: '', role: '', gender: '', password: '' });
+      setForm({ firstName: '', lastName: '', email: '', phone: '', cnic: '', address: '', departmentId: '', designationId: '', joiningDate: '', salaryType: 'monthly', salary: '', bankAccount: '', role: '', gender: '', password: '', nameAr: '', iqamaNumber: '', iqamaExpiryDate: '', contractExpiryDate: '', vehicleRentExpiryDate: '', simExpiryDate: '' });
       fetchData();
     } catch (e) {
       alert(e.response?.data?.message || 'Error saving employee. Please check all fields.');
@@ -309,8 +312,10 @@ const Employees = () => {
             <motion.div initial={{ scale: 0.9, y: 20 }} animate={{ scale: 1, y: 0 }} exit={{ scale: 0.9 }} style={{ background: 'white', borderRadius: 24, width: '100%', maxWidth: 500, position: 'relative', padding: 32 }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
                 <h2 style={{ fontSize: 20, fontWeight: 900 }}>Add New Employee</h2>
-                <div style={{ display: 'flex', gap: 4 }}>
-                  {[1, 2, 3].map(i => <div key={i} style={{ width: 24, height: 4, borderRadius: 2, background: step >= i ? '#0a84ff' : '#e2e8f0' }} />)}
+                <div style={{ display: 'flex', gap: 8, marginBottom: 24 }}>
+                  {[1, 2, 3, 4, 5].map(s => (
+                    <div key={s} style={{ height: 6, width: 24, borderRadius: 3, background: step >= s ? '#0a84ff' : '#e2e8f0', transition: 'all 0.3s' }} />
+                  ))}
                 </div><button onClick={() => setShowModal(false)} style={{ background: 'none', border: 'none', cursor: 'pointer' }}><X size={20} color="#94a3b8" /></button>
               </div>
 
@@ -318,10 +323,13 @@ const Employees = () => {
                 {step === 1 && (
                   <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
                     <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
-                      <input placeholder="First Name" style={inputStyle} value={form.firstName} onChange={e => setForm({...form, firstName: e.target.value})} />
-                      <input placeholder="Last Name" style={inputStyle} value={form.lastName} onChange={e => setForm({...form, lastName: e.target.value})} />
+                      <input placeholder="First Name *" style={inputStyle} value={form.firstName} onChange={e => setForm({...form, firstName: e.target.value})} />
+                      <input placeholder="Last Name *" style={inputStyle} value={form.lastName} onChange={e => setForm({...form, lastName: e.target.value})} />
                     </div>
-                    <input placeholder="Email Address *" style={inputStyle} value={form.email} onChange={e => setForm({...form, email: e.target.value})} />
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+                      <input placeholder="Arabic Name (Optional)" style={inputStyle} value={form.nameAr} onChange={e => setForm({...form, nameAr: e.target.value})} />
+                      <input type="email" placeholder="Email Address *" style={inputStyle} value={form.email} onChange={e => setForm({...form, email: e.target.value})} />
+                    </div>
                     <div style={{ display: 'flex', gap: 8 }}>
                       <select
                         value={phoneCode}
@@ -437,13 +445,79 @@ const Employees = () => {
                     <input placeholder="Bank Account Number" style={inputStyle} value={form.bankAccount} onChange={e => setForm({...form, bankAccount: e.target.value})} />
                     <div style={{ display: 'flex', gap: 10, marginTop: 12 }}>
                       <button type="button" onClick={() => setStep(1)} style={{ flex: 1, padding: 14, borderRadius: 12, background: '#f1f5f9', color: '#64748b', fontWeight: 800, border: 'none', cursor: 'pointer' }}>Edit Basic Info</button>
-<button type="button" onClick={() => setStep(2)} style={{ flex: 1, padding: 14, borderRadius: 12, background: '#f1f5f9', color: '#64748b', fontWeight: 800, border: 'none', cursor: 'pointer' }}>← Back</button>
-<button type="submit" style={{ flex: 2, padding: 14, borderRadius: 12, background: '#10b981', color: 'white', fontWeight: 800, border: 'none', cursor: 'pointer' }}>✓ Complete & Add Employee</button>
-                      
+                      <button type="button" onClick={() => setStep(2)} style={{ flex: 1, padding: 14, borderRadius: 12, background: '#f1f5f9', color: '#64748b', fontWeight: 800, border: 'none', cursor: 'pointer' }}>← Back</button>
+                      <button type="button" onClick={() => setStep(4)} style={{ flex: 2, padding: 14, borderRadius: 12, background: '#0a84ff', color: 'white', fontWeight: 800, border: 'none', cursor: 'pointer' }}>Continue →</button>
+                    </div>
+                  </div>
+                )}
+                {step === 4 && (
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+                    <div style={{ fontSize: 13, fontWeight: 700, color: '#64748b', marginBottom: 4 }}>Documents & Expiries</div>
+                    <input placeholder="Iqama Number" style={inputStyle} value={form.iqamaNumber} onChange={e => setForm({...form, iqamaNumber: e.target.value})} />
+                    
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+                      <div>
+                        <label style={{ fontSize: 11, fontWeight: 700, color: '#64748b', display: 'block', marginBottom: 4 }}>Iqama Expiry</label>
+                        <input type="date" style={inputStyle} value={form.iqamaExpiryDate} onChange={e => setForm({...form, iqamaExpiryDate: e.target.value})} />
+                      </div>
+                      <div>
+                        <label style={{ fontSize: 11, fontWeight: 700, color: '#64748b', display: 'block', marginBottom: 4 }}>Contract Expiry</label>
+                        <input type="date" style={inputStyle} value={form.contractExpiryDate} onChange={e => setForm({...form, contractExpiryDate: e.target.value})} />
+                      </div>
+                    </div>
+
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+                      <div>
+                        <label style={{ fontSize: 11, fontWeight: 700, color: '#64748b', display: 'block', marginBottom: 4 }}>Vehicle Rent Expiry</label>
+                        <input type="date" style={inputStyle} value={form.vehicleRentExpiryDate} onChange={e => setForm({...form, vehicleRentExpiryDate: e.target.value})} />
+                      </div>
+                      <div>
+                        <label style={{ fontSize: 11, fontWeight: 700, color: '#64748b', display: 'block', marginBottom: 4 }}>SIM Expiry</label>
+                        <input type="date" style={inputStyle} value={form.simExpiryDate} onChange={e => setForm({...form, simExpiryDate: e.target.value})} />
+                      </div>
+                    </div>
+
+                    <div style={{ display: 'flex', gap: 10, marginTop: 12 }}>
+                      <button type="button" onClick={() => setStep(3)} style={{ flex: 1, padding: 14, borderRadius: 12, background: '#f1f5f9', color: '#64748b', fontWeight: 800, border: 'none', cursor: 'pointer' }}>← Back</button>
+                      <button type="button" onClick={() => setStep(5)} style={{ flex: 2, padding: 14, borderRadius: 12, background: '#0a84ff', color: 'white', fontWeight: 800, border: 'none', cursor: 'pointer' }}>Continue to Face Scan →</button>
+                    </div>
+                  </div>
+                )}
+                {step === 5 && (
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+                    <div style={{ fontSize: 13, fontWeight: 700, color: '#64748b', marginBottom: 4 }}>Face Scanning (Attendance)</div>
+                    <p style={{ fontSize: 12, color: '#94a3b8' }}>
+                      We need to register your face for the attendance system. Please ensure your face is clearly visible.
+                    </p>
+                    
+                    <div style={{ background: '#f8fafc', padding: 20, borderRadius: 12, border: '2px dashed #e2e8f0', textAlign: 'center' }}>
+                       {form.faceDescriptor ? (
+                         <div style={{ color: '#10b981', fontWeight: 800 }}>✓ Face Scanned Successfully</div>
+                       ) : (
+                         <button type="button" onClick={() => setShowFaceScanner(true)} style={{ padding: '12px 24px', borderRadius: 8, background: '#3b82f6', color: 'white', border: 'none', cursor: 'pointer', fontWeight: 700 }}>
+                           Open Camera to Scan
+                         </button>
+                       )}
+                    </div>
+
+                    <div style={{ display: 'flex', gap: 10, marginTop: 12 }}>
+                      <button type="button" onClick={() => setStep(4)} style={{ flex: 1, padding: 14, borderRadius: 12, background: '#f1f5f9', color: '#64748b', fontWeight: 800, border: 'none', cursor: 'pointer' }}>← Back</button>
+                      <button type="submit" style={{ flex: 2, padding: 14, borderRadius: 12, background: '#10b981', color: 'white', fontWeight: 800, border: 'none', cursor: 'pointer' }}>✓ Complete & Add Employee</button>
                     </div>
                   </div>
                 )}
               </form>
+              
+              {showFaceScanner && (
+                <FaceScanner 
+                  mode="register"
+                  onCapture={(descriptor) => {
+                    setForm({...form, faceDescriptor: JSON.stringify(descriptor)});
+                    setShowFaceScanner(false);
+                  }}
+                  onClose={() => setShowFaceScanner(false)}
+                />
+              )}
             </motion.div>
           </div>
         )}

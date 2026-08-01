@@ -32,7 +32,7 @@ const Sale = sequelize.define('Sale', {
     defaultValue: 0,
   },
   paymentMethod: {
-    type: DataTypes.ENUM('cash', 'card', 'credit', 'split'),
+    type: DataTypes.ENUM('cash', 'card', 'credit', 'split', 'bank_transfer'),
     defaultValue: 'cash',
   },
   cashAmount: {
@@ -78,6 +78,14 @@ const Sale = sequelize.define('Sale', {
   },
   companyId: {
     type: DataTypes.UUID,
+    allowNull: true,
+  },
+  latitude: {
+    type: DataTypes.DECIMAL(10, 8),
+    allowNull: true,
+  },
+  longitude: {
+    type: DataTypes.DECIMAL(11, 8),
     allowNull: true,
   },
 }, {

@@ -23,7 +23,7 @@ function getDistance(lat1, lon1, lat2, lon2) {
 // Clock In
 router.post('/clockin', auth, async (req, res) => {
   try {
-    const { latitude, longitude } = req.body;
+    const { latitude, longitude, photoUrl } = req.body;
     
     // Strict GPS Fence: 100 meters from office/store location
     const OFFICE_LAT = 31.571398336628878;
@@ -112,6 +112,8 @@ router.post('/clockin', auth, async (req, res) => {
       lateMinutes,
       latitude,
       longitude,
+      photoUrl,
+      notes: lateMinutes > 0 ? `Late by ${lateMinutes} minutes` : '',
       workShiftId: shift ? shift.id : null
     });
 
@@ -242,6 +244,16 @@ router.get('/my-active', auth, async (req, res) => {
       order: [['clockIn', 'DESC']]
     });
     res.json(active);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
+// Get my employee profile (for faceDescriptor)
+router.get('/my-profile', auth, async (req, res) => {
+  try {
+    const employee = await Employee.findOne({ where: { userId: req.user.id } });
+    res.json(employee);
   } catch (err) {
     res.status(500).json({ message: err.message });
   }

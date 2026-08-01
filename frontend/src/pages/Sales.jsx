@@ -7,6 +7,7 @@ import {
 import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { salesAPI, inventoryAPI, customerAPI, shiftAPI } from '../api';
+import Barcode from 'react-barcode';
 
 // IndexedDB helpers for offline queue
 const DB_NAME = 'erp_offline';
@@ -283,6 +284,21 @@ const Sales = () => {
   const handleCheckout = async () => {
     if (cart.length === 0) return alert('Cart is empty');
     setProcessing(true);
+    
+    let lat = null;
+    let lng = null;
+    try {
+      if (navigator.geolocation) {
+        const pos = await new Promise((resolve, reject) => {
+          navigator.geolocation.getCurrentPosition(resolve, reject, { timeout: 5000 });
+        });
+        lat = pos.coords.latitude;
+        lng = pos.coords.longitude;
+      }
+    } catch (err) {
+      console.warn("GPS failed", err);
+    }
+
     const saleData = {
       items: cart,
       customerId: selectedCustomer?.id,
@@ -297,6 +313,8 @@ const Sales = () => {
       tax: taxAmount,
       grandTotal: total,
       paymentMethod,
+      latitude: lat,
+      longitude: lng,
       cashAmount: paymentMethod === 'split' ? splitAmount.cash : (paymentMethod === 'cash' ? total : 0),
       cardAmount: paymentMethod === 'split' ? splitAmount.card : (paymentMethod === 'card' ? total : 0),
       redeemPoints: redeemPoints,
@@ -539,14 +557,14 @@ const Sales = () => {
           </div>
 
           {/* Payment Method Selector */}
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, minmax(0, 1fr))', gap: 6, marginBottom: 14 }}>
-            {['cash', 'card', 'credit', 'split'].map(method => (
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, minmax(0, 1fr))', gap: 4, marginBottom: 14 }}>
+            {['cash', 'card', 'bank_transfer', 'credit', 'split'].map(method => (
               <button key={method} onClick={() => setPaymentMethod(method)}
-                style={{ padding: '10px 4px', borderRadius: 10, fontWeight: 800, fontSize: 11, cursor: 'pointer', border: '2px solid', textTransform: 'capitalize', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
+                style={{ padding: '10px 2px', borderRadius: 10, fontWeight: 800, fontSize: 10, cursor: 'pointer', border: '2px solid', textTransform: 'capitalize', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
                   borderColor: paymentMethod === method ? '#0a84ff' : 'transparent',
                   background: paymentMethod === method ? '#eff6ff' : 'white',
                   color: paymentMethod === method ? '#0a84ff' : '#64748b' }}>
-                {method === 'credit' ? 'Loan/Credit' : method}
+                {method === 'credit' ? 'Loan/Credit' : method.replace('_', ' ')}
               </button>
             ))}
           </div>
@@ -677,10 +695,10 @@ const Sales = () => {
               </div>
             )}
             <div id="printable-invoice" style={{ flex: 1, overflowY: 'auto', paddingRight: 8 }}>
-              <div style={{ textAlign: 'center', marginBottom: 24 }}>
-                <h2 style={{ fontSize: 28, fontWeight: 900, color: '#0f172a', margin: 0 }}>GlobalAI ERP</h2>
-                <p style={{ color: '#64748b', fontWeight: 600, fontSize: 13, margin: '4px 0 0 0' }}>Official Sales Invoice</p>
-                <div style={{ marginTop: 12, fontSize: 12, color: '#94a3b8', fontWeight: 500 }}>
+              <div style={{ textAlign: 'center', marginBottom: 20 }}>
+                <div style={{ fontSize: 24, fontWeight: 900, letterSpacing: 2, marginBottom: 8 }}>BTG LOGO</div>
+                <h2 style={{ fontSize: 18, fontWeight: 800, margin: '0 0 4px', textTransform: 'uppercase' }}>Tax Invoice / فاتورة ضريبية</h2>
+                <div style={{ fontSize: 12, color: '#64748b', lineHeight: 1.5 }}>
                   Txn: {receipt.id?.split('-')[0]?.toUpperCase()}<br/>
                   Cashier: {receipt.cashierName || 'Staff'}<br/>
                   Date: {new Date(receipt.createdAt).toLocaleString()}
@@ -694,21 +712,26 @@ const Sales = () => {
                 </div>
               )}
 
-              <div style={{ borderTop: '2px dashed #e2e8f0', borderBottom: '2px dashed #e2e8f0', padding: '16px 0', margin: '16px 0', display: 'flex', flexDirection: 'column', gap: 10 }}>
-                <div style={{ display: 'grid', gridTemplateColumns: '2.5fr 1fr 1fr 1fr', gap: 8, fontSize: 12, fontWeight: 800, color: '#64748b', paddingBottom: 6, borderBottom: '1px solid #e2e8f0' }}>
+              <div style={{ borderTop: '2px dashed #e2e8f0', borderBottom: '2px dashed #e2e8f0', padding: '16px 0', margin: '16px 0' }}>
+                <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1fr', gap: 10, fontSize: 13, fontWeight: 800, color: '#64748b', paddingBottom: 8, borderBottom: '1px solid #e2e8f0' }}>
                   <span>Item</span>
                   <span style={{ textAlign: 'center' }}>Qty</span>
-                  <span style={{ textAlign: 'right' }}>Unit</span>
                   <span style={{ textAlign: 'right' }}>Total</span>
                 </div>
                 {receipt.items?.map((item, idx) => (
-                  <div key={idx} style={{ display: 'grid', gridTemplateColumns: '2.5fr 1fr 1fr 1fr', gap: 8, fontSize: 13, alignItems: 'center' }}>
-                    <span style={{ fontWeight: 600, color: '#0f172a', wordBreak: 'break-all' }}>{item.name}</span>
-                    <span style={{ textAlign: 'center', fontWeight: 800, color: '#0f172a' }}>{item.quantity}</span>
-                    <span style={{ textAlign: 'right', color: '#64748b' }}>SAR {parseFloat(item.price || 0).toFixed(2)}</span>
-                    <span style={{ textAlign: 'right', fontWeight: 800, color: '#0f172a' }}>SAR {(item.price * item.quantity).toFixed(2)}</span>
+                  <div key={idx} style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1fr', gap: 10, fontSize: 13, borderBottom: '1px dashed #e2e8f0', paddingBottom: 8 }}>
+                    <div>
+                      <div style={{ fontWeight: 700, color: '#0f172a' }}>{item.name}</div>
+                      {item.nameAr && <div style={{ fontSize: 11, color: '#64748b' }}>{item.nameAr}</div>}
+                    </div>
+                    <div style={{ textAlign: 'center' }}>{item.quantity}</div>
+                    <div style={{ textAlign: 'right' }}>SAR {(item.price * item.quantity).toFixed(2)}</div>
                   </div>
                 ))}
+                
+                <div style={{ marginTop: 24, display: 'flex', justifyContent: 'center' }}>
+                  <Barcode value={receipt.id} width={1.5} height={40} fontSize={12} background="transparent" />
+                </div>
               </div>
 
               <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBottom: 24 }}>
