@@ -31,7 +31,7 @@ router.post('/', auth, roleCheck(['admin', 'hr', 'manager']), async (req, res) =
       const passwordHash = await bcrypt.hash(password, salt);
       let userRole = role || 'cashier';
 
-      await User.create({
+      user = await User.create({
         name: `${employee.firstName} ${employee.lastName}`,
         email: employee.email,
         phone: `EMP-${Date.now()}`,
@@ -39,6 +39,11 @@ router.post('/', auth, roleCheck(['admin', 'hr', 'manager']), async (req, res) =
         role
       }, { transaction });
     }
+    
+    // Link employee to user
+    employee.userId = user.id;
+    await employee.save({ transaction });
+
     await transaction.commit();
     res.status(201).json(employee);
   } catch (err) {
