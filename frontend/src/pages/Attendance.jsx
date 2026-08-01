@@ -147,8 +147,12 @@ const Attendance = () => {
         }
       }
 
-      if (!myProfile?.faceDescriptor) {
-        alert('You have not registered your face for attendance yet. Please ask HR to update your profile.');
+      if (!myProfile) {
+        alert('DEBUG: Your User account is not linked to any Employee profile. (myProfile is null)');
+        return;
+      }
+      if (!myProfile.faceDescriptor) {
+        alert('DEBUG: Employee profile found, but face data is missing. Please ask HR to scan your face again.');
         return;
       }
       setShowScanner(true);
