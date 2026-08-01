@@ -52,6 +52,20 @@ router.post('/', auth, roleCheck(['admin', 'hr', 'manager']), async (req, res) =
   }
 });
 
+// Update employee face descriptor
+router.put('/:id/face', auth, roleCheck(['admin', 'hr', 'manager']), async (req, res) => {
+  try {
+    const employee = await Employee.findByPk(req.params.id);
+    if (!employee) return res.status(404).json({ message: 'Employee not found' });
+    
+    employee.faceDescriptor = req.body.faceDescriptor;
+    await employee.save();
+    res.json({ message: 'Face data updated successfully' });
+  } catch (err) {
+    res.status(400).json({ message: err.message });
+  }
+});
+
 router.get('/stats', auth, async (req, res) => {
   try {
     const employees = await Employee.findAll();

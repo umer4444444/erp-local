@@ -38,6 +38,7 @@ const Employees = () => {
   const [loadingLeaves, setLoadingLeaves] = useState(false);
   const [step, setStep] = useState(1);
   const [showFaceScanner, setShowFaceScanner] = useState(false);
+  const [showUpdateFaceScanner, setShowUpdateFaceScanner] = useState(false);
   const [phoneCode, setPhoneCode] = useState('+92');
   const [form, setForm] = useState({
     firstName: '', lastName: '', email: '', phone: '', cnic: '', address: '',
@@ -652,7 +653,10 @@ const Employees = () => {
               )}
 
               {(user?.role === 'admin' || user?.role === 'hr') && (
-                <div style={{ marginTop: 32, paddingTop: 24, borderTop: '1px solid #f1f5f9', display: 'flex', justifyContent: 'flex-end' }}>
+                <div style={{ marginTop: 32, paddingTop: 24, borderTop: '1px solid #f1f5f9', display: 'flex', justifyContent: 'space-between' }}>
+                  <button onClick={() => setShowUpdateFaceScanner(true)} style={{ padding: '12px 20px', borderRadius: 12, background: '#e0f2fe', color: '#0284c7', fontWeight: 800, border: 'none', cursor: 'pointer' }}>
+                    {selectedEmployee.faceDescriptor ? 'Re-scan Face' : 'Register Face'}
+                  </button>
                   <button onClick={() => handleTerminate(selectedEmployee.id)} style={{ padding: '12px 20px', borderRadius: 12, background: '#fee2e2', color: '#ef4444', fontWeight: 800, border: 'none', cursor: 'pointer' }}>
                     Terminate Employee
                   </button>
@@ -662,6 +666,24 @@ const Employees = () => {
           </div>
         )}
       </AnimatePresence>
+
+      {showUpdateFaceScanner && selectedEmployee && (
+        <FaceScanner 
+          mode="register"
+          onCapture={async (descriptor) => {
+            setShowUpdateFaceScanner(false);
+            try {
+              await employeeAPI.updateFace(selectedEmployee.id, JSON.stringify(descriptor));
+              alert('Face registered successfully!');
+              fetchData();
+            } catch (err) {
+              alert('Failed to update face data');
+            }
+          }}
+          onClose={() => setShowUpdateFaceScanner(false)}
+        />
+      )}
+
       {/* Reset Password Modal */}
       <AnimatePresence>
         {resetPassModal.open && (

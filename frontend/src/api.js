@@ -110,7 +110,8 @@ export const employeeAPI = {
   getDepartments: () => API.get('/employees/departments'),
   getDesignations: () => API.get('/employees/designations'),
   resetPassword: (id, newPassword) => API.post(`/employees/${id}/reset-password`, { newPassword }),
-  getAlerts: () => API.get('/hr/alerts')
+  getAlerts: () => API.get('/hr/alerts'),
+  updateFace: (id, faceDescriptor) => API.put(`/hr/${id}/face`, { faceDescriptor })
 };
 
 export const usersAPI = {
