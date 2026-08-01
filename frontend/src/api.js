@@ -61,6 +61,7 @@ export const inventoryAPI = {
   getProducts: () => API.get('/inventory/products'),
   addProduct: (data) => API.post('/inventory/products', data),
   updateProduct: (id, data) => API.put(`/inventory/products/${id}`, data),
+  deleteProducts: (data) => API.post('/inventory/products/delete', data),
   getAlerts: () => API.get('/inventory/alerts'),
   restock: (data) => API.post('/inventory/restock', data),
   getCategories: () => API.get('/inventory/categories'),

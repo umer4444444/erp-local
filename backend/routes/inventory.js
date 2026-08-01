@@ -19,6 +19,42 @@ router.get('/products', auth, async (req, res) => {
   }
 });
 
+// Delete multiple products
+router.post('/products/delete', auth, roleCheck(['admin', 'inventory', 'manager']), async (req, res) => {
+  try {
+    const { ids } = req.body;
+    if (!ids || !Array.isArray(ids) || ids.length === 0) {
+      return res.status(400).json({ message: 'No product IDs provided.' });
+    }
+    
+    let deletedCount = 0;
+    let failedCount = 0;
+
+    for (const id of ids) {
+      try {
+        // Find product
+        const product = await Product.findByPk(id);
+        if (product) {
+          // Delete variations first if any
+          await ProductVariation.destroy({ where: { productId: id } });
+          // Destroy product (will fail if there are RESTRICT constraints like SaleItem)
+          await product.destroy();
+          deletedCount++;
+        }
+      } catch (err) {
+        // Usually fails due to foreign key constraint (e.g., product has been sold)
+        failedCount++;
+      }
+    }
+
+    res.json({ 
+      message: `Deleted ${deletedCount} products. ${failedCount > 0 ? `Failed to delete ${failedCount} products (they might be tied to sales or purchase orders).` : ''}` 
+    });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
 // Get categories
 router.get('/categories', auth, async (req, res) => {
   try {

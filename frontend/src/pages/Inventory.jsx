@@ -326,6 +326,23 @@ const Inventory = () => {
     link.click();
   };
 
+  const handleDeleteSelected = async () => {
+    if (selectedIds.size === 0) return;
+    if (!window.confirm(`Are you sure you want to delete ${selectedIds.size} products? This cannot be undone.`)) return;
+    
+    setLoading(true);
+    try {
+      const res = await inventoryAPI.deleteProducts({ ids: Array.from(selectedIds) });
+      alert(res.data.message);
+      setSelectedIds(new Set());
+      fetchData();
+    } catch (err) {
+      alert(err.response?.data?.message || 'Failed to delete products');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const exportAllToCSV = () => {
     const headers = ['Name', 'SKU', 'Category', 'Stock', 'Price', 'Cost', 'Margin %', 'Expiry'];
     const rows = filteredProducts.map(p => {
@@ -439,6 +456,11 @@ const Inventory = () => {
           <button onClick={exportSelectedToCSV} style={{ padding: '12px 20px', borderRadius: 14, background: '#0f172a', color: 'white', border: 'none', fontWeight: 800, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 8 }}>
             <Download size={18} /> Export Selected {selectedIds.size > 0 ? `(${selectedIds.size})` : ''}
           </button>
+          {selectedIds.size > 0 && (
+            <button onClick={handleDeleteSelected} style={{ padding: '12px 20px', borderRadius: 14, background: '#ef4444', color: 'white', border: 'none', fontWeight: 800, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 8 }}>
+              <Trash2 size={18} /> Delete Selected ({selectedIds.size})
+            </button>
+          )}
           <button onClick={() => setShowBulkModal(true)} style={{ padding: '12px 24px', borderRadius: 14, background: '#0a84ff', color: 'white', border: 'none', fontWeight: 800, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 8 }}>
             <Upload size={18} /> Bulk Entry
           </button>
