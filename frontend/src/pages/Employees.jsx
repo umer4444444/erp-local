@@ -677,7 +677,8 @@ const Employees = () => {
               alert('Face registered successfully!');
               fetchData();
             } catch (err) {
-              alert('Failed to update face data');
+              const errorMsg = err.response?.data?.message || err.message || 'Unknown error';
+              alert('Failed to update face data: ' + errorMsg);
             }
           }}
           onClose={() => setShowUpdateFaceScanner(false)}
