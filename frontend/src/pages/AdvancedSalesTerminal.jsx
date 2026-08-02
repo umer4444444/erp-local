@@ -201,7 +201,7 @@ const AdvancedSalesTerminal = ({ onClose }) => {
       
     } catch (err) {
       console.error(err);
-      alert("Checkout failed: " + (err.response?.data?.error || err.message));
+      alert("Checkout failed: " + (err.response?.data?.message || err.response?.data?.error || err.message));
     } finally {
       setIsProcessing(false);
     }
