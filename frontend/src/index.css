@@ -4,12 +4,35 @@
 
 :root {
   font-family: 'Outfit', sans-serif;
-  background-color: #f8fafc;
+  --bg-main: #f8fafc;
+  --bg-panel: #ffffff;
+  --text-main: #0f172a;
+  --text-muted: #64748b;
+  --border-color: #e2e8f0;
+  --border-color-rgb: rgba(0,0,0,0.05);
+  --shadow-color-rgb: rgba(0,0,0,0.03);
+  --shadow-strong-rgb: rgba(0,0,0,0.1);
+  background-color: var(--bg-main);
+  color: var(--text-main);
+}
+
+.dark {
+  --bg-main: #0f172a;
+  --bg-panel: #1e293b;
+  --text-main: #f8fafc;
+  --text-muted: #94a3b8;
+  --border-color: #334155;
+  --border-color-rgb: rgba(255,255,255,0.05);
+  --shadow-color-rgb: rgba(0,0,0,0.2);
+  --shadow-strong-rgb: rgba(0,0,0,0.4);
 }
 
 body {
   margin: 0;
   min-height: 100vh;
+  background-color: var(--bg-main);
+  color: var(--text-main);
+  overflow-x: hidden;
 }
 
 .orb-container {

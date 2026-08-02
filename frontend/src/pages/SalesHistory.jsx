@@ -46,7 +46,7 @@ const SalesHistory = () => {
     switch (status) {
       case 'active': return { bg: '#f0fdf4', color: '#16a34a' };
       case 'voided': return { bg: '#fff1f2', color: '#e11d48' };
-      default: return { bg: '#f1f5f9', color: '#64748b' };
+      default: return { bg: '#f1f5f9', color: 'var(--text-muted)' };
     }
   };
 
@@ -178,15 +178,15 @@ const SalesHistory = () => {
   };
 
   return (
-    <div style={{ padding: 40, minHeight: '100vh', background: '#f8fafc', fontFamily: "'Outfit', sans-serif" }}>
+    <div style={{ padding: 40, minHeight: '100vh', background: 'var(--bg-main)', fontFamily: "'Outfit', sans-serif" }}>
       <header style={{ marginBottom: 40, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <div>
-          <h1 style={{ fontSize: 32, fontWeight: 900, color: '#0f172a' }}>Transaction Ledger</h1>
-          <p style={{ color: '#64748b', fontWeight: 600 }}>Audit past sales, void transactions, and re-print receipts.</p>
+          <h1 style={{ fontSize: 32, fontWeight: 900, color: 'var(--text-main)' }}>Transaction Ledger</h1>
+          <p style={{ color: 'var(--text-muted)', fontWeight: 600 }}>Audit past sales, void transactions, and re-print receipts.</p>
         </div>
         <div style={{ display: 'flex', gap: 16 }}>
           <div style={{ position: 'relative' }}>
-            <Search size={18} style={{ position: 'absolute', left: 16, top: '50%', transform: 'translateY(-50%)', color: '#94a3b8' }} />
+            <Search size={18} style={{ position: 'absolute', left: 16, top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
             <input 
               value={search} onChange={e => setSearch(e.target.value)}
               onKeyPress={e => e.key === 'Enter' && fetchHistory()}
@@ -197,23 +197,23 @@ const SalesHistory = () => {
           <div style={{ position: 'relative' }}>
             <button 
               onClick={() => setShowFilters(!showFilters)}
-              style={{ padding: '12px 24px', borderRadius: 14, background: showFilters ? '#f1f5f9' : 'white', border: '1px solid #e2e8f0', fontWeight: 800, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 8 }}
+              style={{ padding: '12px 24px', borderRadius: 14, background: showFilters ? '#f1f5f9' : 'var(--bg-panel)', border: '1px solid #e2e8f0', fontWeight: 800, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 8 }}
             >
               <Filter size={18} /> Filters
             </button>
             
             {showFilters && (
-              <div style={{ position: 'absolute', top: '100%', right: 0, marginTop: 8, background: 'white', borderRadius: 16, padding: 20, width: 300, boxShadow: '0 10px 40px rgba(0,0,0,0.1)', border: '1px solid #e2e8f0', zIndex: 100 }}>
+              <div style={{ position: 'absolute', top: '100%', right: 0, marginTop: 8, background: 'var(--bg-panel)', borderRadius: 16, padding: 20, width: 300, boxShadow: '0 10px 40px var(--shadow-strong-rgb)', border: '1px solid #e2e8f0', zIndex: 100 }}>
                 <div style={{ marginBottom: 16 }}>
-                  <label style={{ display: 'block', fontSize: 12, fontWeight: 700, color: '#64748b', marginBottom: 6 }}>Start Date</label>
+                  <label style={{ display: 'block', fontSize: 12, fontWeight: 700, color: 'var(--text-muted)', marginBottom: 6 }}>Start Date</label>
                   <input type="date" value={startDate} onChange={e => setStartDate(e.target.value)} style={{ width: '100%', padding: 10, borderRadius: 8, border: '1px solid #e2e8f0', fontFamily: 'inherit' }} />
                 </div>
                 <div style={{ marginBottom: 16 }}>
-                  <label style={{ display: 'block', fontSize: 12, fontWeight: 700, color: '#64748b', marginBottom: 6 }}>End Date</label>
+                  <label style={{ display: 'block', fontSize: 12, fontWeight: 700, color: 'var(--text-muted)', marginBottom: 6 }}>End Date</label>
                   <input type="date" value={endDate} onChange={e => setEndDate(e.target.value)} style={{ width: '100%', padding: 10, borderRadius: 8, border: '1px solid #e2e8f0', fontFamily: 'inherit' }} />
                 </div>
                 <div style={{ marginBottom: 16 }}>
-                  <label style={{ display: 'block', fontSize: 12, fontWeight: 700, color: '#64748b', marginBottom: 6 }}>Status</label>
+                  <label style={{ display: 'block', fontSize: 12, fontWeight: 700, color: 'var(--text-muted)', marginBottom: 6 }}>Status</label>
                   <select value={statusFilter} onChange={e => setStatusFilter(e.target.value)} style={{ width: '100%', padding: 10, borderRadius: 8, border: '1px solid #e2e8f0', fontFamily: 'inherit' }}>
                     <option value="">All Statuses</option>
                     <option value="active">Active</option>
@@ -224,7 +224,7 @@ const SalesHistory = () => {
                 </div>
                 <button 
                   onClick={() => { setStartDate(''); setEndDate(''); setStatusFilter(''); setSearch(''); fetchHistory(); }}
-                  style={{ width: '100%', padding: 10, borderRadius: 8, background: '#f1f5f9', border: 'none', color: '#64748b', fontWeight: 700, cursor: 'pointer' }}
+                  style={{ width: '100%', padding: 10, borderRadius: 8, background: '#f1f5f9', border: 'none', color: 'var(--text-muted)', fontWeight: 700, cursor: 'pointer' }}
                 >
                   Clear Filters
                 </button>
@@ -234,16 +234,16 @@ const SalesHistory = () => {
         </div>
       </header>
 
-      <div style={{ background: 'white', borderRadius: 24, border: '1px solid rgba(0,0,0,0.05)', overflow: 'hidden' }}>
-        <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
+      <div style={{ background: 'var(--bg-panel)', borderRadius: 24, border: '1px solid var(--border-color-rgb)', overflow: 'hidden' }}>
+        <div className="w-full overflow-x-auto"><table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
           <thead>
-            <tr style={{ background: '#f8fafc', borderBottom: '1px solid #f1f5f9' }}>
-              <th style={{ padding: '20px 24px', color: '#64748b', fontSize: 12, fontWeight: 800, textTransform: 'uppercase' }}>Transaction ID</th>
-              <th style={{ padding: '20px 24px', color: '#64748b', fontSize: 12, fontWeight: 800, textTransform: 'uppercase' }}>Date & Time</th>
-              <th style={{ padding: '20px 24px', color: '#64748b', fontSize: 12, fontWeight: 800, textTransform: 'uppercase' }}>Customer</th>
-              <th style={{ padding: '20px 24px', color: '#64748b', fontSize: 12, fontWeight: 800, textTransform: 'uppercase' }}>Amount</th>
-              <th style={{ padding: '20px 24px', color: '#64748b', fontSize: 12, fontWeight: 800, textTransform: 'uppercase' }}>Status</th>
-              <th style={{ padding: '20px 24px', color: '#64748b', fontSize: 12, fontWeight: 800, textTransform: 'uppercase' }}></th>
+            <tr style={{ background: 'var(--bg-main)', borderBottom: '1px solid #f1f5f9' }}>
+              <th style={{ padding: '20px 24px', color: 'var(--text-muted)', fontSize: 12, fontWeight: 800, textTransform: 'uppercase' }}>Transaction ID</th>
+              <th style={{ padding: '20px 24px', color: 'var(--text-muted)', fontSize: 12, fontWeight: 800, textTransform: 'uppercase' }}>Date & Time</th>
+              <th style={{ padding: '20px 24px', color: 'var(--text-muted)', fontSize: 12, fontWeight: 800, textTransform: 'uppercase' }}>Customer</th>
+              <th style={{ padding: '20px 24px', color: 'var(--text-muted)', fontSize: 12, fontWeight: 800, textTransform: 'uppercase' }}>Amount</th>
+              <th style={{ padding: '20px 24px', color: 'var(--text-muted)', fontSize: 12, fontWeight: 800, textTransform: 'uppercase' }}>Status</th>
+              <th style={{ padding: '20px 24px', color: 'var(--text-muted)', fontSize: 12, fontWeight: 800, textTransform: 'uppercase' }}></th>
             </tr>
           </thead>
           <tbody>
@@ -251,20 +251,20 @@ const SalesHistory = () => {
               const style = getStatusStyle(sale.status);
               return (
                 <tr key={sale.id} style={{ borderBottom: '1px solid #f8fafc' }}>
-                  <td style={{ padding: '16px 24px', fontWeight: 800, color: '#0f172a' }}>#{sale.id.slice(0,8).toUpperCase()}</td>
+                  <td style={{ padding: '16px 24px', fontWeight: 800, color: 'var(--text-main)' }}>#{sale.id.slice(0,8).toUpperCase()}</td>
                   <td style={{ padding: '16px 24px' }}>
-                    <div style={{ fontWeight: 700, color: '#0f172a', fontSize: 14 }}>{new Date(sale.createdAt).toLocaleDateString()}</div>
-                    <div style={{ fontSize: 12, color: '#94a3b8', fontWeight: 600 }}>{new Date(sale.createdAt).toLocaleTimeString()}</div>
+                    <div style={{ fontWeight: 700, color: 'var(--text-main)', fontSize: 14 }}>{new Date(sale.createdAt).toLocaleDateString()}</div>
+                    <div style={{ fontSize: 12, color: 'var(--text-muted)', fontWeight: 600 }}>{new Date(sale.createdAt).toLocaleTimeString()}</div>
                   </td>
                   <td style={{ padding: '16px 24px' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                      <div style={{ width: 32, height: 32, borderRadius: 8, background: '#f1f5f9', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#64748b' }}>
+                      <div style={{ width: 32, height: 32, borderRadius: 8, background: '#f1f5f9', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text-muted)' }}>
                         <User size={16} />
                       </div>
-                      <span style={{ fontWeight: 700, color: '#64748b', fontSize: 14 }}>{sale.Customer?.name || 'Walk-in'}</span>
+                      <span style={{ fontWeight: 700, color: 'var(--text-muted)', fontSize: 14 }}>{sale.Customer?.name || 'Walk-in'}</span>
                     </div>
                   </td>
-                  <td style={{ padding: '16px 24px', fontWeight: 900, color: '#0f172a' }}>SAR {sale.grandTotal}</td>
+                  <td style={{ padding: '16px 24px', fontWeight: 900, color: 'var(--text-main)' }}>SAR {sale.grandTotal}</td>
                   <td style={{ padding: '16px 24px' }}>
                     <span style={{ padding: '6px 12px', borderRadius: 8, background: style.bg, color: style.color, fontSize: 12, fontWeight: 800, textTransform: 'capitalize' }}>
                       {sale.status}
@@ -273,7 +273,7 @@ const SalesHistory = () => {
                   <td style={{ padding: '16px 24px', textAlign: 'right' }}>
                     <button 
                       onClick={() => setSelectedSale(sale)}
-                      style={{ padding: '8px 12px', borderRadius: 10, background: 'transparent', border: '1px solid #e2e8f0', color: '#64748b', fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 6 }}
+                      style={{ padding: '8px 12px', borderRadius: 10, background: 'transparent', border: '1px solid #e2e8f0', color: 'var(--text-muted)', fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 6 }}
                     >
                       <Eye size={16} /> Details
                     </button>
@@ -282,20 +282,20 @@ const SalesHistory = () => {
               );
             })}
           </tbody>
-        </table>
+        </table></div>
       </div>
 
       {/* Sale Detail Modal */}
       <AnimatePresence>
         {selectedSale && (
           <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20 }}>
-            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 20 }} style={{ background: 'white', width: '100%', maxWidth: 500, borderRadius: 32, overflow: 'hidden' }}>
-              <div style={{ padding: 32, background: '#0f172a', color: 'white', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 20 }} style={{ background: 'var(--bg-panel)', width: '100%', maxWidth: 500, borderRadius: 32, overflow: 'hidden' }}>
+              <div style={{ padding: 32, background: 'var(--text-main)', color: 'var(--bg-panel)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <div>
                   <h3 style={{ fontSize: 20, fontWeight: 900 }}>Sale Details</h3>
                   <p style={{ opacity: 0.7, fontSize: 13, fontWeight: 600 }}>Transaction #{selectedSale.id}</p>
                 </div>
-                <button onClick={() => setSelectedSale(null)} style={{ background: 'rgba(255,255,255,0.1)', border: 'none', color: 'white', width: 36, height: 36, borderRadius: '50%', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <button onClick={() => setSelectedSale(null)} style={{ background: 'rgba(255,255,255,0.1)', border: 'none', color: 'var(--bg-panel)', width: 36, height: 36, borderRadius: '50%', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                   <X size={20} />
                 </button>
               </div>
@@ -304,20 +304,20 @@ const SalesHistory = () => {
                   {selectedSale.Items?.map(item => (
                     <div key={item.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                       <div>
-                        <div style={{ fontWeight: 800, color: '#0f172a', fontSize: 14 }}>{item.Product?.name}</div>
-                        <div style={{ fontSize: 12, color: '#94a3b8', fontWeight: 600 }}>SAR {item.price} × {item.quantity}</div>
+                        <div style={{ fontWeight: 800, color: 'var(--text-main)', fontSize: 14 }}>{item.Product?.name}</div>
+                        <div style={{ fontSize: 12, color: 'var(--text-muted)', fontWeight: 600 }}>SAR {item.price} × {item.quantity}</div>
                       </div>
-                      <div style={{ fontWeight: 900, color: '#0f172a' }}>SAR {item.total}</div>
+                      <div style={{ fontWeight: 900, color: 'var(--text-main)' }}>SAR {item.total}</div>
                     </div>
                   ))}
                 </div>
                 <div style={{ borderTop: '2px dashed #f1f5f9', paddingTop: 24 }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 12 }}>
-                    <span style={{ fontWeight: 700, color: '#64748b' }}>Total Amount</span>
-                    <span style={{ fontWeight: 900, color: '#0f172a', fontSize: 24 }}>SAR {selectedSale.grandTotal}</span>
+                    <span style={{ fontWeight: 700, color: 'var(--text-muted)' }}>Total Amount</span>
+                    <span style={{ fontWeight: 900, color: 'var(--text-main)', fontSize: 24 }}>SAR {selectedSale.grandTotal}</span>
                   </div>
                   <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 14 }}>
-                    <span style={{ fontWeight: 700, color: '#64748b' }}>Payment Method</span>
+                    <span style={{ fontWeight: 700, color: 'var(--text-muted)' }}>Payment Method</span>
                     <span style={{ fontWeight: 800, color: '#0a84ff', textTransform: 'capitalize' }}>{selectedSale.paymentMethod}</span>
                   </div>
                 </div>

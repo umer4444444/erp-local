@@ -10,7 +10,7 @@ import { payrollAPI, advanceAPI } from '../api';
 const inputStyle = {
   padding: '8px 12px', border: '1.5px solid #e2e8f0', borderRadius: 10,
   outline: 'none', fontFamily: "'Outfit', sans-serif", fontSize: 14,
-  fontWeight: 700, color: '#0f172a', background: '#f8fafc', width: 90,
+  fontWeight: 700, color: 'var(--text-main)', background: 'var(--bg-main)', width: 90,
 };
 
 const fmtMoney = (n) => `SAR ${parseFloat(n || 0).toFixed(2)}`;
@@ -167,12 +167,12 @@ const Payroll = () => {
         <div class="info-box"><label>Pay Period</label><value>${selectedRun.month}/${selectedRun.year}</value></div>
         <div class="info-box"><label>Status</label><value>${ps.status?.toUpperCase() || 'UNPAID'}</value></div>
       </div>
-      <table>
+      <div className="w-full overflow-x-auto"><table>
         <tr><th>Description</th><th>Amount</th></tr>
         <tr><td>Base Salary</td><td>SAR ${parseFloat(ps.baseSalary).toFixed(2)}</td></tr>
         <tr><td style="color:#10b981">+ Allowances</td><td style="color:#10b981">SAR ${parseFloat(ps.allowances).toFixed(2)}</td></tr>
         <tr><td style="color:#ef4444">- Deductions</td><td style="color:#ef4444">SAR ${parseFloat(ps.deductions).toFixed(2)}</td></tr>
-      </table>
+      </table></div>
       <div class="net-salary">
         <div class="label">NET SALARY</div>
         <div class="amount">SAR ${net}</div>
@@ -199,19 +199,19 @@ const Payroll = () => {
   };
 
   return (
-    <div style={{ padding: 40, minHeight: '100vh', background: '#f8fafc', fontFamily: "'Outfit', sans-serif" }}>
+    <div style={{ padding: 40, minHeight: '100vh', background: 'var(--bg-main)', fontFamily: "'Outfit', sans-serif" }}>
       {/* Header */}
       <header style={{ marginBottom: 32, display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 16 }}>
         <div>
-          <h1 style={{ fontSize: 32, fontWeight: 900, color: '#0f172a' }}>Payroll Engine</h1>
-          <p style={{ color: '#64748b', fontWeight: 600 }}>Execute payroll runs, adjust payslips, and manage salary advances.</p>
+          <h1 style={{ fontSize: 32, fontWeight: 900, color: 'var(--text-main)' }}>Payroll Engine</h1>
+          <p style={{ color: 'var(--text-muted)', fontWeight: 600 }}>Execute payroll runs, adjust payslips, and manage salary advances.</p>
         </div>
         <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
-          <div style={{ display: 'flex', gap: 4, background: 'white', padding: 4, borderRadius: 12, border: '1px solid #e2e8f0' }}>
+          <div style={{ display: 'flex', gap: 4, background: 'var(--bg-panel)', padding: 4, borderRadius: 12, border: '1px solid #e2e8f0' }}>
             {TABS.map(t => (
               <button key={t} onClick={() => setActiveTab(t)}
                 style={{ padding: '8px 18px', borderRadius: 10, border: 'none', fontWeight: 800, cursor: 'pointer', fontFamily: "'Outfit', sans-serif", transition: 'all 0.2s',
-                  background: activeTab === t ? '#0f172a' : 'transparent', color: activeTab === t ? 'white' : '#64748b' }}>
+                  background: activeTab === t ? 'var(--text-main)' : 'transparent', color: activeTab === t ? 'var(--bg-panel)' : 'var(--text-muted)' }}>
                 {t === 'payroll' ? 'Payroll Runs' : 'Salary Advances'}
               </button>
             ))}
@@ -225,7 +225,7 @@ const Payroll = () => {
                 style={{ ...inputStyle, width: 'auto', padding: '10px 14px' }}
               />
               <button onClick={handleRunPayroll} disabled={processing}
-                style={{ padding: '12px 24px', borderRadius: 14, background: '#0a84ff', color: 'white', border: 'none', fontWeight: 800, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 8, opacity: processing ? 0.7 : 1 }}>
+                style={{ padding: '12px 24px', borderRadius: 14, background: '#0a84ff', color: 'var(--bg-panel)', border: 'none', fontWeight: 800, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 8, opacity: processing ? 0.7 : 1 }}>
                 {processing ? <Calculator size={18} /> : <Play size={18} />}
                 {processing ? 'Processing...' : 'Run Payroll'}
               </button>
@@ -240,21 +240,21 @@ const Payroll = () => {
           <motion.div key="payroll" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
             style={{ display: 'grid', gridTemplateColumns: '280px 1fr', gap: 28 }}>
             {/* History sidebar */}
-            <div style={{ background: 'white', padding: 28, borderRadius: 28, border: '1px solid rgba(0,0,0,0.05)' }}>
-              <h2 style={{ fontSize: 18, fontWeight: 900, color: '#0f172a', marginBottom: 20, display: 'flex', alignItems: 'center', gap: 8 }}>
+            <div style={{ background: 'var(--bg-panel)', padding: 28, borderRadius: 28, border: '1px solid var(--border-color-rgb)' }}>
+              <h2 style={{ fontSize: 18, fontWeight: 900, color: 'var(--text-main)', marginBottom: 20, display: 'flex', alignItems: 'center', gap: 8 }}>
                 <History size={18} /> History
               </h2>
               {loading ? (
-                <div style={{ padding: 40, textAlign: 'center', color: '#94a3b8' }}>Loading...</div>
+                <div style={{ padding: 40, textAlign: 'center', color: 'var(--text-muted)' }}>Loading...</div>
               ) : runs.length === 0 ? (
-                <div style={{ padding: 40, textAlign: 'center', color: '#94a3b8', fontSize: 13, fontWeight: 700 }}>No payroll runs yet.</div>
+                <div style={{ padding: 40, textAlign: 'center', color: 'var(--text-muted)', fontSize: 13, fontWeight: 700 }}>No payroll runs yet.</div>
               ) : (
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
                   {runs.map(run => (
                     <button key={run.id} onClick={() => viewRun(run)}
-                      style={{ textAlign: 'left', padding: '18px', borderRadius: 18, border: selectedRun?.id === run.id ? '2px solid #0a84ff' : '1.5px solid #e2e8f0', background: selectedRun?.id === run.id ? '#f0f9ff' : 'white', cursor: 'pointer', transition: 'all 0.2s' }}>
-                      <div style={{ fontWeight: 900, color: '#0f172a', fontSize: 15 }}>Period {run.month}/{run.year}</div>
-                      <div style={{ fontSize: 12, color: '#94a3b8', marginTop: 4 }}>{new Date(run.processedAt).toLocaleDateString()}</div>
+                      style={{ textAlign: 'left', padding: '18px', borderRadius: 18, border: selectedRun?.id === run.id ? '2px solid #0a84ff' : '1.5px solid #e2e8f0', background: selectedRun?.id === run.id ? '#f0f9ff' : 'var(--bg-panel)', cursor: 'pointer', transition: 'all 0.2s' }}>
+                      <div style={{ fontWeight: 900, color: 'var(--text-main)', fontSize: 15 }}>Period {run.month}/{run.year}</div>
+                      <div style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 4 }}>{new Date(run.processedAt).toLocaleDateString()}</div>
                       <div style={{ marginTop: 8, display: 'flex', alignItems: 'center', gap: 6, fontSize: 11, fontWeight: 800, color: '#10b981' }}>
                         <CheckCircle size={13} /> {run.status?.toUpperCase()}
                       </div>
@@ -265,13 +265,13 @@ const Payroll = () => {
             </div>
 
             {/* Payslips panel */}
-            <div style={{ background: 'white', padding: 32, borderRadius: 28, border: '1px solid rgba(0,0,0,0.05)' }}>
+            <div style={{ background: 'var(--bg-panel)', padding: 32, borderRadius: 28, border: '1px solid var(--border-color-rgb)' }}>
               {selectedRun ? (
                 <>
                   <div style={{ marginBottom: 28, display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
                     <div>
-                      <h2 style={{ fontSize: 22, fontWeight: 900, color: '#0f172a' }}>Payroll Details — {selectedRun.month}/{selectedRun.year}</h2>
-                      <p style={{ color: '#94a3b8', fontSize: 13, fontWeight: 600, marginTop: 4 }}>Click the edit icon to adjust allowances and deductions per employee.</p>
+                      <h2 style={{ fontSize: 22, fontWeight: 900, color: 'var(--text-main)' }}>Payroll Details — {selectedRun.month}/{selectedRun.year}</h2>
+                      <p style={{ color: 'var(--text-muted)', fontSize: 13, fontWeight: 600, marginTop: 4 }}>Click the edit icon to adjust allowances and deductions per employee.</p>
                     </div>
                     <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
                       <span style={{ fontSize: 12, fontWeight: 800, padding: '6px 14px', borderRadius: 10,
@@ -281,18 +281,18 @@ const Payroll = () => {
                       </span>
                       {selectedRun.status !== 'processed' && (
                         <button onClick={handleFinalize} disabled={finalizing}
-                          style={{ padding: '10px 20px', borderRadius: 12, background: '#10b981', color: 'white', border: 'none', fontWeight: 800, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 8, opacity: finalizing ? 0.7 : 1, fontSize: 13 }}>
+                          style={{ padding: '10px 20px', borderRadius: 12, background: '#10b981', color: 'var(--bg-panel)', border: 'none', fontWeight: 800, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 8, opacity: finalizing ? 0.7 : 1, fontSize: 13 }}>
                           <Lock size={14} /> {finalizing ? 'Finalizing...' : 'Finalize & Pay'}
                         </button>
                       )}
                     </div>
                   </div>
                   <div style={{ overflowX: 'auto' }}>
-                    <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                    <div className="w-full overflow-x-auto"><table style={{ width: '100%', borderCollapse: 'collapse' }}>
                       <thead>
                         <tr style={{ textAlign: 'left', borderBottom: '2px solid #f1f5f9' }}>
                           {['Employee', 'Base Salary', 'Allowances', 'Deductions', 'Net Salary', 'Action'].map(h => (
-                            <th key={h} style={{ padding: '14px 16px', color: '#64748b', fontSize: 12, fontWeight: 800, letterSpacing: 0.5 }}>{h.toUpperCase()}</th>
+                            <th key={h} style={{ padding: '14px 16px', color: 'var(--text-muted)', fontSize: 12, fontWeight: 800, letterSpacing: 0.5 }}>{h.toUpperCase()}</th>
                           ))}
                         </tr>
                       </thead>
@@ -303,8 +303,8 @@ const Payroll = () => {
                             ? (parseFloat(ps.baseSalary) + parseFloat(editValues.allowances) - parseFloat(editValues.deductions)).toFixed(2)
                             : parseFloat(ps.netSalary).toFixed(2);
                           return (
-                            <tr key={ps.id} style={{ borderBottom: '1px solid #f8fafc', background: isEditing ? '#f0f9ff' : 'white', transition: 'background 0.2s' }}>
-                              <td style={{ padding: '16px', fontWeight: 800, color: '#0f172a' }}>{ps.Employee?.User?.name || '—'}</td>
+                            <tr key={ps.id} style={{ borderBottom: '1px solid #f8fafc', background: isEditing ? '#f0f9ff' : 'var(--bg-panel)', transition: 'background 0.2s' }}>
+                              <td style={{ padding: '16px', fontWeight: 800, color: 'var(--text-main)' }}>{ps.Employee?.User?.name || '—'}</td>
                               <td style={{ padding: '16px', fontWeight: 700 }}>{fmtMoney(ps.baseSalary)}</td>
                               <td style={{ padding: '16px' }}>
                                 {isEditing
@@ -322,25 +322,25 @@ const Payroll = () => {
                                   {isEditing ? (
                                     <>
                                       <button onClick={() => handleSave(ps.id)} disabled={saving}
-                                        style={{ padding: '7px 12px', borderRadius: 8, background: '#10b981', color: 'white', border: 'none', fontWeight: 800, cursor: 'pointer', fontSize: 12, display: 'flex', alignItems: 'center', gap: 4 }}>
+                                        style={{ padding: '7px 12px', borderRadius: 8, background: '#10b981', color: 'var(--bg-panel)', border: 'none', fontWeight: 800, cursor: 'pointer', fontSize: 12, display: 'flex', alignItems: 'center', gap: 4 }}>
                                         <Save size={13} /> Save
                                       </button>
                                       <button onClick={() => setEditingId(null)}
                                         style={{ padding: '7px', borderRadius: 8, background: '#f1f5f9', border: 'none', cursor: 'pointer' }}>
-                                        <X size={13} color="#64748b" />
+                                        <X size={13} color='var(--text-muted)' />
                                       </button>
                                     </>
                                   ) : (
                                     <>
                                       {selectedRun.status !== 'processed' && (
                                         <button onClick={() => startEdit(ps)}
-                                          style={{ padding: '7px', borderRadius: 8, background: '#f8fafc', border: '1px solid #e2e8f0', cursor: 'pointer' }}>
+                                          style={{ padding: '7px', borderRadius: 8, background: 'var(--bg-main)', border: '1px solid #e2e8f0', cursor: 'pointer' }}>
                                           <Edit2 size={15} color="#0a84ff" />
                                         </button>
                                       )}
                                       <button onClick={() => printPayslip(ps)} title="Print Payslip"
-                                        style={{ padding: '7px', borderRadius: 8, background: '#f8fafc', border: '1px solid #e2e8f0', cursor: 'pointer' }}>
-                                        <Printer size={15} color="#64748b" />
+                                        style={{ padding: '7px', borderRadius: 8, background: 'var(--bg-main)', border: '1px solid #e2e8f0', cursor: 'pointer' }}>
+                                        <Printer size={15} color='var(--text-muted)' />
                                       </button>
                                     </>
                                   )}
@@ -350,14 +350,14 @@ const Payroll = () => {
                           );
                         })}
                         {payslips.length === 0 && (
-                          <tr><td colSpan={6} style={{ textAlign: 'center', padding: 60, color: '#94a3b8', fontWeight: 700 }}>No payslips found for this run.</td></tr>
+                          <tr><td colSpan={6} style={{ textAlign: 'center', padding: 60, color: 'var(--text-muted)', fontWeight: 700 }}>No payslips found for this run.</td></tr>
                         )}
                       </tbody>
-                    </table>
+                    </table></div>
                   </div>
                 </>
               ) : (
-                <div style={{ textAlign: 'center', padding: 100, color: '#94a3b8' }}>
+                <div style={{ textAlign: 'center', padding: 100, color: 'var(--text-muted)' }}>
                   <Calculator size={64} style={{ opacity: 0.15, marginBottom: 20 }} />
                   <h3 style={{ fontSize: 20, fontWeight: 800 }}>Select a Payroll Period</h3>
                   <p style={{ fontWeight: 600 }}>Choose a run from history to view detailed payslips.</p>
@@ -371,53 +371,53 @@ const Payroll = () => {
         {activeTab === 'advances' && (
           <motion.div key="advances" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
             {/* Request form */}
-            <div style={{ background: 'white', borderRadius: 28, padding: 36, border: '1px solid rgba(0,0,0,0.05)', marginBottom: 28 }}>
-              <h2 style={{ fontSize: 20, fontWeight: 900, color: '#0f172a', marginBottom: 20, display: 'flex', alignItems: 'center', gap: 10 }}>
+            <div style={{ background: 'var(--bg-panel)', borderRadius: 28, padding: 36, border: '1px solid var(--border-color-rgb)', marginBottom: 28 }}>
+              <h2 style={{ fontSize: 20, fontWeight: 900, color: 'var(--text-main)', marginBottom: 20, display: 'flex', alignItems: 'center', gap: 10 }}>
                 <CreditCard size={22} color="#0a84ff" /> Request Salary Advance
               </h2>
               <div style={{ display: 'grid', gridTemplateColumns: '180px 1fr auto', gap: 16, alignItems: 'flex-end' }}>
                 <div>
-                  <label style={{ display: 'block', fontSize: 12, fontWeight: 800, color: '#64748b', marginBottom: 8 }}>AMOUNT (SAR)</label>
+                  <label style={{ display: 'block', fontSize: 12, fontWeight: 800, color: 'var(--text-muted)', marginBottom: 8 }}>AMOUNT (SAR)</label>
                   <div style={{ position: 'relative' }}>
-                    <DollarSign size={16} style={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)', color: '#94a3b8' }} />
+                    <DollarSign size={16} style={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
                     <input type="number" min="0" value={advForm.amount} onChange={e => setAdvForm(f => ({ ...f, amount: e.target.value }))}
                       placeholder="0.00"
                       style={{ width: '100%', padding: '12px 12px 12px 36px', borderRadius: 12, border: '1.5px solid #e2e8f0', outline: 'none', fontFamily: "'Outfit', sans-serif", fontWeight: 700, boxSizing: 'border-box' }} />
                   </div>
                 </div>
                 <div>
-                  <label style={{ display: 'block', fontSize: 12, fontWeight: 800, color: '#64748b', marginBottom: 8 }}>REASON</label>
+                  <label style={{ display: 'block', fontSize: 12, fontWeight: 800, color: 'var(--text-muted)', marginBottom: 8 }}>REASON</label>
                   <input value={advForm.reason} onChange={e => setAdvForm(f => ({ ...f, reason: e.target.value }))}
                     placeholder="Reason for advance request..."
                     style={{ width: '100%', padding: '12px 16px', borderRadius: 12, border: '1.5px solid #e2e8f0', outline: 'none', fontFamily: "'Outfit', sans-serif", fontWeight: 700, boxSizing: 'border-box' }} />
                 </div>
                 <button onClick={handleAdvanceRequest} disabled={submitting}
-                  style={{ padding: '12px 24px', borderRadius: 12, background: '#0a84ff', color: 'white', border: 'none', fontWeight: 800, cursor: 'pointer', opacity: submitting ? 0.7 : 1 }}>
+                  style={{ padding: '12px 24px', borderRadius: 12, background: '#0a84ff', color: 'var(--bg-panel)', border: 'none', fontWeight: 800, cursor: 'pointer', opacity: submitting ? 0.7 : 1 }}>
                   {submitting ? 'Submitting...' : 'Submit Request'}
                 </button>
               </div>
             </div>
 
             {/* Advance requests list */}
-            <div style={{ background: 'white', borderRadius: 28, padding: 32, border: '1px solid rgba(0,0,0,0.05)' }}>
-              <h2 style={{ fontSize: 20, fontWeight: 900, color: '#0f172a', marginBottom: 24, display: 'flex', alignItems: 'center', gap: 10 }}>
+            <div style={{ background: 'var(--bg-panel)', borderRadius: 28, padding: 32, border: '1px solid var(--border-color-rgb)' }}>
+              <h2 style={{ fontSize: 20, fontWeight: 900, color: 'var(--text-main)', marginBottom: 24, display: 'flex', alignItems: 'center', gap: 10 }}>
                 <Clock size={20} /> Advance Requests
               </h2>
               {advLoading ? (
-                <div style={{ padding: 60, textAlign: 'center', color: '#94a3b8', fontWeight: 700 }}>Loading...</div>
+                <div style={{ padding: 60, textAlign: 'center', color: 'var(--text-muted)', fontWeight: 700 }}>Loading...</div>
               ) : advances.length === 0 ? (
-                <div style={{ padding: 60, textAlign: 'center', color: '#94a3b8', fontWeight: 700 }}>No advance requests found.</div>
+                <div style={{ padding: 60, textAlign: 'center', color: 'var(--text-muted)', fontWeight: 700 }}>No advance requests found.</div>
               ) : (
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
                   {advances.map(adv => (
                     <div key={adv.id} style={{ display: 'grid', gridTemplateColumns: '1fr 2fr 1fr 1fr', alignItems: 'center', gap: 24, padding: '20px 24px', borderRadius: 20, border: '1.5px solid #f1f5f9', background: '#fafafa' }}>
                       <div>
-                        <div style={{ fontWeight: 900, color: '#0f172a', fontSize: 16 }}>{fmtMoney(adv.amount)}</div>
-                        <div style={{ fontSize: 12, color: '#94a3b8', fontWeight: 600, marginTop: 2 }}>{new Date(adv.createdAt).toLocaleDateString()}</div>
+                        <div style={{ fontWeight: 900, color: 'var(--text-main)', fontSize: 16 }}>{fmtMoney(adv.amount)}</div>
+                        <div style={{ fontSize: 12, color: 'var(--text-muted)', fontWeight: 600, marginTop: 2 }}>{new Date(adv.createdAt).toLocaleDateString()}</div>
                       </div>
                       <div>
-                        <div style={{ fontSize: 13, fontWeight: 700, color: '#64748b' }}>{adv.reason || '—'}</div>
-                        <div style={{ fontSize: 12, color: '#94a3b8', fontWeight: 600 }}>By: {adv.Employee?.User?.name || 'Self'}</div>
+                        <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-muted)' }}>{adv.reason || '—'}</div>
+                        <div style={{ fontSize: 12, color: 'var(--text-muted)', fontWeight: 600 }}>By: {adv.Employee?.User?.name || 'Self'}</div>
                       </div>
                       <div>{statusBadge(adv.status)}</div>
                       {adv.status === 'pending' && (

@@ -115,13 +115,13 @@ const NotificationCenter = ({ user }) => {
           whileTap={{ scale: 0.95 }}
           onClick={() => setShowDropdown(!showDropdown)}
           style={{ 
-            width: 48, height: 48, borderRadius: 16, background: 'white', 
-            border: '1px solid rgba(0,0,0,0.05)', boxShadow: '0 8px 30px rgba(0,0,0,0.06)',
+            width: 48, height: 48, borderRadius: 16, background: 'var(--bg-panel)', 
+            border: '1px solid var(--border-color-rgb)', boxShadow: '0 8px 30px rgba(0,0,0,0.06)',
             display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer',
             position: 'relative'
           }}
         >
-          <Bell size={20} color="#64748b" />
+          <Bell size={20} color='var(--text-muted)' />
           {notifications.length > 0 && (
             <span style={{ 
               position: 'absolute', top: 12, right: 12, width: 10, height: 10, 
@@ -137,21 +137,21 @@ const NotificationCenter = ({ user }) => {
               animate={{ opacity: 1, y: 0, scale: 1 }}
               exit={{ opacity: 0, y: 10, scale: 0.95 }}
               style={{ 
-                position: 'absolute', top: 60, right: 0, width: 320, background: 'white',
-                borderRadius: 24, border: '1px solid rgba(0,0,0,0.08)', boxShadow: '0 20px 50px rgba(0,0,0,0.1)',
+                position: 'absolute', top: 60, right: 0, width: 320, background: 'var(--bg-panel)',
+                borderRadius: 24, border: '1px solid var(--shadow-strong-rgb)', boxShadow: '0 20px 50px var(--shadow-strong-rgb)',
                 padding: '20px 0', overflow: 'hidden'
               }}
             >
               <div style={{ padding: '0 20px 16px', borderBottom: '1px solid #f1f5f9', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <span style={{ fontWeight: 900, fontSize: 16 }}>Notifications</span>
-                <span style={{ fontSize: 11, fontWeight: 800, background: '#f1f5f9', padding: '4px 10px', borderRadius: 100, color: '#64748b' }}>
+                <span style={{ fontSize: 11, fontWeight: 800, background: '#f1f5f9', padding: '4px 10px', borderRadius: 100, color: 'var(--text-muted)' }}>
                   {notifications.length} New
                 </span>
               </div>
 
               <div style={{ maxHeight: 400, overflowY: 'auto' }}>
                 {notifications.length === 0 ? (
-                  <div style={{ padding: 40, textAlign: 'center', color: '#94a3b8' }}>
+                  <div style={{ padding: 40, textAlign: 'center', color: 'var(--text-muted)' }}>
                     <Check size={32} style={{ marginBottom: 12, opacity: 0.3 }} />
                     <div style={{ fontSize: 13, fontWeight: 700 }}>All caught up!</div>
                   </div>
@@ -164,15 +164,15 @@ const NotificationCenter = ({ user }) => {
                         padding: '16px 20px', borderBottom: '1px solid #f8fafc', cursor: 'pointer',
                         display: 'flex', gap: 14, transition: 'background 0.2s'
                       }}
-                      onMouseEnter={e => e.currentTarget.style.background = '#f8fafc'}
-                      onMouseLeave={e => e.currentTarget.style.background = 'white'}
+                      onMouseEnter={e => e.currentTarget.style.background = 'var(--bg-main)'}
+                      onMouseLeave={e => e.currentTarget.style.background = 'var(--bg-panel)'}
                     >
-                      <div style={{ width: 40, height: 40, borderRadius: 12, background: 'rgba(0,0,0,0.03)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                      <div style={{ width: 40, height: 40, borderRadius: 12, background: 'var(--shadow-color-rgb)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
                         {n.icon}
                       </div>
                       <div style={{ flex: 1 }}>
-                        <div style={{ fontSize: 14, fontWeight: 800, color: '#0f172a', marginBottom: 2 }}>{n.title}</div>
-                        <div style={{ fontSize: 12, color: '#64748b', fontWeight: 500, lineHeight: 1.4 }}>{n.message}</div>
+                        <div style={{ fontSize: 14, fontWeight: 800, color: 'var(--text-main)', marginBottom: 2 }}>{n.title}</div>
+                        <div style={{ fontSize: 12, color: 'var(--text-muted)', fontWeight: 500, lineHeight: 1.4 }}>{n.message}</div>
                       </div>
                       <div style={{ alignSelf: 'center' }}>
                         <ArrowRight size={14} color="#cbd5e1" />
@@ -188,23 +188,23 @@ const NotificationCenter = ({ user }) => {
 
       {/* Profile Summary */}
       <div style={{ 
-        height: 48, padding: '0 16px', borderRadius: 16, background: 'white', 
-        border: '1px solid rgba(0,0,0,0.05)', boxShadow: '0 8px 30px rgba(0,0,0,0.06)',
+        height: 48, padding: '0 16px', borderRadius: 16, background: 'var(--bg-panel)', 
+        border: '1px solid var(--border-color-rgb)', boxShadow: '0 8px 30px rgba(0,0,0,0.06)',
         display: 'flex', alignItems: 'center', gap: 12
       }}>
-        <div style={{ width: 32, height: 32, borderRadius: 10, background: '#e2e8f0', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 900, fontSize: 12 }}>
+        <div style={{ width: 32, height: 32, borderRadius: 10, background: 'var(--border-color)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 900, fontSize: 12 }}>
           {user?.name?.[0]}
         </div>
         <div>
-          <div style={{ fontSize: 13, fontWeight: 800, color: '#0f172a' }}>{user?.name}</div>
-          <div style={{ fontSize: 10, fontWeight: 700, color: '#94a3b8', textTransform: 'uppercase' }}>{user?.role}</div>
+          <div style={{ fontSize: 13, fontWeight: 800, color: 'var(--text-main)' }}>{user?.name}</div>
+          <div style={{ fontSize: 10, fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase' }}>{user?.role}</div>
         </div>
       </div>
 
       {/* Google Translate Widget */}
       <div style={{ 
-        height: 48, padding: '0 12px', borderRadius: 16, background: 'white', 
-        border: '1px solid rgba(0,0,0,0.05)', boxShadow: '0 8px 30px rgba(0,0,0,0.06)',
+        height: 48, padding: '0 12px', borderRadius: 16, background: 'var(--bg-panel)', 
+        border: '1px solid var(--border-color-rgb)', boxShadow: '0 8px 30px rgba(0,0,0,0.06)',
         display: 'flex', alignItems: 'center', overflow: 'hidden'
       }}>
         <div id="google_translate_element" style={{ transform: 'translateY(4px)' }}></div>

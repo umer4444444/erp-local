@@ -173,7 +173,7 @@ const Accounting = () => {
           {activeTab === 'chart' && (
             <button 
               onClick={() => setShowAccountModal(true)}
-              style={{ background: '#4f46e5', color: 'white', border: 'none', padding: '10px 16px', borderRadius: 8, fontWeight: 600, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 8 }}
+              style={{ background: '#4f46e5', color: 'var(--bg-panel)', border: 'none', padding: '10px 16px', borderRadius: 8, fontWeight: 600, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 8 }}
             >
               <Plus size={18} /> Add Account
             </button>
@@ -181,7 +181,7 @@ const Accounting = () => {
           {activeTab === 'journals' && (
             <button 
               onClick={() => setShowJournalModal(true)}
-              style={{ background: '#4f46e5', color: 'white', border: 'none', padding: '10px 16px', borderRadius: 8, fontWeight: 600, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 8 }}
+              style={{ background: '#4f46e5', color: 'var(--bg-panel)', border: 'none', padding: '10px 16px', borderRadius: 8, fontWeight: 600, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 8 }}
             >
               <Plus size={18} /> New Journal Entry
             </button>
@@ -194,11 +194,11 @@ const Accounting = () => {
       {loading ? (
         <div style={{ padding: 40, textAlign: 'center', color: '#6b7280' }}>Loading data...</div>
       ) : (
-        <div style={{ background: 'white', borderRadius: 12, boxShadow: '0 1px 3px rgba(0,0,0,0.1)', overflow: 'hidden' }}>
+        <div style={{ background: 'var(--bg-panel)', borderRadius: 12, boxShadow: '0 1px 3px var(--shadow-strong-rgb)', overflow: 'hidden' }}>
           
           {activeTab === 'chart' && (
-            <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-              <thead style={{ background: '#f8fafc', borderBottom: '1px solid #e5e7eb' }}>
+            <div className="w-full overflow-x-auto"><table style={{ width: '100%', borderCollapse: 'collapse' }}>
+              <thead style={{ background: 'var(--bg-main)', borderBottom: '1px solid #e5e7eb' }}>
                 <tr>
                   <th style={{ padding: 16, textAlign: 'left', fontWeight: 600, color: '#475569' }}>Code</th>
                   <th style={{ padding: 16, textAlign: 'left', fontWeight: 600, color: '#475569' }}>Account Name</th>
@@ -208,11 +208,11 @@ const Accounting = () => {
               </thead>
               <tbody>
                 {accounts.length === 0 ? (
-                  <tr><td colSpan="4" style={{ padding: 24, textAlign: 'center', color: '#94a3b8' }}>No accounts found.</td></tr>
+                  <tr><td colSpan="4" style={{ padding: 24, textAlign: 'center', color: 'var(--text-muted)' }}>No accounts found.</td></tr>
                 ) : accounts.map(acc => (
                   <tr key={acc.id} style={{ borderBottom: '1px solid #f1f5f9' }}>
-                    <td style={{ padding: 16, color: '#0f172a', fontWeight: 500 }}>{acc.code}</td>
-                    <td style={{ padding: 16, color: '#0f172a' }}>{acc.name}</td>
+                    <td style={{ padding: 16, color: 'var(--text-main)', fontWeight: 500 }}>{acc.code}</td>
+                    <td style={{ padding: 16, color: 'var(--text-main)' }}>{acc.name}</td>
                     <td style={{ padding: 16 }}>
                       <span style={{ 
                         background: '#e0e7ff', color: '#4f46e5', padding: '4px 8px', borderRadius: 9999, fontSize: 12, fontWeight: 600, textTransform: 'capitalize' 
@@ -224,22 +224,22 @@ const Accounting = () => {
                   </tr>
                 ))}
               </tbody>
-            </table>
+            </table></div>
           )}
 
           {activeTab === 'journals' && (
             <div style={{ padding: 24 }}>
               {journals.length === 0 ? (
-                <div style={{ textAlign: 'center', color: '#94a3b8', padding: 40 }}>No journal entries recorded.</div>
+                <div style={{ textAlign: 'center', color: 'var(--text-muted)', padding: 40 }}>No journal entries recorded.</div>
               ) : journals.map(entry => (
                 <div key={entry.id} style={{ marginBottom: 24, border: '1px solid #e5e7eb', borderRadius: 8, overflow: 'hidden' }}>
-                  <div style={{ background: '#f8fafc', padding: '12px 16px', display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid #e5e7eb' }}>
+                  <div style={{ background: 'var(--bg-main)', padding: '12px 16px', display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid #e5e7eb' }}>
                     <div>
                       <strong>{new Date(entry.date).toLocaleDateString()}</strong> - {entry.description}
                     </div>
-                    <div style={{ color: '#64748b' }}>Ref: {entry.reference || 'N/A'}</div>
+                    <div style={{ color: 'var(--text-muted)' }}>Ref: {entry.reference || 'N/A'}</div>
                   </div>
-                  <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                  <div className="w-full overflow-x-auto"><table style={{ width: '100%', borderCollapse: 'collapse' }}>
                     <tbody>
                       {entry.Lines?.map(line => (
                         <tr key={line.id} style={{ borderBottom: '1px solid #f1f5f9' }}>
@@ -249,15 +249,15 @@ const Accounting = () => {
                         </tr>
                       ))}
                     </tbody>
-                  </table>
+                  </table></div>
                 </div>
               ))}
             </div>
           )}
 
           {activeTab === 'trial' && (
-            <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-              <thead style={{ background: '#f8fafc', borderBottom: '1px solid #e5e7eb' }}>
+            <div className="w-full overflow-x-auto"><table style={{ width: '100%', borderCollapse: 'collapse' }}>
+              <thead style={{ background: 'var(--bg-main)', borderBottom: '1px solid #e5e7eb' }}>
                 <tr>
                   <th style={{ padding: 16, textAlign: 'left', fontWeight: 600, color: '#475569' }}>Account</th>
                   <th style={{ padding: 16, textAlign: 'right', fontWeight: 600, color: '#475569' }}>Debit</th>
@@ -267,17 +267,17 @@ const Accounting = () => {
               </thead>
               <tbody>
                 {trialBalance.length === 0 ? (
-                  <tr><td colSpan="4" style={{ padding: 24, textAlign: 'center', color: '#94a3b8' }}>No data.</td></tr>
+                  <tr><td colSpan="4" style={{ padding: 24, textAlign: 'center', color: 'var(--text-muted)' }}>No data.</td></tr>
                 ) : trialBalance.map(acc => (
                   <tr key={acc.id} style={{ borderBottom: '1px solid #f1f5f9' }}>
-                    <td style={{ padding: 16, color: '#0f172a', fontWeight: 500 }}>{acc.code} - {acc.name}</td>
+                    <td style={{ padding: 16, color: 'var(--text-main)', fontWeight: 500 }}>{acc.code} - {acc.name}</td>
                     <td style={{ padding: 16, textAlign: 'right', color: '#10b981' }}>{acc.totalDebit > 0 ? acc.totalDebit.toFixed(2) : '-'}</td>
                     <td style={{ padding: 16, textAlign: 'right', color: '#ef4444' }}>{acc.totalCredit > 0 ? acc.totalCredit.toFixed(2) : '-'}</td>
                     <td style={{ padding: 16, textAlign: 'right', fontWeight: 700 }}>{acc.balance.toFixed(2)}</td>
                   </tr>
                 ))}
               </tbody>
-            </table>
+            </table></div>
           )}
 
         </div>
@@ -286,7 +286,7 @@ const Accounting = () => {
       {/* Add Account Modal */}
       {showAccountModal && (
         <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000 }}>
-          <div style={{ background: 'white', borderRadius: 12, padding: 24, width: '100%', maxWidth: 400 }}>
+          <div style={{ background: 'var(--bg-panel)', borderRadius: 12, padding: 24, width: '100%', maxWidth: 400 }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
               <h2 style={{ margin: 0, fontSize: 20 }}>Add Account</h2>
               <button onClick={() => setShowAccountModal(false)} style={{ background: 'transparent', border: 'none', cursor: 'pointer' }}><X size={20} /></button>
@@ -317,7 +317,7 @@ const Accounting = () => {
                 <select 
                   value={newAccount.type} 
                   onChange={e => setNewAccount({...newAccount, type: e.target.value})} 
-                  style={{ width: '100%', padding: '10px', borderRadius: 8, border: '1px solid #d1d5db', background: 'white' }}
+                  style={{ width: '100%', padding: '10px', borderRadius: 8, border: '1px solid #d1d5db', background: 'var(--bg-panel)' }}
                 >
                   <option value="asset">Asset</option>
                   <option value="liability">Liability</option>
@@ -326,7 +326,7 @@ const Accounting = () => {
                   <option value="expense">Expense</option>
                 </select>
               </div>
-              <button type="submit" style={{ width: '100%', background: '#4f46e5', color: 'white', border: 'none', padding: 12, borderRadius: 8, fontWeight: 600, cursor: 'pointer' }}>
+              <button type="submit" style={{ width: '100%', background: '#4f46e5', color: 'var(--bg-panel)', border: 'none', padding: 12, borderRadius: 8, fontWeight: 600, cursor: 'pointer' }}>
                 Save Account
               </button>
             </form>
@@ -337,7 +337,7 @@ const Accounting = () => {
       {/* Add Journal Modal */}
       {showJournalModal && (
         <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000, overflowY: 'auto', padding: 20 }}>
-          <div style={{ background: 'white', borderRadius: 12, padding: 24, width: '100%', maxWidth: 800 }}>
+          <div style={{ background: 'var(--bg-panel)', borderRadius: 12, padding: 24, width: '100%', maxWidth: 800 }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
               <h2 style={{ margin: 0, fontSize: 20 }}>New Journal Entry</h2>
               <button onClick={() => setShowJournalModal(false)} style={{ background: 'transparent', border: 'none', cursor: 'pointer' }}><X size={20} /></button>
@@ -360,7 +360,7 @@ const Accounting = () => {
 
               <div style={{ marginBottom: 20 }}>
                 <h3 style={{ fontSize: 16, marginBottom: 12 }}>Journal Lines</h3>
-                <div style={{ display: 'flex', background: '#f8fafc', padding: 12, borderRadius: '8px 8px 0 0', borderBottom: '1px solid #e5e7eb' }}>
+                <div style={{ display: 'flex', background: 'var(--bg-main)', padding: 12, borderRadius: '8px 8px 0 0', borderBottom: '1px solid #e5e7eb' }}>
                   <div style={{ flex: 3, fontWeight: 600 }}>Account</div>
                   <div style={{ flex: 2, fontWeight: 600 }}>Description</div>
                   <div style={{ flex: 1, fontWeight: 600, textAlign: 'right' }}>Debit</div>
@@ -398,7 +398,7 @@ const Accounting = () => {
                 </button>
               </div>
 
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: '#f8fafc', padding: 16, borderRadius: 8, marginBottom: 24 }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'var(--bg-main)', padding: 16, borderRadius: 8, marginBottom: 24 }}>
                 <div style={{ fontWeight: 600 }}>Total</div>
                 <div style={{ display: 'flex', gap: 24 }}>
                   <div style={{ color: '#10b981', fontWeight: 700 }}>Dr: {newJournal.lines.reduce((s, l) => s + Number(l.debit || 0), 0).toFixed(2)}</div>
@@ -406,7 +406,7 @@ const Accounting = () => {
                 </div>
               </div>
 
-              <button type="submit" style={{ width: '100%', background: '#4f46e5', color: 'white', border: 'none', padding: 12, borderRadius: 8, fontWeight: 600, cursor: 'pointer' }}>
+              <button type="submit" style={{ width: '100%', background: '#4f46e5', color: 'var(--bg-panel)', border: 'none', padding: 12, borderRadius: 8, fontWeight: 600, cursor: 'pointer' }}>
                 Post Journal Entry
               </button>
             </form>

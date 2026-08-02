@@ -121,12 +121,12 @@ const FaceScanner = ({ onCapture, onClose, mode = 'register', referenceDescripto
         initial={{ scale: 0.9, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
         style={{
-          background: 'white', padding: 24, borderRadius: 24, width: '100%', maxWidth: 400,
+          background: 'var(--bg-panel)', padding: 24, borderRadius: 24, width: '100%', maxWidth: 400,
           display: 'flex', flexDirection: 'column', alignItems: 'center', position: 'relative'
         }}
       >
         <button onClick={onClose} style={{ position: 'absolute', top: 16, right: 16, background: 'none', border: 'none', cursor: 'pointer' }}>
-          <X size={24} color="#64748b" />
+          <X size={24} color='var(--text-muted)' />
         </button>
 
         <h3 style={{ marginTop: 0, marginBottom: 16, fontSize: 18, fontWeight: 800 }}>
@@ -134,12 +134,12 @@ const FaceScanner = ({ onCapture, onClose, mode = 'register', referenceDescripto
         </h3>
 
         <div style={{ 
-          width: 300, height: 300, background: '#0f172a', borderRadius: 150, 
+          width: 300, height: 300, background: 'var(--text-main)', borderRadius: 150, 
           overflow: 'hidden', position: 'relative', marginBottom: 20,
           border: matchStatus === 'match' ? '6px solid #10b981' : matchStatus === 'no_match' ? '6px solid #ef4444' : '6px solid #e2e8f0'
         }}>
           {loadingMsg && !matchStatus && (
-            <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', background: 'rgba(0,0,0,0.5)', zIndex: 10, flexDirection: 'column', gap: 10 }}>
+            <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--bg-panel)', background: 'rgba(0,0,0,0.5)', zIndex: 10, flexDirection: 'column', gap: 10 }}>
               <Loader size={24} className="animate-spin" />
               <div style={{ fontSize: 14, fontWeight: 600 }}>{loadingMsg}</div>
             </div>
@@ -154,7 +154,7 @@ const FaceScanner = ({ onCapture, onClose, mode = 'register', referenceDescripto
           />
 
           {matchStatus === 'match' && (
-            <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(16, 185, 129, 0.8)', color: 'white' }}>
+            <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(16, 185, 129, 0.8)', color: 'var(--bg-panel)' }}>
               <Check size={64} />
             </div>
           )}
@@ -167,7 +167,7 @@ const FaceScanner = ({ onCapture, onClose, mode = 'register', referenceDescripto
           disabled={!!loadingMsg && loadingMsg !== 'Scanning...'}
           style={{ 
             width: '100%', padding: 16, borderRadius: 16, border: 'none',
-            background: '#0a84ff', color: 'white', fontWeight: 800, fontSize: 16,
+            background: '#0a84ff', color: 'var(--bg-panel)', fontWeight: 800, fontSize: 16,
             cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8
           }}
         >

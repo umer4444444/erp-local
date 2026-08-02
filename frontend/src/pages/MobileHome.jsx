@@ -8,8 +8,8 @@ const MobileHome = () => {
   return (
     <div>
       <div style={{ marginBottom: 24 }}>
-        <h1 style={{ margin: 0, fontSize: 24, fontWeight: 700, color: '#0f172a' }}>Hello, {user?.name}</h1>
-        <p style={{ margin: '4px 0 0', color: '#64748b' }}>Here is your field summary for today.</p>
+        <h1 style={{ margin: 0, fontSize: 24, fontWeight: 700, color: 'var(--text-main)' }}>Hello, {user?.name}</h1>
+        <p style={{ margin: '4px 0 0', color: 'var(--text-muted)' }}>Here is your field summary for today.</p>
       </div>
 
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginBottom: 24 }}>
@@ -25,9 +25,9 @@ const MobileHome = () => {
         </div>
       </div>
 
-      <div style={{ background: 'white', padding: 20, borderRadius: 16, boxShadow: '0 2px 8px rgba(0,0,0,0.05)', marginBottom: 24 }}>
+      <div style={{ background: 'var(--bg-panel)', padding: 20, borderRadius: 16, boxShadow: '0 2px 8px var(--border-color-rgb)', marginBottom: 24 }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8, color: '#0f172a', fontWeight: 600 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, color: 'var(--text-main)', fontWeight: 600 }}>
             <Target size={20} color="#8b5cf6" /> Monthly Target
           </div>
           <div style={{ fontWeight: 700, color: '#8b5cf6' }}>82%</div>
@@ -35,18 +35,18 @@ const MobileHome = () => {
         <div style={{ background: '#f1f5f9', height: 8, borderRadius: 4, overflow: 'hidden' }}>
           <div style={{ width: '82%', height: '100%', background: 'linear-gradient(90deg, #8b5cf6, #d946ef)' }} />
         </div>
-        <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 8, fontSize: 12, color: '#64748b' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 8, fontSize: 12, color: 'var(--text-muted)' }}>
           <span>SAR 41,000</span>
           <span>SAR 50,000</span>
         </div>
       </div>
 
-      <h3 style={{ fontSize: 16, fontWeight: 700, marginBottom: 12, color: '#0f172a' }}>Quick Actions</h3>
+      <h3 style={{ fontSize: 16, fontWeight: 700, marginBottom: 12, color: 'var(--text-main)' }}>Quick Actions</h3>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-        <button style={{ background: 'white', border: '1px solid #e2e8f0', padding: 16, borderRadius: 12, display: 'flex', alignItems: 'center', gap: 12, textAlign: 'left', fontWeight: 600, color: '#334155' }}>
+        <button style={{ background: 'var(--bg-panel)', border: '1px solid #e2e8f0', padding: 16, borderRadius: 12, display: 'flex', alignItems: 'center', gap: 12, textAlign: 'left', fontWeight: 600, color: '#334155' }}>
           <Package size={20} color="#3b82f6" /> View Vehicle Stock
         </button>
-        <button style={{ background: 'white', border: '1px solid #e2e8f0', padding: 16, borderRadius: 12, display: 'flex', alignItems: 'center', gap: 12, textAlign: 'left', fontWeight: 600, color: '#334155' }}>
+        <button style={{ background: 'var(--bg-panel)', border: '1px solid #e2e8f0', padding: 16, borderRadius: 12, display: 'flex', alignItems: 'center', gap: 12, textAlign: 'left', fontWeight: 600, color: '#334155' }}>
           <MapPin size={20} color="#f59e0b" /> Sync Offline Data
         </button>
       </div>

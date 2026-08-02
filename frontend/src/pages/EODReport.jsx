@@ -104,33 +104,33 @@ const EODReport = () => {
 
   if (loading) {
     return (
-      <div style={{ minHeight: '100vh', background: '#f8fafc', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-        <p style={{ fontWeight: 600, color: '#64748b' }}>Loading EOD details...</p>
+      <div style={{ minHeight: '100vh', background: 'var(--bg-main)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <p style={{ fontWeight: 600, color: 'var(--text-muted)' }}>Loading EOD details...</p>
       </div>
     );
   }
 
   if (!activeSession) {
     return (
-      <div style={{ padding: 40, minHeight: '100vh', background: '#f8fafc', display: 'flex', justifyContent: 'center', alignItems: 'center', fontFamily: "'Outfit', sans-serif" }}>
-        <div style={{ width: '100%', maxWidth: 500, background: 'white', borderRadius: 32, padding: 40, textAlign: 'center', border: '1px solid rgba(0,0,0,0.05)', boxShadow: '0 10px 30px rgba(0,0,0,0.03)' }}>
+      <div style={{ padding: 40, minHeight: '100vh', background: 'var(--bg-main)', display: 'flex', justifyContent: 'center', alignItems: 'center', fontFamily: "'Outfit', sans-serif" }}>
+        <div style={{ width: '100%', maxWidth: 500, background: 'var(--bg-panel)', borderRadius: 32, padding: 40, textAlign: 'center', border: '1px solid var(--border-color-rgb)', boxShadow: '0 10px 30px var(--shadow-color-rgb)' }}>
           <div style={{ width: 64, height: 64, borderRadius: '50%', background: '#fffbeb', color: '#d97706', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 20px' }}>
             <AlertCircle size={32} />
           </div>
-          <h2 style={{ fontSize: 24, fontWeight: 900, color: '#0f172a', marginBottom: 12 }}>No Active Shift Session</h2>
-          <p style={{ color: '#64748b', fontWeight: 600, fontSize: 14, lineHeight: 1.6, marginBottom: 32 }}>
+          <h2 style={{ fontSize: 24, fontWeight: 900, color: 'var(--text-main)', marginBottom: 12 }}>No Active Shift Session</h2>
+          <p style={{ color: 'var(--text-muted)', fontWeight: 600, fontSize: 14, lineHeight: 1.6, marginBottom: 32 }}>
             You do not have an active shift session. You must start a shift session first to register EOD sales totals and perform EOD closing.
           </p>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
             <button 
               onClick={handleStartSession}
-              style={{ width: '100%', padding: 16, borderRadius: 16, background: '#0a84ff', color: 'white', border: 'none', fontWeight: 800, fontSize: 16, cursor: 'pointer' }}
+              style={{ width: '100%', padding: 16, borderRadius: 16, background: '#0a84ff', color: 'var(--bg-panel)', border: 'none', fontWeight: 800, fontSize: 16, cursor: 'pointer' }}
             >
               Start Shift Session
             </button>
             <button 
               onClick={() => navigate('/')}
-              style={{ width: '100%', padding: 16, borderRadius: 16, background: '#f1f5f9', color: '#64748b', border: 'none', fontWeight: 800, fontSize: 14, cursor: 'pointer' }}
+              style={{ width: '100%', padding: 16, borderRadius: 16, background: '#f1f5f9', color: 'var(--text-muted)', border: 'none', fontWeight: 800, fontSize: 14, cursor: 'pointer' }}
             >
               Go to Dashboard
             </button>
@@ -142,18 +142,18 @@ const EODReport = () => {
 
   if (submitted) {
     return (
-      <div style={{ minHeight: '100vh', background: '#f8fafc', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20 }}>
-        <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} style={{ background: 'white', width: '100%', maxWidth: 450, padding: 48, borderRadius: 40, textAlign: 'center', boxShadow: '0 20px 50px rgba(0,0,0,0.05)' }}>
+      <div style={{ minHeight: '100vh', background: 'var(--bg-main)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20 }}>
+        <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} style={{ background: 'var(--bg-panel)', width: '100%', maxWidth: 450, padding: 48, borderRadius: 40, textAlign: 'center', boxShadow: '0 20px 50px var(--border-color-rgb)' }}>
           <div style={{ width: 80, height: 80, borderRadius: '50%', background: '#f0fdf4', color: '#22c55e', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 24px' }}>
             <CheckCircle2 size={40} />
           </div>
-          <h2 style={{ fontSize: 28, fontWeight: 900, color: '#0f172a', marginBottom: 12 }}>EOD Closed</h2>
-          <p style={{ color: '#64748b', fontWeight: 600, marginBottom: 40 }}>Your shift has been successfully completed and the drawer is balanced.</p>
+          <h2 style={{ fontSize: 28, fontWeight: 900, color: 'var(--text-main)', marginBottom: 12 }}>EOD Closed</h2>
+          <p style={{ color: 'var(--text-muted)', fontWeight: 600, marginBottom: 40 }}>Your shift has been successfully completed and the drawer is balanced.</p>
           <div style={{ display: 'flex', gap: 16 }}>
             <button onClick={handlePrintEOD} style={{ flex: 1, padding: 16, borderRadius: 16, background: '#f1f5f9', border: 'none', fontWeight: 800, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
               <Printer size={20} /> Print
             </button>
-            <button onClick={() => navigate('/')} style={{ flex: 1, padding: 16, borderRadius: 16, background: '#0a84ff', color: 'white', border: 'none', fontWeight: 800, cursor: 'pointer' }}>
+            <button onClick={() => navigate('/')} style={{ flex: 1, padding: 16, borderRadius: 16, background: '#0a84ff', color: 'var(--bg-panel)', border: 'none', fontWeight: 800, cursor: 'pointer' }}>
               Home
             </button>
           </div>
@@ -163,31 +163,31 @@ const EODReport = () => {
   }
 
   return (
-    <div style={{ padding: 40, minHeight: '100vh', background: '#f8fafc', display: 'flex', justifyContent: 'center', fontFamily: "'Outfit', sans-serif" }}>
+    <div style={{ padding: 40, minHeight: '100vh', background: 'var(--bg-main)', display: 'flex', justifyContent: 'center', fontFamily: "'Outfit', sans-serif" }}>
       <div style={{ width: '100%', maxWidth: 800 }}>
         <header style={{ marginBottom: 40 }}>
-          <h1 style={{ fontSize: 32, fontWeight: 900, color: '#0f172a' }}>End of Day Processing</h1>
-          <p style={{ color: '#64748b', fontWeight: 600 }}>Verify drawer totals and close your active shift.</p>
+          <h1 style={{ fontSize: 32, fontWeight: 900, color: 'var(--text-main)' }}>End of Day Processing</h1>
+          <p style={{ color: 'var(--text-muted)', fontWeight: 600 }}>Verify drawer totals and close your active shift.</p>
         </header>
 
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 32 }}>
           {/* Sales Summary */}
-          <div style={{ background: 'white', borderRadius: 32, padding: 40, border: '1px solid rgba(0,0,0,0.05)' }}>
+          <div style={{ background: 'var(--bg-panel)', borderRadius: 32, padding: 40, border: '1px solid var(--border-color-rgb)' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
-              <h2 style={{ fontSize: 20, fontWeight: 900, color: '#0f172a', margin: 0 }}>Expected Totals</h2>
+              <h2 style={{ fontSize: 20, fontWeight: 900, color: 'var(--text-main)', margin: 0 }}>Expected Totals</h2>
               <div style={{ padding: '6px 12px', background: '#f1f5f9', borderRadius: 10, fontSize: 11, fontWeight: 800, color: '#0a84ff' }}>
                 {activeSession?.id ? `Shift #${activeSession.id.slice(0, 8).toUpperCase()}` : 'Active Shift'}
               </div>
             </div>
             
-            <div style={{ background: '#f8fafc', padding: 16, borderRadius: 16, marginBottom: 24, fontSize: 13, display: 'flex', flexDirection: 'column', gap: 6 }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', color: '#64748b', fontWeight: 600 }}>
+            <div style={{ background: 'var(--bg-main)', padding: 16, borderRadius: 16, marginBottom: 24, fontSize: 13, display: 'flex', flexDirection: 'column', gap: 6 }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', color: 'var(--text-muted)', fontWeight: 600 }}>
                 <span>Report Date:</span>
-                <strong style={{ color: '#0f172a' }}>{new Date().toLocaleDateString()}</strong>
+                <strong style={{ color: 'var(--text-main)' }}>{new Date().toLocaleDateString()}</strong>
               </div>
-              <div style={{ display: 'flex', justifyContent: 'space-between', color: '#64748b', fontWeight: 600 }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', color: 'var(--text-muted)', fontWeight: 600 }}>
                 <span>Current Time:</span>
-                <strong style={{ color: '#0f172a' }}>{new Date().toLocaleTimeString()}</strong>
+                <strong style={{ color: 'var(--text-main)' }}>{new Date().toLocaleTimeString()}</strong>
               </div>
             </div>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
@@ -196,32 +196,32 @@ const EODReport = () => {
                   <div style={{ width: 40, height: 40, borderRadius: 12, background: '#f0fdf4', color: '#10b981', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                     <DollarSign size={20} />
                   </div>
-                  <span style={{ fontWeight: 700, color: '#64748b' }}>Cash Sales</span>
+                  <span style={{ fontWeight: 700, color: 'var(--text-muted)' }}>Cash Sales</span>
                 </div>
-                <span style={{ fontSize: 18, fontWeight: 900, color: '#0f172a' }}>SAR {summary.cash.toFixed(2)}</span>
+                <span style={{ fontSize: 18, fontWeight: 900, color: 'var(--text-main)' }}>SAR {summary.cash.toFixed(2)}</span>
               </div>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
                   <div style={{ width: 40, height: 40, borderRadius: 12, background: '#eff6ff', color: '#0a84ff', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                     <CreditCard size={20} />
                   </div>
-                  <span style={{ fontWeight: 700, color: '#64748b' }}>Card Sales</span>
+                  <span style={{ fontWeight: 700, color: 'var(--text-muted)' }}>Card Sales</span>
                 </div>
-                <span style={{ fontSize: 18, fontWeight: 900, color: '#0f172a' }}>SAR {summary.card.toFixed(2)}</span>
+                <span style={{ fontSize: 18, fontWeight: 900, color: 'var(--text-main)' }}>SAR {summary.card.toFixed(2)}</span>
               </div>
               <div style={{ borderTop: '2px dashed #f1f5f9', paddingTop: 24, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <span style={{ fontWeight: 800, color: '#0f172a' }}>Total Expected</span>
-                <span style={{ fontSize: 24, fontWeight: 900, color: '#0f172a' }}>SAR {summary.total.toFixed(2)}</span>
+                <span style={{ fontWeight: 800, color: 'var(--text-main)' }}>Total Expected</span>
+                <span style={{ fontSize: 24, fontWeight: 900, color: 'var(--text-main)' }}>SAR {summary.total.toFixed(2)}</span>
               </div>
             </div>
           </div>
 
           {/* Verification Form */}
-          <div style={{ background: 'white', borderRadius: 32, padding: 40, border: '1px solid rgba(0,0,0,0.05)', display: 'flex', flexDirection: 'column', gap: 24 }}>
+          <div style={{ background: 'var(--bg-panel)', borderRadius: 32, padding: 40, border: '1px solid var(--border-color-rgb)', display: 'flex', flexDirection: 'column', gap: 24 }}>
             <div>
-              <label style={{ display: 'block', fontSize: 14, fontWeight: 800, color: '#0f172a', marginBottom: 12 }}>ACTUAL CASH IN DRAWER</label>
+              <label style={{ display: 'block', fontSize: 14, fontWeight: 800, color: 'var(--text-main)', marginBottom: 12 }}>ACTUAL CASH IN DRAWER</label>
               <div style={{ position: 'relative' }}>
-                <DollarSign size={20} style={{ position: 'absolute', left: 16, top: '50%', transform: 'translateY(-50%)', color: '#94a3b8' }} />
+                <DollarSign size={20} style={{ position: 'absolute', left: 16, top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
                 <input 
                   type="number"
                   value={cashCount} onChange={e => setCashCount(e.target.value)}
@@ -239,7 +239,7 @@ const EODReport = () => {
             )}
 
             <div>
-              <label style={{ display: 'block', fontSize: 14, fontWeight: 800, color: '#0f172a', marginBottom: 12 }}>NOTES / DISCREPANCIES</label>
+              <label style={{ display: 'block', fontSize: 14, fontWeight: 800, color: 'var(--text-main)', marginBottom: 12 }}>NOTES / DISCREPANCIES</label>
               <textarea 
                 value={notes} onChange={e => setNotes(e.target.value)}
                 placeholder="Optional notes..."
@@ -249,7 +249,7 @@ const EODReport = () => {
 
             <button 
               onClick={handleCloseEOD}
-              style={{ marginTop: 'auto', padding: 20, borderRadius: 20, background: '#0f172a', color: 'white', border: 'none', fontSize: 18, fontWeight: 900, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 12 }}
+              style={{ marginTop: 'auto', padding: 20, borderRadius: 20, background: 'var(--text-main)', color: 'var(--bg-panel)', border: 'none', fontSize: 18, fontWeight: 900, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 12 }}
             >
               Complete EOD <ArrowRight size={22} />
             </button>

@@ -16,13 +16,13 @@ const MetricCard = ({ title, value, sub, trend, color = '#0a84ff', delay = 0 }) 
     animate={{ opacity: 1, y: 0 }}
     transition={{ delay }}
     style={{
-      background: 'white', padding: 28, borderRadius: 28,
-      border: '1px solid rgba(0,0,0,0.05)',
-      boxShadow: '0 4px 20px rgba(0,0,0,0.03)', flex: 1
+      background: 'var(--bg-panel)', padding: 28, borderRadius: 28,
+      border: '1px solid var(--border-color-rgb)',
+      boxShadow: '0 4px 20px var(--shadow-color-rgb)', flex: 1
     }}
   >
-    <div style={{ fontSize: 12, fontWeight: 800, color: '#94a3b8', letterSpacing: 1, marginBottom: 10 }}>{title.toUpperCase()}</div>
-    <div style={{ fontSize: 30, fontWeight: 900, color: '#0f172a', marginBottom: 10 }}>{value}</div>
+    <div style={{ fontSize: 12, fontWeight: 800, color: 'var(--text-muted)', letterSpacing: 1, marginBottom: 10 }}>{title.toUpperCase()}</div>
+    <div style={{ fontSize: 30, fontWeight: 900, color: 'var(--text-main)', marginBottom: 10 }}>{value}</div>
     <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 13, fontWeight: 700 }}>
       {trend === 'up' ? <ArrowUpRight size={14} color="#10b981" /> : <ArrowDownRight size={14} color="#ef4444" />}
       <span style={{ color: trend === 'up' ? '#10b981' : '#ef4444' }}>{sub}</span>
@@ -103,36 +103,36 @@ const Revenue = () => {
   const maxRevenue = topProducts.reduce((m, p) => Math.max(m, parseFloat(p.totalRevenue || 0)), 1);
 
   return (
-    <div style={{ padding: '100px 40px 40px 40px', minHeight: '100vh', background: '#f8fafc', fontFamily: "'Outfit', sans-serif" }}>
+    <div style={{ padding: '100px 40px 40px 40px', minHeight: '100vh', background: 'var(--bg-main)', fontFamily: "'Outfit', sans-serif" }}>
       {/* Header */}
       <header style={{ marginBottom: 32, display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: 16 }}>
         <div>
-          <h1 style={{ fontSize: 32, fontWeight: 900, color: '#0f172a', marginBottom: 4 }}>Revenue Intelligence</h1>
-          <p style={{ color: '#64748b', fontWeight: 600 }}>In-depth financial analytics powered by live data.</p>
+          <h1 style={{ fontSize: 32, fontWeight: 900, color: 'var(--text-main)', marginBottom: 4 }}>Revenue Intelligence</h1>
+          <p style={{ color: 'var(--text-muted)', fontWeight: 600 }}>In-depth financial analytics powered by live data.</p>
         </div>
         <div style={{ display: 'flex', gap: 12, alignItems: 'center', flexWrap: 'wrap' }}>
           {/* Date range filter */}
-          <div style={{ display: 'flex', gap: 8, alignItems: 'center', background: 'white', padding: '8px 16px', borderRadius: 14, border: '1px solid #e2e8f0' }}>
+          <div style={{ display: 'flex', gap: 8, alignItems: 'center', background: 'var(--bg-panel)', padding: '8px 16px', borderRadius: 14, border: '1px solid #e2e8f0' }}>
             <Calendar size={16} color="#94a3b8" />
             <input type="date" value={from} onChange={e => setFrom(e.target.value)}
-              style={{ border: 'none', outline: 'none', fontFamily: "'Outfit', sans-serif", fontWeight: 700, color: '#0f172a', background: 'transparent' }} />
-            <span style={{ color: '#94a3b8' }}>→</span>
+              style={{ border: 'none', outline: 'none', fontFamily: "'Outfit', sans-serif", fontWeight: 700, color: 'var(--text-main)', background: 'transparent' }} />
+            <span style={{ color: 'var(--text-muted)' }}>→</span>
             <input type="date" value={to} onChange={e => setTo(e.target.value)}
-              style={{ border: 'none', outline: 'none', fontFamily: "'Outfit', sans-serif", fontWeight: 700, color: '#0f172a', background: 'transparent' }} />
+              style={{ border: 'none', outline: 'none', fontFamily: "'Outfit', sans-serif", fontWeight: 700, color: 'var(--text-main)', background: 'transparent' }} />
           </div>
           <button onClick={fetchAll}
-            style={{ padding: '10px 20px', borderRadius: 14, background: 'white', border: '1px solid #e2e8f0', fontWeight: 800, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 8 }}>
+            style={{ padding: '10px 20px', borderRadius: 14, background: 'var(--bg-panel)', border: '1px solid #e2e8f0', fontWeight: 800, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 8 }}>
             <RefreshCw size={16} /> Refresh
           </button>
           <button onClick={exportCSV}
-            style={{ padding: '10px 20px', borderRadius: 14, background: '#0f172a', color: 'white', border: 'none', fontWeight: 800, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 8 }}>
+            style={{ padding: '10px 20px', borderRadius: 14, background: 'var(--text-main)', color: 'var(--bg-panel)', border: 'none', fontWeight: 800, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 8 }}>
             <Download size={16} /> Export CSV
           </button>
         </div>
       </header>
 
       {loading ? (
-        <div style={{ textAlign: 'center', padding: 120, color: '#94a3b8', fontSize: 18, fontWeight: 700 }}>
+        <div style={{ textAlign: 'center', padding: 120, color: 'var(--text-muted)', fontSize: 18, fontWeight: 700 }}>
           Loading intelligence...
         </div>
       ) : (
@@ -143,17 +143,17 @@ const Revenue = () => {
               style={{ background: 'linear-gradient(135deg, #0f172a, #1e3a5f)', borderRadius: 28, padding: '24px 40px', marginBottom: 32, display: 'flex', gap: 48, alignItems: 'center', flexWrap: 'wrap' }}>
               <div>
                 <div style={{ color: 'rgba(255,255,255,0.5)', fontSize: 12, fontWeight: 800, letterSpacing: 1, marginBottom: 6 }}>TODAY'S REVENUE</div>
-                <div style={{ color: 'white', fontSize: 36, fontWeight: 900 }}>{fmtCurrency(daily.revenue)}</div>
+                <div style={{ color: 'var(--bg-panel)', fontSize: 36, fontWeight: 900 }}>{fmtCurrency(daily.revenue)}</div>
               </div>
               <div style={{ width: 1, height: 50, background: 'rgba(255,255,255,0.1)' }} />
               <div>
                 <div style={{ color: 'rgba(255,255,255,0.5)', fontSize: 12, fontWeight: 800, letterSpacing: 1, marginBottom: 6 }}>TRANSACTIONS TODAY</div>
-                <div style={{ color: 'white', fontSize: 36, fontWeight: 900 }}>{daily.count}</div>
+                <div style={{ color: 'var(--bg-panel)', fontSize: 36, fontWeight: 900 }}>{daily.count}</div>
               </div>
               <div style={{ width: 1, height: 50, background: 'rgba(255,255,255,0.1)' }} />
               <div>
                 <div style={{ color: 'rgba(255,255,255,0.5)', fontSize: 12, fontWeight: 800, letterSpacing: 1, marginBottom: 6 }}>AVG BASKET SIZE</div>
-                <div style={{ color: 'white', fontSize: 36, fontWeight: 900 }}>{fmtCurrency(daily.averageBasket)}</div>
+                <div style={{ color: 'var(--bg-panel)', fontSize: 36, fontWeight: 900 }}>{fmtCurrency(daily.averageBasket)}</div>
               </div>
             </motion.div>
           )}
@@ -169,13 +169,13 @@ const Revenue = () => {
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 28, marginBottom: 28 }}>
             {/* P&L Statement */}
             <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.2 }}
-              style={{ background: 'white', borderRadius: 28, padding: 36, border: '1px solid rgba(0,0,0,0.05)' }}>
+              style={{ background: 'var(--bg-panel)', borderRadius: 28, padding: 36, border: '1px solid var(--border-color-rgb)' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 28 }}>
-                <h2 style={{ fontSize: 20, fontWeight: 900, color: '#0f172a' }}>P&amp;L Statement</h2>
+                <h2 style={{ fontSize: 20, fontWeight: 900, color: 'var(--text-main)' }}>P&amp;L Statement</h2>
                 <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
                   <input type="date" value={pnlFrom} onChange={e => setPnlFrom(e.target.value)}
                     style={{ padding: '6px 10px', borderRadius: 10, border: '1.5px solid #e2e8f0', fontFamily: "'Outfit', sans-serif", fontWeight: 700, outline: 'none' }} />
-                  <span style={{ color: '#94a3b8', fontWeight: 800 }}>to</span>
+                  <span style={{ color: 'var(--text-muted)', fontWeight: 800 }}>to</span>
                   <input type="date" value={pnlTo} onChange={e => setPnlTo(e.target.value)}
                     style={{ padding: '6px 10px', borderRadius: 10, border: '1.5px solid #e2e8f0', fontFamily: "'Outfit', sans-serif", fontWeight: 700, outline: 'none' }} />
                 </div>
@@ -188,12 +188,12 @@ const Revenue = () => {
                     { label: 'Operating Expenses', value: pnl.expenses, color: '#ef4444', sign: '-' },
                   ].map((row, i) => (
                     <div key={i} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '16px 0', borderBottom: '1px solid #f8fafc' }}>
-                      <span style={{ color: '#64748b', fontWeight: 700 }}>{row.label}</span>
+                      <span style={{ color: 'var(--text-muted)', fontWeight: 700 }}>{row.label}</span>
                       <span style={{ fontWeight: 900, color: row.color, fontSize: 18 }}>{row.sign}{fmtCurrency(row.value)}</span>
                     </div>
                   ))}
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '24px 0 0', marginTop: 8 }}>
-                    <span style={{ fontWeight: 900, color: '#0f172a', fontSize: 18 }}>Net Profit</span>
+                    <span style={{ fontWeight: 900, color: 'var(--text-main)', fontSize: 18 }}>Net Profit</span>
                     <span style={{ fontWeight: 900, fontSize: 28, color: pnl.netProfit >= 0 ? '#10b981' : '#ef4444' }}>
                       {pnl.netProfit >= 0 ? '+' : ''}{fmtCurrency(pnl.netProfit)}
                     </span>
@@ -201,7 +201,7 @@ const Revenue = () => {
                   <div style={{ marginTop: 16, height: 8, background: '#f1f5f9', borderRadius: 4, overflow: 'hidden' }}>
                     <div style={{ height: '100%', width: `${Math.max(0, Math.min(100, (pnl.netProfit / pnl.revenue) * 100))}%`, background: pnl.netProfit >= 0 ? '#10b981' : '#ef4444', borderRadius: 4, transition: 'width 0.6s ease' }} />
                   </div>
-                  <div style={{ fontSize: 12, color: '#94a3b8', fontWeight: 700, marginTop: 6 }}>
+                  <div style={{ fontSize: 12, color: 'var(--text-muted)', fontWeight: 700, marginTop: 6 }}>
                     Margin: {pnl.revenue > 0 ? ((pnl.netProfit / pnl.revenue) * 100).toFixed(1) : 0}%
                   </div>
                 </div>
@@ -210,13 +210,13 @@ const Revenue = () => {
 
             {/* Sales by Salesperson */}
             <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.3 }}
-              style={{ background: 'white', borderRadius: 28, padding: 36, border: '1px solid rgba(0,0,0,0.05)' }}>
-              <h2 style={{ fontSize: 20, fontWeight: 900, color: '#0f172a', marginBottom: 28, display: 'flex', alignItems: 'center', gap: 10 }}>
+              style={{ background: 'var(--bg-panel)', borderRadius: 28, padding: 36, border: '1px solid var(--border-color-rgb)' }}>
+              <h2 style={{ fontSize: 20, fontWeight: 900, color: 'var(--text-main)', marginBottom: 28, display: 'flex', alignItems: 'center', gap: 10 }}>
                 <Award size={22} color="#f59e0b" /> Staff Leaderboard
               </h2>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
                 {salesperson.length === 0 && (
-                  <div style={{ textAlign: 'center', padding: 40, color: '#94a3b8', fontWeight: 700 }}>No sales data available.</div>
+                  <div style={{ textAlign: 'center', padding: 40, color: 'var(--text-muted)', fontWeight: 700 }}>No sales data available.</div>
                 )}
                 {salesperson.map((s, i) => {
                   const maxRev = parseFloat(salesperson[0]?.revenueGenerated || 1);
@@ -225,12 +225,12 @@ const Revenue = () => {
                     <div key={s.userId}>
                       <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 6 }}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                          <div style={{ width: 28, height: 28, borderRadius: '50%', background: i === 0 ? '#fef3c7' : '#f1f5f9', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 13, fontWeight: 900, color: i === 0 ? '#d97706' : '#64748b' }}>
+                          <div style={{ width: 28, height: 28, borderRadius: '50%', background: i === 0 ? '#fef3c7' : '#f1f5f9', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 13, fontWeight: 900, color: i === 0 ? '#d97706' : 'var(--text-muted)' }}>
                             {i + 1}
                           </div>
                           <div>
-                            <div style={{ fontWeight: 800, color: '#0f172a', fontSize: 14 }}>{s.User?.name || 'Unknown'}</div>
-                            <div style={{ fontSize: 11, color: '#94a3b8', fontWeight: 600 }}>{s.salesCount} transactions</div>
+                            <div style={{ fontWeight: 800, color: 'var(--text-main)', fontSize: 14 }}>{s.User?.name || 'Unknown'}</div>
+                            <div style={{ fontSize: 11, color: 'var(--text-muted)', fontWeight: 600 }}>{s.salesCount} transactions</div>
                           </div>
                         </div>
                         <div style={{ fontWeight: 900, color: '#0a84ff', fontSize: 15 }}>{fmtCurrency(s.revenueGenerated)}</div>
@@ -247,28 +247,28 @@ const Revenue = () => {
 
           {/* Top Products */}
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4 }}
-            style={{ background: 'white', borderRadius: 28, padding: 36, border: '1px solid rgba(0,0,0,0.05)' }}>
-            <h2 style={{ fontSize: 20, fontWeight: 900, color: '#0f172a', marginBottom: 28, display: 'flex', alignItems: 'center', gap: 10 }}>
+            style={{ background: 'var(--bg-panel)', borderRadius: 28, padding: 36, border: '1px solid var(--border-color-rgb)' }}>
+            <h2 style={{ fontSize: 20, fontWeight: 900, color: 'var(--text-main)', marginBottom: 28, display: 'flex', alignItems: 'center', gap: 10 }}>
               <Package size={22} color="#0a84ff" /> Top Selling Products
             </h2>
             {topProducts.length === 0 ? (
-              <div style={{ textAlign: 'center', padding: 60, color: '#94a3b8', fontWeight: 700 }}>No product sales data available.</div>
+              <div style={{ textAlign: 'center', padding: 60, color: 'var(--text-muted)', fontWeight: 700 }}>No product sales data available.</div>
             ) : (
               <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
                 {topProducts.map((p, i) => {
                   const barPct = (parseFloat(p.totalRevenue || 0) / maxRevenue) * 100;
                   return (
                     <div key={p.productId} style={{ display: 'grid', gridTemplateColumns: '28px 1fr 100px 120px', alignItems: 'center', gap: 16 }}>
-                      <div style={{ fontWeight: 900, color: '#94a3b8', fontSize: 14, textAlign: 'center' }}>{i + 1}</div>
+                      <div style={{ fontWeight: 900, color: 'var(--text-muted)', fontSize: 14, textAlign: 'center' }}>{i + 1}</div>
                       <div>
-                        <div style={{ fontWeight: 800, color: '#0f172a', fontSize: 14, marginBottom: 6 }}>
+                        <div style={{ fontWeight: 800, color: 'var(--text-main)', fontSize: 14, marginBottom: 6 }}>
                           {p.Product?.name || p.Product?.sku || 'Unknown'}
                         </div>
                         <div style={{ height: 8, background: '#f1f5f9', borderRadius: 4, overflow: 'hidden' }}>
                           <div style={{ height: '100%', width: `${barPct}%`, background: `hsl(${220 - i * 18}, 80%, 55%)`, borderRadius: 4, transition: 'width 0.5s ease' }} />
                         </div>
                       </div>
-                      <div style={{ textAlign: 'right', fontWeight: 700, color: '#64748b', fontSize: 13 }}>
+                      <div style={{ textAlign: 'right', fontWeight: 700, color: 'var(--text-muted)', fontSize: 13 }}>
                         {parseInt(p.totalSold).toLocaleString()} units
                       </div>
                       <div style={{ textAlign: 'right', fontWeight: 900, color: '#10b981', fontSize: 15 }}>

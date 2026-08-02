@@ -104,14 +104,14 @@ const Users = () => {
       hr:        { bg: '#f3e8ff', color: '#9333ea' },
       expenses:  { bg: '#ffedd5', color: '#ea580c' },
     };
-    return map[role] || { bg: '#f1f5f9', color: '#64748b' };
+    return map[role] || { bg: '#f1f5f9', color: 'var(--text-muted)' };
   };
 
   const ACTION_COLOR = {
     POST:   { bg: '#dcfce7', color: '#16a34a' },
     PUT:    { bg: '#dbeafe', color: '#2563eb' },
     DELETE: { bg: '#fee2e2', color: '#ef4444' },
-    GET:    { bg: '#f1f5f9', color: '#64748b' },
+    GET:    { bg: '#f1f5f9', color: 'var(--text-muted)' },
   };
 
   const filteredLogs = auditLogs.filter(l =>
@@ -121,28 +121,28 @@ const Users = () => {
   );
 
   return (
-    <div style={{ padding: 40, minHeight: '100vh', background: '#f8fafc', fontFamily: "'Outfit', sans-serif" }}>
+    <div style={{ padding: 40, minHeight: '100vh', background: 'var(--bg-main)', fontFamily: "'Outfit', sans-serif" }}>
       <header style={{ marginBottom: 32 }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
           <div>
-            <h1 style={{ fontSize: 32, fontWeight: 900, color: '#0f172a' }}>System Access Control</h1>
-            <p style={{ color: '#64748b', fontWeight: 600 }}>Manage user accounts, roles, audit logs, and system settings.</p>
+            <h1 style={{ fontSize: 32, fontWeight: 900, color: 'var(--text-main)' }}>System Access Control</h1>
+            <p style={{ color: 'var(--text-muted)', fontWeight: 600 }}>Manage user accounts, roles, audit logs, and system settings.</p>
           </div>
           {activeTab === 'Users' && (
             <div style={{ display: 'flex', gap: 12 }}>
               <div style={{ position: 'relative' }}>
-                <Search size={18} style={{ position: 'absolute', left: 16, top: '50%', transform: 'translateY(-50%)', color: '#94a3b8' }} />
+                <Search size={18} style={{ position: 'absolute', left: 16, top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
                 <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Search users..."
                   style={{ padding: '12px 12px 12px 44px', borderRadius: 14, border: '1px solid #e2e8f0', width: 260, fontWeight: 600 }} />
               </div>
-              <button onClick={() => setShowModal(true)} style={{ padding: '12px 24px', borderRadius: 14, background: '#0f172a', color: 'white', border: 'none', fontWeight: 800, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 8 }}>
+              <button onClick={() => setShowModal(true)} style={{ padding: '12px 24px', borderRadius: 14, background: 'var(--text-main)', color: 'var(--bg-panel)', border: 'none', fontWeight: 800, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 8 }}>
                 <UserPlus size={20} /> Authorize Staff
               </button>
             </div>
           )}
           {activeTab === 'Audit Log' && (
             <div style={{ position: 'relative' }}>
-              <Search size={18} style={{ position: 'absolute', left: 16, top: '50%', transform: 'translateY(-50%)', color: '#94a3b8' }} />
+              <Search size={18} style={{ position: 'absolute', left: 16, top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
               <input value={auditSearch} onChange={e => setAuditSearch(e.target.value)} placeholder="Filter logs..."
                 style={{ padding: '12px 12px 12px 44px', borderRadius: 14, border: '1px solid #e2e8f0', width: 300, fontWeight: 600 }} />
             </div>
@@ -150,12 +150,12 @@ const Users = () => {
         </div>
 
         {/* Tab Bar */}
-        <div style={{ display: 'flex', gap: 4, background: 'white', borderRadius: 16, padding: 6, width: 'fit-content', border: '1px solid #e2e8f0' }}>
+        <div style={{ display: 'flex', gap: 4, background: 'var(--bg-panel)', borderRadius: 16, padding: 6, width: 'fit-content', border: '1px solid #e2e8f0' }}>
           {TABS.map(tab => (
             <button key={tab} onClick={() => setActiveTab(tab)}
               style={{ padding: '10px 20px', borderRadius: 12, border: 'none', cursor: 'pointer', fontWeight: 800, fontSize: 14, transition: 'all 0.2s',
-                background: activeTab === tab ? '#0f172a' : 'transparent',
-                color: activeTab === tab ? 'white' : '#64748b' }}>
+                background: activeTab === tab ? 'var(--text-main)' : 'transparent',
+                color: activeTab === tab ? 'var(--bg-panel)' : 'var(--text-muted)' }}>
               {tab === 'Users' && <User size={14} style={{ display: 'inline', marginRight: 8 }} />}
               {tab === 'Audit Log' && <Activity size={14} style={{ display: 'inline', marginRight: 8 }} />}
               {tab === 'System Settings' && <Settings size={14} style={{ display: 'inline', marginRight: 8 }} />}
@@ -173,13 +173,13 @@ const Users = () => {
             const isActive = user.isActive !== false;
             return (
               <motion.div whileHover={{ y: -5 }} key={user.id}
-                style={{ background: 'white', borderRadius: 28, padding: 32, border: '1px solid rgba(0,0,0,0.05)', boxShadow: '0 4px 12px rgba(0,0,0,0.02)', opacity: isActive ? 1 : 0.65 }}>
+                style={{ background: 'var(--bg-panel)', borderRadius: 28, padding: 32, border: '1px solid var(--border-color-rgb)', boxShadow: '0 4px 12px var(--shadow-color-rgb)', opacity: isActive ? 1 : 0.65 }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start', marginBottom: 24 }}>
                   <div style={{ position: 'relative' }}>
-                    <div style={{ width: 64, height: 64, borderRadius: 20, background: isActive ? '#f1f5f9' : '#e2e8f0', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#0a84ff', fontSize: 24, fontWeight: 900 }}>
+                    <div style={{ width: 64, height: 64, borderRadius: 20, background: isActive ? '#f1f5f9' : 'var(--border-color)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#0a84ff', fontSize: 24, fontWeight: 900 }}>
                       {user.name.charAt(0)}
                     </div>
-                    <div style={{ position: 'absolute', bottom: -4, right: -4, width: 16, height: 16, borderRadius: '50%', background: isActive ? '#10b981' : '#94a3b8', border: '2px solid white' }} />
+                    <div style={{ position: 'absolute', bottom: -4, right: -4, width: 16, height: 16, borderRadius: '50%', background: isActive ? '#10b981' : 'var(--text-muted)', border: '2px solid white' }} />
                   </div>
                   <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 8 }}>
                     <select value={user.role} onChange={(e) => handleChangeRole(user.id, e.target.value)}
@@ -188,7 +188,7 @@ const Users = () => {
                         <option key={r} value={r}>{r.toUpperCase()}</option>
                       ))}
                     </select>
-                    <div style={{ fontSize: 11, fontWeight: 700, color: isActive ? '#10b981' : '#94a3b8', display: 'flex', alignItems: 'center', gap: 4 }}>
+                    <div style={{ fontSize: 11, fontWeight: 700, color: isActive ? '#10b981' : 'var(--text-muted)', display: 'flex', alignItems: 'center', gap: 4 }}>
                       {isActive ? <CheckCircle size={11} /> : <AlertCircle size={11} />}
                       {isActive ? 'Active' : 'Inactive'}
                     </div>
@@ -196,11 +196,11 @@ const Users = () => {
                 </div>
                 
                 <div style={{ marginBottom: 24 }}>
-                  <h3 style={{ fontSize: 20, fontWeight: 900, color: '#0f172a', marginBottom: 4 }}>{user.name}</h3>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, color: '#64748b', fontSize: 14, fontWeight: 600 }}>
+                  <h3 style={{ fontSize: 20, fontWeight: 900, color: 'var(--text-main)', marginBottom: 4 }}>{user.name}</h3>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, color: 'var(--text-muted)', fontSize: 14, fontWeight: 600 }}>
                     <Mail size={14} /> {user.email}
                   </div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, color: '#64748b', fontSize: 14, fontWeight: 600, marginTop: 4 }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, color: 'var(--text-muted)', fontSize: 14, fontWeight: 600, marginTop: 4 }}>
                     <Phone size={14} /> {user.phone || 'No phone provided'}
                   </div>
                 </div>
@@ -224,40 +224,40 @@ const Users = () => {
 
       {/* AUDIT LOG TAB */}
       {activeTab === 'Audit Log' && (
-        <div style={{ background: 'white', borderRadius: 24, overflow: 'hidden', border: '1px solid rgba(0,0,0,0.05)' }}>
+        <div style={{ background: 'var(--bg-panel)', borderRadius: 24, overflow: 'hidden', border: '1px solid var(--border-color-rgb)' }}>
           {auditLoading ? (
-            <div style={{ padding: 60, textAlign: 'center', color: '#94a3b8', fontWeight: 700 }}>Loading audit trail...</div>
+            <div style={{ padding: 60, textAlign: 'center', color: 'var(--text-muted)', fontWeight: 700 }}>Loading audit trail...</div>
           ) : (
-            <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+            <div className="w-full overflow-x-auto"><table style={{ width: '100%', borderCollapse: 'collapse' }}>
               <thead>
-                <tr style={{ background: '#f8fafc', borderBottom: '1px solid #f1f5f9' }}>
+                <tr style={{ background: 'var(--bg-main)', borderBottom: '1px solid #f1f5f9' }}>
                   {['Time', 'User', 'Action', 'Endpoint', 'Status', 'IP'].map(h => (
-                    <th key={h} style={{ padding: '18px 20px', fontSize: 11, fontWeight: 800, color: '#64748b', textTransform: 'uppercase', textAlign: 'left' }}>{h}</th>
+                    <th key={h} style={{ padding: '18px 20px', fontSize: 11, fontWeight: 800, color: 'var(--text-muted)', textTransform: 'uppercase', textAlign: 'left' }}>{h}</th>
                   ))}
                 </tr>
               </thead>
               <tbody>
                 {filteredLogs.length === 0 && (
-                  <tr><td colSpan={6} style={{ padding: 60, textAlign: 'center', color: '#94a3b8', fontWeight: 700 }}>No audit records found</td></tr>
+                  <tr><td colSpan={6} style={{ padding: 60, textAlign: 'center', color: 'var(--text-muted)', fontWeight: 700 }}>No audit records found</td></tr>
                 )}
                 {filteredLogs.map((log, idx) => {
                   const ac = ACTION_COLOR[log.method] || ACTION_COLOR.GET;
                   return (
                     <tr key={idx} style={{ borderBottom: '1px solid #f8fafc' }}>
-                      <td style={{ padding: '12px 20px', fontSize: 12, color: '#64748b', fontWeight: 600 }}>
+                      <td style={{ padding: '12px 20px', fontSize: 12, color: 'var(--text-muted)', fontWeight: 600 }}>
                         <div>{new Date(log.createdAt).toLocaleDateString()}</div>
-                        <div style={{ color: '#94a3b8' }}>{new Date(log.createdAt).toLocaleTimeString()}</div>
+                        <div style={{ color: 'var(--text-muted)' }}>{new Date(log.createdAt).toLocaleTimeString()}</div>
                       </td>
                       <td style={{ padding: '12px 20px' }}>
-                        <div style={{ fontSize: 13, fontWeight: 800, color: '#0f172a' }}>{log.User?.name || 'System'}</div>
-                        <div style={{ fontSize: 11, color: '#94a3b8', fontWeight: 600 }}>{log.User?.role}</div>
+                        <div style={{ fontSize: 13, fontWeight: 800, color: 'var(--text-main)' }}>{log.User?.name || 'System'}</div>
+                        <div style={{ fontSize: 11, color: 'var(--text-muted)', fontWeight: 600 }}>{log.User?.role}</div>
                       </td>
                       <td style={{ padding: '12px 20px' }}>
                         <span style={{ padding: '4px 10px', borderRadius: 8, background: ac.bg, color: ac.color, fontSize: 11, fontWeight: 800 }}>
                           {log.method || log.action}
                         </span>
                       </td>
-                      <td style={{ padding: '12px 20px', fontSize: 12, color: '#0f172a', fontWeight: 600, fontFamily: 'monospace' }}>
+                      <td style={{ padding: '12px 20px', fontSize: 12, color: 'var(--text-main)', fontWeight: 600, fontFamily: 'monospace' }}>
                         {log.endpoint || log.resource}
                       </td>
                       <td style={{ padding: '12px 20px' }}>
@@ -267,14 +267,14 @@ const Users = () => {
                           {log.statusCode || 200}
                         </span>
                       </td>
-                      <td style={{ padding: '12px 20px', fontSize: 12, color: '#94a3b8', fontWeight: 600, fontFamily: 'monospace' }}>
+                      <td style={{ padding: '12px 20px', fontSize: 12, color: 'var(--text-muted)', fontWeight: 600, fontFamily: 'monospace' }}>
                         {log.ipAddress || '—'}
                       </td>
                     </tr>
                   );
                 })}
               </tbody>
-            </table>
+            </table></div>
           )}
         </div>
       )}
@@ -294,12 +294,12 @@ const Users = () => {
               { label: 'GEOFENCE RADIUS (metres)', key: 'geofenceRadius', placeholder: '500', type: 'number' },
             ]},
           ].map(({ section, fields }) => (
-            <div key={section} style={{ background: 'white', borderRadius: 24, padding: 32, border: '1px solid rgba(0,0,0,0.05)' }}>
-              <h2 style={{ fontSize: 18, fontWeight: 900, color: '#0f172a', marginBottom: 24 }}>{section}</h2>
+            <div key={section} style={{ background: 'var(--bg-panel)', borderRadius: 24, padding: 32, border: '1px solid var(--border-color-rgb)' }}>
+              <h2 style={{ fontSize: 18, fontWeight: 900, color: 'var(--text-main)', marginBottom: 24 }}>{section}</h2>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
                 {fields.map(f => (
                   <div key={f.key}>
-                    <label style={{ display: 'block', fontSize: 12, fontWeight: 800, color: '#64748b', marginBottom: 8 }}>{f.label}</label>
+                    <label style={{ display: 'block', fontSize: 12, fontWeight: 800, color: 'var(--text-muted)', marginBottom: 8 }}>{f.label}</label>
                     <input type={f.type || 'text'} value={settings[f.key] || ''} onChange={e => setSettings({...settings, [f.key]: e.target.value})}
                       placeholder={f.placeholder}
                       style={{ width: '100%', padding: '13px 16px', borderRadius: 12, border: '1px solid #e2e8f0', fontWeight: 600, fontSize: 14 }} />
@@ -310,7 +310,7 @@ const Users = () => {
           ))}
           <div style={{ gridColumn: '1/-1' }}>
             <button onClick={handleSaveSettings} disabled={settingsSaving}
-              style={{ padding: '18px 48px', borderRadius: 16, background: '#0f172a', color: 'white', border: 'none', fontWeight: 900, fontSize: 16, cursor: 'pointer' }}>
+              style={{ padding: '18px 48px', borderRadius: 16, background: 'var(--text-main)', color: 'var(--bg-panel)', border: 'none', fontWeight: 900, fontSize: 16, cursor: 'pointer' }}>
               {settingsSaving ? 'Saving...' : '💾 Save All Settings'}
             </button>
           </div>
@@ -322,22 +322,22 @@ const Users = () => {
         {showModal && (
           <div style={{ position: 'fixed', inset: 0, zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 24 }}>
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setShowModal(false)} style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.3)' }} />
-            <motion.div initial={{ scale: 0.9, y: 20 }} animate={{ scale: 1, y: 0 }} exit={{ scale: 0.9 }} style={{ background: 'white', borderRadius: 32, width: '100%', maxWidth: 450, position: 'relative', padding: 40 }}>
+            <motion.div initial={{ scale: 0.9, y: 20 }} animate={{ scale: 1, y: 0 }} exit={{ scale: 0.9 }} style={{ background: 'var(--bg-panel)', borderRadius: 32, width: '100%', maxWidth: 450, position: 'relative', padding: 40 }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 32 }}>
                 <h2 style={{ fontSize: 24, fontWeight: 900 }}>Authorize Staff</h2>
-                <button onClick={() => setShowModal(false)} style={{ background: 'transparent', border: 'none', cursor: 'pointer' }}><X size={24} color="#64748b" /></button>
+                <button onClick={() => setShowModal(false)} style={{ background: 'transparent', border: 'none', cursor: 'pointer' }}><X size={24} color='var(--text-muted)' /></button>
               </div>
               <form onSubmit={handleCreateUser} style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
                 <input required placeholder="Full Name" value={form.name} onChange={e => setForm({...form, name: e.target.value})} style={{ width: '100%', padding: '14px 16px', borderRadius: 16, border: '1px solid #e2e8f0', fontSize: 14, fontWeight: 600 }} />
                 <input required type="email" placeholder="Email Address" value={form.email} onChange={e => setForm({...form, email: e.target.value})} style={{ width: '100%', padding: '14px 16px', borderRadius: 16, border: '1px solid #e2e8f0', fontSize: 14, fontWeight: 600 }} />
                 <input required placeholder="Phone Number" value={form.phone} onChange={e => setForm({...form, phone: e.target.value})} style={{ width: '100%', padding: '14px 16px', borderRadius: 16, border: '1px solid #e2e8f0', fontSize: 14, fontWeight: 600 }} />
-                <select value={form.role} onChange={e => setForm({...form, role: e.target.value})} style={{ width: '100%', padding: '14px 16px', borderRadius: 16, border: '1px solid #e2e8f0', fontSize: 14, fontWeight: 600, background: 'white' }}>
+                <select value={form.role} onChange={e => setForm({...form, role: e.target.value})} style={{ width: '100%', padding: '14px 16px', borderRadius: 16, border: '1px solid #e2e8f0', fontSize: 14, fontWeight: 600, background: 'var(--bg-panel)' }}>
                   {[['admin','System Admin'],['manager','Store Manager'],['inventory','Inventory Lead'],['hr','HR Head'],['cashier','Cashier'],['expenses','Expenses Officer'],['pharmacist','Pharmacist'],['operations','Operations'],['finance','Finance']].map(([v, l]) => (
                     <option key={v} value={v}>{l}</option>
                   ))}
                 </select>
                 <input type="password" placeholder="Temporary Password" value={form.password} onChange={e => setForm({...form, password: e.target.value})} style={{ width: '100%', padding: '14px 16px', borderRadius: 16, border: '1px solid #e2e8f0', fontSize: 14, fontWeight: 600 }} />
-                <button type="submit" style={{ marginTop: 16, width: '100%', padding: 16, borderRadius: 16, background: '#0f172a', color: 'white', border: 'none', fontSize: 16, fontWeight: 800, cursor: 'pointer' }}>
+                <button type="submit" style={{ marginTop: 16, width: '100%', padding: 16, borderRadius: 16, background: 'var(--text-main)', color: 'var(--bg-panel)', border: 'none', fontSize: 16, fontWeight: 800, cursor: 'pointer' }}>
                   Create Account
                 </button>
               </form>

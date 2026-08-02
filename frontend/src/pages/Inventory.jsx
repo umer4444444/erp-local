@@ -423,15 +423,15 @@ const Inventory = () => {
   };
 
   return (
-    <div style={{ padding: '100px 40px 40px 40px', minHeight: '100vh', background: '#f8fafc', fontFamily: "'Outfit', sans-serif" }}>
+    <div style={{ padding: '100px 40px 40px 40px', minHeight: '100vh', background: 'var(--bg-main)', fontFamily: "'Outfit', sans-serif" }}>
       <header style={{ marginBottom: 40, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <div>
-          <h1 style={{ fontSize: 32, fontWeight: 900, color: '#0f172a' }}>Inventory Ledger</h1>
-          <p style={{ color: '#64748b', fontWeight: 600 }}>Manage categorized stock and product details.</p>
+          <h1 style={{ fontSize: 32, fontWeight: 900, color: 'var(--text-main)' }}>Inventory Ledger</h1>
+          <p style={{ color: 'var(--text-muted)', fontWeight: 600 }}>Manage categorized stock and product details.</p>
         </div>
         <div style={{ display: 'flex', gap: 12 }}>
           <div style={{ position: 'relative' }}>
-            <Search size={18} style={{ position: 'absolute', left: 16, top: '50%', transform: 'translateY(-50%)', color: '#94a3b8' }} />
+            <Search size={18} style={{ position: 'absolute', left: 16, top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
             <input 
               value={search} onChange={e => setSearch(e.target.value)}
               placeholder="Search items..." 
@@ -442,7 +442,7 @@ const Inventory = () => {
           <select 
             value={categoryFilter} 
             onChange={(e) => setCategoryFilter(e.target.value)}
-            style={{ padding: '12px 16px', borderRadius: 14, border: '1px solid #e2e8f0', color: '#0f172a', fontWeight: 600, background: 'white', minWidth: 150 }}
+            style={{ padding: '12px 16px', borderRadius: 14, border: '1px solid #e2e8f0', color: 'var(--text-main)', fontWeight: 600, background: 'var(--bg-panel)', minWidth: 150 }}
           >
             <option value="">All Categories</option>
             {categories.map(cat => (
@@ -450,18 +450,18 @@ const Inventory = () => {
             ))}
           </select>
 
-          <button onClick={exportAllToCSV} style={{ padding: '12px 20px', borderRadius: 14, background: 'white', border: '1px solid #e2e8f0', color: '#64748b', fontWeight: 800, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 8 }}>
+          <button onClick={exportAllToCSV} style={{ padding: '12px 20px', borderRadius: 14, background: 'var(--bg-panel)', border: '1px solid #e2e8f0', color: 'var(--text-muted)', fontWeight: 800, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 8 }}>
             <Download size={18} /> Export All
           </button>
-          <button onClick={exportSelectedToCSV} style={{ padding: '12px 20px', borderRadius: 14, background: '#0f172a', color: 'white', border: 'none', fontWeight: 800, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 8 }}>
+          <button onClick={exportSelectedToCSV} style={{ padding: '12px 20px', borderRadius: 14, background: 'var(--text-main)', color: 'var(--bg-panel)', border: 'none', fontWeight: 800, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 8 }}>
             <Download size={18} /> Export Selected {selectedIds.size > 0 ? `(${selectedIds.size})` : ''}
           </button>
           {selectedIds.size > 0 && (
-            <button onClick={handleDeleteSelected} style={{ padding: '12px 20px', borderRadius: 14, background: '#ef4444', color: 'white', border: 'none', fontWeight: 800, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 8 }}>
+            <button onClick={handleDeleteSelected} style={{ padding: '12px 20px', borderRadius: 14, background: '#ef4444', color: 'var(--bg-panel)', border: 'none', fontWeight: 800, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 8 }}>
               <Trash2 size={18} /> Delete Selected ({selectedIds.size})
             </button>
           )}
-          <button onClick={() => setShowBulkModal(true)} style={{ padding: '12px 24px', borderRadius: 14, background: '#0a84ff', color: 'white', border: 'none', fontWeight: 800, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 8 }}>
+          <button onClick={() => setShowBulkModal(true)} style={{ padding: '12px 24px', borderRadius: 14, background: '#0a84ff', color: 'var(--bg-panel)', border: 'none', fontWeight: 800, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 8 }}>
             <Upload size={18} /> Bulk Entry
           </button>
         </div>
@@ -469,26 +469,26 @@ const Inventory = () => {
 
       {/* Advanced Quick-Actions row */}
       <div style={{ display: 'flex', gap: 12, marginBottom: 24, flexWrap: 'wrap' }}>
-        <button onClick={() => setShowLogsModal(true)} style={{ padding: '10px 16px', borderRadius: 12, background: 'white', border: '1px solid #e2e8f0', color: '#64748b', fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 8 }}>
+        <button onClick={() => setShowLogsModal(true)} style={{ padding: '10px 16px', borderRadius: 12, background: 'var(--bg-panel)', border: '1px solid #e2e8f0', color: 'var(--text-muted)', fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 8 }}>
           <History size={16} /> Movement Logs
         </button>
-        <button onClick={() => setShowPredictiveModal(true)} style={{ padding: '10px 16px', borderRadius: 12, background: 'white', border: '1px solid #e2e8f0', color: '#64748b', fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 8 }}>
+        <button onClick={() => setShowPredictiveModal(true)} style={{ padding: '10px 16px', borderRadius: 12, background: 'var(--bg-panel)', border: '1px solid #e2e8f0', color: 'var(--text-muted)', fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 8 }}>
           <TrendingUp size={16} /> AI Restock Suggestions
         </button>
-        <button onClick={() => setShowAutoDiscountModal(true)} style={{ padding: '10px 16px', borderRadius: 12, background: 'white', border: '1px solid #e2e8f0', color: '#64748b', fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 8 }}>
+        <button onClick={() => setShowAutoDiscountModal(true)} style={{ padding: '10px 16px', borderRadius: 12, background: 'var(--bg-panel)', border: '1px solid #e2e8f0', color: 'var(--text-muted)', fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 8 }}>
           <Tags size={16} /> Expiring Auto-Discounts
         </button>
-        <label style={{ padding: '10px 16px', borderRadius: 12, background: 'white', border: '1px solid #e2e8f0', color: '#64748b', fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 8 }}>
+        <label style={{ padding: '10px 16px', borderRadius: 12, background: 'var(--bg-panel)', border: '1px solid #e2e8f0', color: 'var(--text-muted)', fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 8 }}>
           <Upload size={16} /> Upload CSV
           <input type="file" accept=".csv" onChange={handleCSVImport} style={{ display: 'none' }} />
         </label>
       </div>
 
       {/* Table */}
-      <div style={{ background: 'white', borderRadius: 24, border: '1px solid rgba(0,0,0,0.05)', overflow: 'hidden' }}>
-        <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
+      <div style={{ background: 'var(--bg-panel)', borderRadius: 24, border: '1px solid var(--border-color-rgb)', overflow: 'hidden' }}>
+        <div className="w-full overflow-x-auto"><table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
           <thead>
-            <tr style={{ background: '#f8fafc', borderBottom: '1px solid #f1f5f9' }}>
+            <tr style={{ background: 'var(--bg-main)', borderBottom: '1px solid #f1f5f9' }}>
               <th style={{ padding: '20px 24px', width: 40 }}>
                 <input 
                   type="checkbox" 
@@ -502,13 +502,13 @@ const Inventory = () => {
                   }}
                 />
               </th>
-              <th style={{ padding: '20px 24px', color: '#64748b', fontSize: 11, fontWeight: 800, textTransform: 'uppercase' }}>Product</th>
-              <th style={{ padding: '20px 24px', color: '#64748b', fontSize: 11, fontWeight: 800, textTransform: 'uppercase' }}>Company Name</th>
-              <th style={{ padding: '20px 24px', color: '#64748b', fontSize: 11, fontWeight: 800, textTransform: 'uppercase' }}>Category</th>
-              <th style={{ padding: '20px 24px', color: '#64748b', fontSize: 11, fontWeight: 800, textTransform: 'uppercase' }}>Stock</th>
-              <th style={{ padding: '20px 24px', color: '#64748b', fontSize: 11, fontWeight: 800, textTransform: 'uppercase' }}>Price</th>
-              <th style={{ padding: '20px 24px', color: '#64748b', fontSize: 11, fontWeight: 800, textTransform: 'uppercase' }}>Cost</th>
-              <th style={{ padding: '20px 24px', color: '#64748b', fontSize: 11, fontWeight: 800, textTransform: 'uppercase' }}>Margin</th>
+              <th style={{ padding: '20px 24px', color: 'var(--text-muted)', fontSize: 11, fontWeight: 800, textTransform: 'uppercase' }}>Product</th>
+              <th style={{ padding: '20px 24px', color: 'var(--text-muted)', fontSize: 11, fontWeight: 800, textTransform: 'uppercase' }}>Company Name</th>
+              <th style={{ padding: '20px 24px', color: 'var(--text-muted)', fontSize: 11, fontWeight: 800, textTransform: 'uppercase' }}>Category</th>
+              <th style={{ padding: '20px 24px', color: 'var(--text-muted)', fontSize: 11, fontWeight: 800, textTransform: 'uppercase' }}>Stock</th>
+              <th style={{ padding: '20px 24px', color: 'var(--text-muted)', fontSize: 11, fontWeight: 800, textTransform: 'uppercase' }}>Price</th>
+              <th style={{ padding: '20px 24px', color: 'var(--text-muted)', fontSize: 11, fontWeight: 800, textTransform: 'uppercase' }}>Cost</th>
+              <th style={{ padding: '20px 24px', color: 'var(--text-muted)', fontSize: 11, fontWeight: 800, textTransform: 'uppercase' }}>Margin</th>
               <th style={{ padding: '20px 24px', textAlign: 'right' }}></th>
             </tr>
           </thead>
@@ -530,11 +530,11 @@ const Inventory = () => {
                     />
                   </td>
                   <td style={{ padding: '16px 24px' }}>
-                    <div style={{ fontWeight: 800, color: '#0f172a' }}>{product.name}</div>
-                    <div style={{ fontSize: 11, color: '#94a3b8', fontWeight: 700, display: 'flex', alignItems: 'center', gap: 6 }}>
+                    <div style={{ fontWeight: 800, color: 'var(--text-main)' }}>{product.name}</div>
+                    <div style={{ fontSize: 11, color: 'var(--text-muted)', fontWeight: 700, display: 'flex', alignItems: 'center', gap: 6 }}>
                       {product.sku}
                       {product.Variations?.length > 0 && (
-                        <span style={{ padding: '2px 6px', background: '#f1f5f9', color: '#64748b', borderRadius: 4, fontSize: 10 }}>
+                        <span style={{ padding: '2px 6px', background: '#f1f5f9', color: 'var(--text-muted)', borderRadius: 4, fontSize: 10 }}>
                           {product.Variations.length} Variations
                         </span>
                       )}
@@ -553,8 +553,8 @@ const Inventory = () => {
                   <td style={{ padding: '16px 24px' }}>
                      <span style={{ fontWeight: 900, color: getStatusColor(product.stock) }}>{product.stock}</span>
                   </td>
-                  <td style={{ padding: '16px 24px', fontWeight: 800, color: '#0f172a' }}>SAR {product.price}</td>
-                  <td style={{ padding: '16px 24px', fontWeight: 700, color: '#64748b' }}>SAR {product.costPrice || 0}</td>
+                  <td style={{ padding: '16px 24px', fontWeight: 800, color: 'var(--text-main)' }}>SAR {product.price}</td>
+                  <td style={{ padding: '16px 24px', fontWeight: 700, color: 'var(--text-muted)' }}>SAR {product.costPrice || 0}</td>
                   <td style={{ padding: '16px 24px' }}>
                     <span style={{ color: '#10b981', fontWeight: 800, fontSize: 12 }}>{margin}%</span>
                   </td>
@@ -570,7 +570,7 @@ const Inventory = () => {
               );
             })}
           </tbody>
-        </table>
+        </table></div>
       </div>
 
       {/* EDIT MODAL */}
@@ -578,47 +578,47 @@ const Inventory = () => {
         {showEditModal && editingProduct && (
           <div style={{ position: 'fixed', inset: 0, zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 24 }}>
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setShowEditModal(false)} style={{ position: 'absolute', inset: 0, background: 'rgba(15,23,42,0.6)', backdropFilter: 'blur(8px)' }} />
-            <motion.div initial={{ scale: 0.9, y: 40 }} animate={{ scale: 1, y: 0 }} exit={{ scale: 0.9, y: 40 }} style={{ background: 'white', borderRadius: 32, width: '100%', maxWidth: 500, position: 'relative', padding: 40, boxShadow: '0 40px 100px rgba(0,0,0,0.2)' }}>
+            <motion.div initial={{ scale: 0.9, y: 40 }} animate={{ scale: 1, y: 0 }} exit={{ scale: 0.9, y: 40 }} style={{ background: 'var(--bg-panel)', borderRadius: 32, width: '100%', maxWidth: 500, position: 'relative', padding: 40, boxShadow: '0 40px 100px var(--shadow-strong-rgb)' }}>
               <h2 style={{ fontSize: 24, fontWeight: 900, marginBottom: 32 }}>Edit Product Details</h2>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
                   <div style={{ gridColumn: 'span 2' }}>
-                    <label style={{ display: 'block', fontSize: 12, fontWeight: 800, color: '#64748b', marginBottom: 8 }}>PRODUCT NAME</label>
+                    <label style={{ display: 'block', fontSize: 12, fontWeight: 800, color: 'var(--text-muted)', marginBottom: 8 }}>PRODUCT NAME</label>
                     <input value={editingProduct.name} onChange={e => setEditingProduct({...editingProduct, name: e.target.value})} style={{ width: '100%', padding: '14px', borderRadius: 12, border: '1px solid #e2e8f0', fontWeight: 600 }} />
                   </div>
                   <div style={{ gridColumn: 'span 2' }}>
-                    <label style={{ display: 'block', fontSize: 12, fontWeight: 800, color: '#64748b', marginBottom: 8 }}>CATEGORY</label>
+                    <label style={{ display: 'block', fontSize: 12, fontWeight: 800, color: 'var(--text-muted)', marginBottom: 8 }}>CATEGORY</label>
                     <select value={editingProduct.categoryId || ''} onChange={e => setEditingProduct({...editingProduct, categoryId: e.target.value})} style={{ width: '100%', padding: '14px', borderRadius: 12, border: '1px solid #e2e8f0', fontWeight: 600 }}>
                       <option value="">Select Category</option>
                       {categories.map(cat => <option key={cat.id} value={cat.id}>{cat.name}</option>)}
                     </select>
                   </div>
                   <div>
-                    <label style={{ display: 'block', fontSize: 12, fontWeight: 800, color: '#64748b', marginBottom: 8 }}>RETAIL PRICE (SAR)</label>
+                    <label style={{ display: 'block', fontSize: 12, fontWeight: 800, color: 'var(--text-muted)', marginBottom: 8 }}>RETAIL PRICE (SAR)</label>
                     <input type="number" value={editingProduct.price} onChange={e => setEditingProduct({...editingProduct, price: e.target.value})} style={{ width: '100%', padding: '14px', borderRadius: 12, border: '1px solid #e2e8f0', fontWeight: 600 }} />
                   </div>
                   <div>
-                    <label style={{ display: 'block', fontSize: 12, fontWeight: 800, color: '#64748b', marginBottom: 8 }}>WHOLESALE PRICE (SAR)</label>
+                    <label style={{ display: 'block', fontSize: 12, fontWeight: 800, color: 'var(--text-muted)', marginBottom: 8 }}>WHOLESALE PRICE (SAR)</label>
                     <input type="number" value={editingProduct.wholesalePrice || ''} onChange={e => setEditingProduct({...editingProduct, wholesalePrice: e.target.value})} style={{ width: '100%', padding: '14px', borderRadius: 12, border: '1px solid #e2e8f0', fontWeight: 600 }} />
                   </div>
                   <div>
-                    <label style={{ display: 'block', fontSize: 12, fontWeight: 800, color: '#64748b', marginBottom: 8 }}>COST PRICE (SAR)</label>
+                    <label style={{ display: 'block', fontSize: 12, fontWeight: 800, color: 'var(--text-muted)', marginBottom: 8 }}>COST PRICE (SAR)</label>
                     <input type="number" value={editingProduct.costPrice || 0} onChange={e => setEditingProduct({...editingProduct, costPrice: e.target.value})} style={{ width: '100%', padding: '14px', borderRadius: 12, border: '1px solid #e2e8f0', fontWeight: 600 }} />
                   </div>
                   <div>
-                    <label style={{ display: 'block', fontSize: 12, fontWeight: 800, color: '#64748b', marginBottom: 8 }}>CURRENT STOCK</label>
+                    <label style={{ display: 'block', fontSize: 12, fontWeight: 800, color: 'var(--text-muted)', marginBottom: 8 }}>CURRENT STOCK</label>
                     <input type="number" value={editingProduct.stock} onChange={e => setEditingProduct({...editingProduct, stock: e.target.value})} style={{ width: '100%', padding: '14px', borderRadius: 12, border: '1px solid #e2e8f0', fontWeight: 600 }} />
                   </div>
                   <div>
-                    <label style={{ display: 'block', fontSize: 12, fontWeight: 800, color: '#64748b', marginBottom: 8 }}>MINIMUM STOCK</label>
+                    <label style={{ display: 'block', fontSize: 12, fontWeight: 800, color: 'var(--text-muted)', marginBottom: 8 }}>MINIMUM STOCK</label>
                     <input type="number" value={editingProduct.minStock || 10} onChange={e => setEditingProduct({...editingProduct, minStock: e.target.value})} style={{ width: '100%', padding: '14px', borderRadius: 12, border: '1px solid #e2e8f0', fontWeight: 600 }} />
                   </div>
                   <div>
-                    <label style={{ display: 'block', fontSize: 12, fontWeight: 800, color: '#64748b', marginBottom: 8 }}>BARCODE</label>
+                    <label style={{ display: 'block', fontSize: 12, fontWeight: 800, color: 'var(--text-muted)', marginBottom: 8 }}>BARCODE</label>
                     <input value={editingProduct.barcode || ''} onChange={e => setEditingProduct({...editingProduct, barcode: e.target.value})} style={{ width: '100%', padding: '14px', borderRadius: 12, border: '1px solid #e2e8f0', fontWeight: 600 }} />
                   </div>
                   <div>
-                    <label style={{ display: 'block', fontSize: 12, fontWeight: 800, color: '#64748b', marginBottom: 8 }}>UNIT</label>
+                    <label style={{ display: 'block', fontSize: 12, fontWeight: 800, color: 'var(--text-muted)', marginBottom: 8 }}>UNIT</label>
                     <select value={editingProduct.unit || 'piece'} onChange={e => setEditingProduct({...editingProduct, unit: e.target.value})} style={{ width: '100%', padding: '14px', borderRadius: 12, border: '1px solid #e2e8f0', fontWeight: 600 }}>
                       <option value="piece">Piece / Item</option>
                       <option value="box">Box</option>
@@ -626,11 +626,11 @@ const Inventory = () => {
                     </select>
                   </div>
                   <div>
-                    <label style={{ display: 'block', fontSize: 12, fontWeight: 800, color: '#64748b', marginBottom: 8 }}>EXPIRY DATE</label>
+                    <label style={{ display: 'block', fontSize: 12, fontWeight: 800, color: 'var(--text-muted)', marginBottom: 8 }}>EXPIRY DATE</label>
                     <input type="date" value={editingProduct.expiryDate?.split('T')[0] || ''} onChange={e => setEditingProduct({...editingProduct, expiryDate: e.target.value})} style={{ width: '100%', padding: '14px', borderRadius: 12, border: '1px solid #e2e8f0', fontWeight: 600 }} />
                   </div>
                   <div style={{ gridColumn: 'span 2' }}>
-                    <label style={{ display: 'block', fontSize: 12, fontWeight: 800, color: '#64748b', marginBottom: 8 }}>COMPANY NAME</label>
+                    <label style={{ display: 'block', fontSize: 12, fontWeight: 800, color: 'var(--text-muted)', marginBottom: 8 }}>COMPANY NAME</label>
                     <input placeholder="Manufacturer or Brand Name" value={editingProduct.manufacturer || ''} onChange={e => setEditingProduct({...editingProduct, manufacturer: e.target.value})} style={{ width: '100%', padding: '14px', borderRadius: 12, border: '1px solid #e2e8f0', fontWeight: 600 }} />
                   </div>
                 </div>
@@ -649,7 +649,7 @@ const Inventory = () => {
                   
                   <div style={{ display: 'flex', flexDirection: 'column', gap: 10, maxHeight: 200, overflowY: 'auto', paddingRight: 8 }}>
                     {editingProduct.variations?.map((v, idx) => (
-                      <div key={idx} style={{ display: 'grid', gridTemplateColumns: '1fr 80px 70px 30px', gap: 8, alignItems: 'center', background: '#f8fafc', padding: 12, borderRadius: 12 }}>
+                      <div key={idx} style={{ display: 'grid', gridTemplateColumns: '1fr 80px 70px 30px', gap: 8, alignItems: 'center', background: 'var(--bg-main)', padding: 12, borderRadius: 12 }}>
                         <input 
                           placeholder="Grade/Size" 
                           value={v.name} 
@@ -694,11 +694,11 @@ const Inventory = () => {
                       </div>
                     ))}
                     {editingProduct.variations?.length === 0 && (
-                      <div style={{ textAlign: 'center', padding: 20, color: '#94a3b8', fontSize: 12, fontWeight: 600 }}>No variations added.</div>
+                      <div style={{ textAlign: 'center', padding: 20, color: 'var(--text-muted)', fontSize: 12, fontWeight: 600 }}>No variations added.</div>
                     )}
                   </div>
                 </div>
-                <button onClick={handleUpdateProduct} style={{ marginTop: 12, padding: 18, borderRadius: 16, background: '#0a84ff', color: 'white', border: 'none', fontWeight: 900, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 10, justifyContent: 'center' }}>
+                <button onClick={handleUpdateProduct} style={{ marginTop: 12, padding: 18, borderRadius: 16, background: '#0a84ff', color: 'var(--bg-panel)', border: 'none', fontWeight: 900, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 10, justifyContent: 'center' }}>
                   <Save size={18} /> Save Item Updates
                 </button>
               </div>
@@ -712,26 +712,26 @@ const Inventory = () => {
         {showBulkModal && (
           <div style={{ position: 'fixed', inset: 0, zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 24 }}>
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setShowBulkModal(false)} style={{ position: 'absolute', inset: 0, background: 'rgba(15,23,42,0.6)', backdropFilter: 'blur(8px)' }} />
-            <motion.div initial={{ scale: 0.9, y: 40 }} animate={{ scale: 1, y: 0 }} exit={{ scale: 0.9, y: 40 }} style={{ background: 'white', borderRadius: 32, width: '95%', maxWidth: 1200, position: 'relative', padding: 40, display: 'flex', flexDirection: 'column', maxHeight: '90vh' }}>
+            <motion.div initial={{ scale: 0.9, y: 40 }} animate={{ scale: 1, y: 0 }} exit={{ scale: 0.9, y: 40 }} style={{ background: 'var(--bg-panel)', borderRadius: 32, width: '95%', maxWidth: 1200, position: 'relative', padding: 40, display: 'flex', flexDirection: 'column', maxHeight: '90vh' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 32 }}>
                 <div>
                   <h2 style={{ fontSize: 28, fontWeight: 900 }}>Bulk Product Ledger</h2>
-                  <p style={{ color: '#64748b', fontWeight: 600 }}>Assign categories and manage financials in bulk.</p>
+                  <p style={{ color: 'var(--text-muted)', fontWeight: 600 }}>Assign categories and manage financials in bulk.</p>
                 </div>
                 <button onClick={() => setShowBulkModal(false)} style={{ border: 'none', background: 'transparent', cursor: 'pointer' }}><X size={24} /></button>
               </div>
  
               <div style={{ flex: 1, overflowY: 'auto', marginBottom: 24 }}>
-                <table style={{ width: '100%', borderCollapse: 'separate', borderSpacing: '0 8px' }}>
+                <div className="w-full overflow-x-auto"><table style={{ width: '100%', borderCollapse: 'separate', borderSpacing: '0 8px' }}>
                   <thead>
                     <tr style={{ textAlign: 'left' }}>
-                      <th style={{ padding: '0 8px', fontSize: 11, fontWeight: 800, color: '#64748b' }}>PRODUCT NAME</th>
-                      <th style={{ padding: '0 8px', fontSize: 11, fontWeight: 800, color: '#64748b' }}>CATEGORY</th>
-                      <th style={{ padding: '0 8px', fontSize: 11, fontWeight: 800, color: '#64748b' }}>COMPANY</th>
-                      <th style={{ padding: '0 8px', fontSize: 11, fontWeight: 800, color: '#64748b' }}>PRICE (SAR)</th>
-                      <th style={{ padding: '0 8px', fontSize: 11, fontWeight: 800, color: '#64748b' }}>COST (SAR)</th>
-                      <th style={{ padding: '0 8px', fontSize: 11, fontWeight: 800, color: '#64748b' }}>STOCK</th>
-                      <th style={{ padding: '0 8px', fontSize: 11, fontWeight: 800, color: '#64748b' }}>EXPIRY</th>
+                      <th style={{ padding: '0 8px', fontSize: 11, fontWeight: 800, color: 'var(--text-muted)' }}>PRODUCT NAME</th>
+                      <th style={{ padding: '0 8px', fontSize: 11, fontWeight: 800, color: 'var(--text-muted)' }}>CATEGORY</th>
+                      <th style={{ padding: '0 8px', fontSize: 11, fontWeight: 800, color: 'var(--text-muted)' }}>COMPANY</th>
+                      <th style={{ padding: '0 8px', fontSize: 11, fontWeight: 800, color: 'var(--text-muted)' }}>PRICE (SAR)</th>
+                      <th style={{ padding: '0 8px', fontSize: 11, fontWeight: 800, color: 'var(--text-muted)' }}>COST (SAR)</th>
+                      <th style={{ padding: '0 8px', fontSize: 11, fontWeight: 800, color: 'var(--text-muted)' }}>STOCK</th>
+                      <th style={{ padding: '0 8px', fontSize: 11, fontWeight: 800, color: 'var(--text-muted)' }}>EXPIRY</th>
                       <th style={{ width: 40 }}></th>
                     </tr>
                   </thead>
@@ -754,13 +754,13 @@ const Inventory = () => {
                       </tr>
                     ))}
                   </tbody>
-                </table>
-                <button onClick={addBulkRow} style={{ marginTop: 12, width: '100%', padding: 14, border: '2px dashed #e2e8f0', borderRadius: 12, color: '#64748b', fontWeight: 800, cursor: 'pointer' }}>+ Add Item to Ledger</button>
+                </table></div>
+                <button onClick={addBulkRow} style={{ marginTop: 12, width: '100%', padding: 14, border: '2px dashed #e2e8f0', borderRadius: 12, color: 'var(--text-muted)', fontWeight: 800, cursor: 'pointer' }}>+ Add Item to Ledger</button>
               </div>
  
               <div style={{ display: 'flex', gap: 16 }}>
                 <button onClick={() => setShowBulkModal(false)} style={{ flex: 1, padding: 18, borderRadius: 16, background: '#f1f5f9', border: 'none', fontWeight: 900, cursor: 'pointer' }}>Discard All</button>
-                <button onClick={submitBulkImport} style={{ flex: 2, padding: 18, borderRadius: 16, background: '#0a84ff', color: 'white', border: 'none', fontWeight: 900, cursor: 'pointer' }}>Confirm Bulk Import</button>
+                <button onClick={submitBulkImport} style={{ flex: 2, padding: 18, borderRadius: 16, background: '#0a84ff', color: 'var(--bg-panel)', border: 'none', fontWeight: 900, cursor: 'pointer' }}>Confirm Bulk Import</button>
               </div>
             </motion.div>
           </div>
@@ -772,21 +772,21 @@ const Inventory = () => {
         {showAdjustModal && adjustProduct && (
           <div style={{ position: 'fixed', inset: 0, zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 24 }}>
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setShowAdjustModal(false)} style={{ position: 'absolute', inset: 0, background: 'rgba(15,23,42,0.6)', backdropFilter: 'blur(8px)' }} />
-            <motion.div initial={{ scale: 0.9, y: 40 }} animate={{ scale: 1, y: 0 }} exit={{ scale: 0.9, y: 40 }} style={{ background: 'white', borderRadius: 32, width: '100%', maxWidth: 450, position: 'relative', padding: 40, boxShadow: '0 40px 100px rgba(0,0,0,0.2)' }}>
+            <motion.div initial={{ scale: 0.9, y: 40 }} animate={{ scale: 1, y: 0 }} exit={{ scale: 0.9, y: 40 }} style={{ background: 'var(--bg-panel)', borderRadius: 32, width: '100%', maxWidth: 450, position: 'relative', padding: 40, boxShadow: '0 40px 100px var(--shadow-strong-rgb)' }}>
               <h2 style={{ fontSize: 24, fontWeight: 900, marginBottom: 12 }}>Stock Adjustment</h2>
-              <p style={{ color: '#64748b', fontSize: 14, marginBottom: 24 }}>Product: <strong>{adjustProduct.name}</strong> (Current Stock: {adjustProduct.stock})</p>
+              <p style={{ color: 'var(--text-muted)', fontSize: 14, marginBottom: 24 }}>Product: <strong>{adjustProduct.name}</strong> (Current Stock: {adjustProduct.stock})</p>
               
               <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
                 <div>
-                  <label style={{ display: 'block', fontSize: 12, fontWeight: 800, color: '#64748b', marginBottom: 8 }}>QUANTITY CHANGE (+ or -)</label>
+                  <label style={{ display: 'block', fontSize: 12, fontWeight: 800, color: 'var(--text-muted)', marginBottom: 8 }}>QUANTITY CHANGE (+ or -)</label>
                   <input type="number" placeholder="e.g. -5 or 10" value={adjustQty} onChange={e => setAdjustQty(e.target.value)} style={{ width: '100%', padding: '14px', borderRadius: 12, border: '1px solid #e2e8f0', fontWeight: 600 }} />
                 </div>
                 <div>
-                  <label style={{ display: 'block', fontSize: 12, fontWeight: 800, color: '#64748b', marginBottom: 8 }}>REASON / NOTES</label>
+                  <label style={{ display: 'block', fontSize: 12, fontWeight: 800, color: 'var(--text-muted)', marginBottom: 8 }}>REASON / NOTES</label>
                   <input placeholder="e.g. Broken packaging, count error" value={adjustReason} onChange={e => setAdjustReason(e.target.value)} style={{ width: '100%', padding: '14px', borderRadius: 12, border: '1px solid #e2e8f0', fontWeight: 600 }} />
                 </div>
                 
-                <button onClick={handleAdjustStock} disabled={adjustLoading} style={{ marginTop: 12, padding: 18, borderRadius: 16, background: '#0a84ff', color: 'white', border: 'none', fontWeight: 900, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 10, justifyContent: 'center' }}>
+                <button onClick={handleAdjustStock} disabled={adjustLoading} style={{ marginTop: 12, padding: 18, borderRadius: 16, background: '#0a84ff', color: 'var(--bg-panel)', border: 'none', fontWeight: 900, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 10, justifyContent: 'center' }}>
                   {adjustLoading ? 'Saving...' : 'Apply Stock Adjustment'}
                 </button>
               </div>
@@ -800,36 +800,36 @@ const Inventory = () => {
         {showLogsModal && (
           <div style={{ position: 'fixed', inset: 0, zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 24 }}>
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setShowLogsModal(false)} style={{ position: 'absolute', inset: 0, background: 'rgba(15,23,42,0.6)', backdropFilter: 'blur(8px)' }} />
-            <motion.div initial={{ scale: 0.9, y: 40 }} animate={{ scale: 1, y: 0 }} exit={{ scale: 0.9, y: 40 }} style={{ background: 'white', borderRadius: 32, width: '90%', maxWidth: 900, position: 'relative', padding: 40, display: 'flex', flexDirection: 'column', maxHeight: '80vh', boxShadow: '0 40px 100px rgba(0,0,0,0.2)' }}>
+            <motion.div initial={{ scale: 0.9, y: 40 }} animate={{ scale: 1, y: 0 }} exit={{ scale: 0.9, y: 40 }} style={{ background: 'var(--bg-panel)', borderRadius: 32, width: '90%', maxWidth: 900, position: 'relative', padding: 40, display: 'flex', flexDirection: 'column', maxHeight: '80vh', boxShadow: '0 40px 100px var(--shadow-strong-rgb)' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
                 <div>
                   <h2 style={{ fontSize: 24, fontWeight: 900 }}>Stock Movement Logs</h2>
-                  <p style={{ color: '#64748b', fontSize: 13, fontWeight: 600 }}>History of manual adjustments and restocks.</p>
+                  <p style={{ color: 'var(--text-muted)', fontSize: 13, fontWeight: 600 }}>History of manual adjustments and restocks.</p>
                 </div>
                 <button onClick={() => setShowLogsModal(false)} style={{ border: 'none', background: 'transparent', cursor: 'pointer' }}><X size={24} /></button>
               </div>
 
               <div style={{ flex: 1, overflowY: 'auto', border: '1px solid #e2e8f0', borderRadius: 16 }}>
                 {logsLoading ? (
-                  <p style={{ padding: 24, textAlign: 'center', fontWeight: 600, color: '#64748b' }}>Loading logs...</p>
+                  <p style={{ padding: 24, textAlign: 'center', fontWeight: 600, color: 'var(--text-muted)' }}>Loading logs...</p>
                 ) : movementLogs.length === 0 ? (
-                  <p style={{ padding: 24, textAlign: 'center', fontWeight: 600, color: '#64748b' }}>No logs recorded yet.</p>
+                  <p style={{ padding: 24, textAlign: 'center', fontWeight: 600, color: 'var(--text-muted)' }}>No logs recorded yet.</p>
                 ) : (
-                  <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
+                  <div className="w-full overflow-x-auto"><table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
                     <thead>
-                      <tr style={{ background: '#f8fafc', borderBottom: '1px solid #f1f5f9' }}>
-                        <th style={{ padding: '14px 20px', fontSize: 11, fontWeight: 800, color: '#64748b' }}>DATE/TIME</th>
-                        <th style={{ padding: '14px 20px', fontSize: 11, fontWeight: 800, color: '#64748b' }}>PRODUCT</th>
-                        <th style={{ padding: '14px 20px', fontSize: 11, fontWeight: 800, color: '#64748b' }}>CHANGE</th>
-                        <th style={{ padding: '14px 20px', fontSize: 11, fontWeight: 800, color: '#64748b' }}>TYPE</th>
-                        <th style={{ padding: '14px 20px', fontSize: 11, fontWeight: 800, color: '#64748b' }}>USER</th>
-                        <th style={{ padding: '14px 20px', fontSize: 11, fontWeight: 800, color: '#64748b' }}>NOTES</th>
+                      <tr style={{ background: 'var(--bg-main)', borderBottom: '1px solid #f1f5f9' }}>
+                        <th style={{ padding: '14px 20px', fontSize: 11, fontWeight: 800, color: 'var(--text-muted)' }}>DATE/TIME</th>
+                        <th style={{ padding: '14px 20px', fontSize: 11, fontWeight: 800, color: 'var(--text-muted)' }}>PRODUCT</th>
+                        <th style={{ padding: '14px 20px', fontSize: 11, fontWeight: 800, color: 'var(--text-muted)' }}>CHANGE</th>
+                        <th style={{ padding: '14px 20px', fontSize: 11, fontWeight: 800, color: 'var(--text-muted)' }}>TYPE</th>
+                        <th style={{ padding: '14px 20px', fontSize: 11, fontWeight: 800, color: 'var(--text-muted)' }}>USER</th>
+                        <th style={{ padding: '14px 20px', fontSize: 11, fontWeight: 800, color: 'var(--text-muted)' }}>NOTES</th>
                       </tr>
                     </thead>
                     <tbody>
                       {movementLogs.map(log => (
                         <tr key={log.id} style={{ borderBottom: '1px solid #f1f5f9', fontSize: 13 }}>
-                          <td style={{ padding: '12px 20px', fontWeight: 600, color: '#0f172a' }}>{new Date(log.createdAt).toLocaleString()}</td>
+                          <td style={{ padding: '12px 20px', fontWeight: 600, color: 'var(--text-main)' }}>{new Date(log.createdAt).toLocaleString()}</td>
                           <td style={{ padding: '12px 20px', fontWeight: 800, color: '#0a84ff' }}>{log.Product?.name || 'Deleted Product'}</td>
                           <td style={{ padding: '12px 20px', fontWeight: 900, color: log.change >= 0 ? '#10b981' : '#ef4444' }}>
                             {log.change >= 0 ? `+${log.change}` : log.change}
@@ -840,11 +840,11 @@ const Inventory = () => {
                             </span>
                           </td>
                           <td style={{ padding: '12px 20px', fontWeight: 600, color: '#475569' }}>{log.User?.name || 'System'}</td>
-                          <td style={{ padding: '12px 20px', color: '#64748b', fontStyle: 'italic' }}>{log.notes}</td>
+                          <td style={{ padding: '12px 20px', color: 'var(--text-muted)', fontStyle: 'italic' }}>{log.notes}</td>
                         </tr>
                       ))}
                     </tbody>
-                  </table>
+                  </table></div>
                 )}
               </div>
             </motion.div>
@@ -857,15 +857,15 @@ const Inventory = () => {
         {showPredictiveModal && (
           <div style={{ position: 'fixed', inset: 0, zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 24 }}>
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setShowPredictiveModal(false)} style={{ position: 'absolute', inset: 0, background: 'rgba(15,23,42,0.6)', backdropFilter: 'blur(8px)' }} />
-            <motion.div initial={{ scale: 0.9, y: 40 }} animate={{ scale: 1, y: 0 }} exit={{ scale: 0.9, y: 40 }} style={{ background: 'white', borderRadius: 32, width: '90%', maxWidth: 850, position: 'relative', padding: 40, display: 'flex', flexDirection: 'column', maxHeight: '80vh', boxShadow: '0 40px 100px rgba(0,0,0,0.2)' }}>
+            <motion.div initial={{ scale: 0.9, y: 40 }} animate={{ scale: 1, y: 0 }} exit={{ scale: 0.9, y: 40 }} style={{ background: 'var(--bg-panel)', borderRadius: 32, width: '90%', maxWidth: 850, position: 'relative', padding: 40, display: 'flex', flexDirection: 'column', maxHeight: '80vh', boxShadow: '0 40px 100px var(--shadow-strong-rgb)' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
                 <div>
                   <h2 style={{ fontSize: 24, fontWeight: 900 }}>AI Restock Suggestions</h2>
-                  <p style={{ color: '#64748b', fontSize: 13, fontWeight: 600 }}>Smart stock projections based on daily sales velocity.</p>
+                  <p style={{ color: 'var(--text-muted)', fontSize: 13, fontWeight: 600 }}>Smart stock projections based on daily sales velocity.</p>
                 </div>
                 <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
                   <button onClick={handleAutoGeneratePO} disabled={autoPoLoading}
-                    style={{ padding: '8px 14px', borderRadius: 10, background: autoPoLoading ? '#e2e8f0' : '#10b981', color: autoPoLoading ? '#64748b' : 'white', border: 'none', cursor: autoPoLoading ? 'not-allowed' : 'pointer', fontWeight: 800 }}>
+                    style={{ padding: '8px 14px', borderRadius: 10, background: autoPoLoading ? 'var(--border-color)' : '#10b981', color: autoPoLoading ? 'var(--text-muted)' : 'var(--bg-panel)', border: 'none', cursor: autoPoLoading ? 'not-allowed' : 'pointer', fontWeight: 800 }}>
                     {autoPoLoading ? 'Generating…' : 'Auto-Generate POs'}
                   </button>
                   <button onClick={() => setShowPredictiveModal(false)} style={{ border: 'none', background: 'transparent', cursor: 'pointer' }}><X size={24} /></button>
@@ -874,26 +874,26 @@ const Inventory = () => {
 
               <div style={{ flex: 1, overflowY: 'auto', border: '1px solid #e2e8f0', borderRadius: 16 }}>
                 {predictiveLoading ? (
-                  <p style={{ padding: 24, textAlign: 'center', fontWeight: 600, color: '#64748b' }}>Analyzing stock velocity...</p>
+                  <p style={{ padding: 24, textAlign: 'center', fontWeight: 600, color: 'var(--text-muted)' }}>Analyzing stock velocity...</p>
                 ) : predictiveData.length === 0 ? (
-                  <p style={{ padding: 24, textAlign: 'center', fontWeight: 600, color: '#64748b' }}>No restock recommendations.</p>
+                  <p style={{ padding: 24, textAlign: 'center', fontWeight: 600, color: 'var(--text-muted)' }}>No restock recommendations.</p>
                 ) : (
-                  <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
+                  <div className="w-full overflow-x-auto"><table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
                     <thead>
-                      <tr style={{ background: '#f8fafc', borderBottom: '1px solid #f1f5f9' }}>
-                        <th style={{ padding: '14px 20px', fontSize: 11, fontWeight: 800, color: '#64748b' }}>PRODUCT</th>
-                        <th style={{ padding: '14px 20px', fontSize: 11, fontWeight: 800, color: '#64748b' }}>CURRENT STOCK</th>
-                        <th style={{ padding: '14px 20px', fontSize: 11, fontWeight: 800, color: '#64748b' }}>DAILY VELOCITY</th>
-                        <th style={{ padding: '14px 20px', fontSize: 11, fontWeight: 800, color: '#64748b' }}>DAYS REMAINING</th>
-                        <th style={{ padding: '14px 20px', fontSize: 11, fontWeight: 800, color: '#64748b' }}>RECOMMENDED ACTION</th>
+                      <tr style={{ background: 'var(--bg-main)', borderBottom: '1px solid #f1f5f9' }}>
+                        <th style={{ padding: '14px 20px', fontSize: 11, fontWeight: 800, color: 'var(--text-muted)' }}>PRODUCT</th>
+                        <th style={{ padding: '14px 20px', fontSize: 11, fontWeight: 800, color: 'var(--text-muted)' }}>CURRENT STOCK</th>
+                        <th style={{ padding: '14px 20px', fontSize: 11, fontWeight: 800, color: 'var(--text-muted)' }}>DAILY VELOCITY</th>
+                        <th style={{ padding: '14px 20px', fontSize: 11, fontWeight: 800, color: 'var(--text-muted)' }}>DAYS REMAINING</th>
+                        <th style={{ padding: '14px 20px', fontSize: 11, fontWeight: 800, color: 'var(--text-muted)' }}>RECOMMENDED ACTION</th>
                       </tr>
                     </thead>
                     <tbody>
                       {predictiveData.map(item => (
                         <tr key={item.id} style={{ borderBottom: '1px solid #f1f5f9', fontSize: 13 }}>
-                          <td style={{ padding: '12px 20px', fontWeight: 800, color: '#0f172a' }}>{item.name}</td>
+                          <td style={{ padding: '12px 20px', fontWeight: 800, color: 'var(--text-main)' }}>{item.name}</td>
                           <td style={{ padding: '12px 20px', fontWeight: 700, color: '#475569' }}>{item.stock} units</td>
-                          <td style={{ padding: '12px 20px', fontWeight: 600, color: '#64748b' }}>{item.dailySalesRate} units/day</td>
+                          <td style={{ padding: '12px 20px', fontWeight: 600, color: 'var(--text-muted)' }}>{item.dailySalesRate} units/day</td>
                           <td style={{ padding: '12px 20px', fontWeight: 900, color: item.daysLeft <= 4 ? '#ef4444' : '#10b981' }}>
                             {item.daysLeft === Infinity ? 'N/A' : `${item.daysLeft} days`}
                           </td>
@@ -914,7 +914,7 @@ const Inventory = () => {
                                       alert('Failed to restock');
                                     }
                                   }}
-                                  style={{ padding: '6px 12px', borderRadius: 8, background: '#0a84ff', color: 'white', border: 'none', fontSize: 11, fontWeight: 700, cursor: 'pointer' }}
+                                  style={{ padding: '6px 12px', borderRadius: 8, background: '#0a84ff', color: 'var(--bg-panel)', border: 'none', fontSize: 11, fontWeight: 700, cursor: 'pointer' }}
                                 >
                                   Restock Now
                                 </button>
@@ -928,7 +928,7 @@ const Inventory = () => {
                         </tr>
                       ))}
                     </tbody>
-                  </table>
+                  </table></div>
                 )}
               </div>
             </motion.div>
@@ -941,37 +941,37 @@ const Inventory = () => {
         {showAutoDiscountModal && (
           <div style={{ position: 'fixed', inset: 0, zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 24 }}>
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setShowAutoDiscountModal(false)} style={{ position: 'absolute', inset: 0, background: 'rgba(15,23,42,0.6)', backdropFilter: 'blur(8px)' }} />
-            <motion.div initial={{ scale: 0.9, y: 40 }} animate={{ scale: 1, y: 0 }} exit={{ scale: 0.9, y: 40 }} style={{ background: 'white', borderRadius: 32, width: '90%', maxWidth: 750, position: 'relative', padding: 40, display: 'flex', flexDirection: 'column', maxHeight: '80vh', boxShadow: '0 40px 100px rgba(0,0,0,0.2)' }}>
+            <motion.div initial={{ scale: 0.9, y: 40 }} animate={{ scale: 1, y: 0 }} exit={{ scale: 0.9, y: 40 }} style={{ background: 'var(--bg-panel)', borderRadius: 32, width: '90%', maxWidth: 750, position: 'relative', padding: 40, display: 'flex', flexDirection: 'column', maxHeight: '80vh', boxShadow: '0 40px 100px var(--shadow-strong-rgb)' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
                 <div>
                   <h2 style={{ fontSize: 24, fontWeight: 900 }}>Expiring Auto-Discounts</h2>
-                  <p style={{ color: '#64748b', fontSize: 13, fontWeight: 600 }}>Products expiring within 5 days are auto-discounted by 50% in sales POS.</p>
+                  <p style={{ color: 'var(--text-muted)', fontSize: 13, fontWeight: 600 }}>Products expiring within 5 days are auto-discounted by 50% in sales POS.</p>
                 </div>
                 <button onClick={() => setShowAutoDiscountModal(false)} style={{ border: 'none', background: 'transparent', cursor: 'pointer' }}><X size={24} /></button>
               </div>
 
               <div style={{ flex: 1, overflowY: 'auto', border: '1px solid #e2e8f0', borderRadius: 16 }}>
                 {autoDiscountLoading ? (
-                  <p style={{ padding: 24, textAlign: 'center', fontWeight: 600, color: '#64748b' }}>Scanning database...</p>
+                  <p style={{ padding: 24, textAlign: 'center', fontWeight: 600, color: 'var(--text-muted)' }}>Scanning database...</p>
                 ) : autoDiscounts.length === 0 ? (
-                  <p style={{ padding: 24, textAlign: 'center', fontWeight: 600, color: '#64748b' }}>No products currently qualifying for auto-discount.</p>
+                  <p style={{ padding: 24, textAlign: 'center', fontWeight: 600, color: 'var(--text-muted)' }}>No products currently qualifying for auto-discount.</p>
                 ) : (
-                  <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
+                  <div className="w-full overflow-x-auto"><table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
                     <thead>
-                      <tr style={{ background: '#f8fafc', borderBottom: '1px solid #f1f5f9' }}>
-                        <th style={{ padding: '14px 20px', fontSize: 11, fontWeight: 800, color: '#64748b' }}>PRODUCT</th>
-                        <th style={{ padding: '14px 20px', fontSize: 11, fontWeight: 800, color: '#64748b' }}>DAYS TO EXPIRY</th>
-                        <th style={{ padding: '14px 20px', fontSize: 11, fontWeight: 800, color: '#64748b' }}>ORIGINAL PRICE</th>
-                        <th style={{ padding: '14px 20px', fontSize: 11, fontWeight: 800, color: '#64748b' }}>PROMO PRICE (50%)</th>
-                        <th style={{ padding: '14px 20px', fontSize: 11, fontWeight: 800, color: '#64748b' }}>STATUS</th>
+                      <tr style={{ background: 'var(--bg-main)', borderBottom: '1px solid #f1f5f9' }}>
+                        <th style={{ padding: '14px 20px', fontSize: 11, fontWeight: 800, color: 'var(--text-muted)' }}>PRODUCT</th>
+                        <th style={{ padding: '14px 20px', fontSize: 11, fontWeight: 800, color: 'var(--text-muted)' }}>DAYS TO EXPIRY</th>
+                        <th style={{ padding: '14px 20px', fontSize: 11, fontWeight: 800, color: 'var(--text-muted)' }}>ORIGINAL PRICE</th>
+                        <th style={{ padding: '14px 20px', fontSize: 11, fontWeight: 800, color: 'var(--text-muted)' }}>PROMO PRICE (50%)</th>
+                        <th style={{ padding: '14px 20px', fontSize: 11, fontWeight: 800, color: 'var(--text-muted)' }}>STATUS</th>
                       </tr>
                     </thead>
                     <tbody>
                       {autoDiscounts.map(item => (
                         <tr key={item.id} style={{ borderBottom: '1px solid #f1f5f9', fontSize: 13 }}>
-                          <td style={{ padding: '12px 20px', fontWeight: 800, color: '#0f172a' }}>{item.name}</td>
+                          <td style={{ padding: '12px 20px', fontWeight: 800, color: 'var(--text-main)' }}>{item.name}</td>
                           <td style={{ padding: '12px 20px', fontWeight: 900, color: '#ef4444' }}>{item.daysToExpiry} days left</td>
-                          <td style={{ padding: '12px 20px', fontWeight: 700, color: '#64748b', textDecoration: 'line-through' }}>SAR {item.originalPrice}</td>
+                          <td style={{ padding: '12px 20px', fontWeight: 700, color: 'var(--text-muted)', textDecoration: 'line-through' }}>SAR {item.originalPrice}</td>
                           <td style={{ padding: '12px 20px', fontWeight: 900, color: '#10b981' }}>SAR {item.promoPrice}</td>
                           <td style={{ padding: '12px 20px' }}>
                             <span style={{ padding: '4px 8px', borderRadius: 6, fontSize: 11, fontWeight: 800, background: 'rgba(16,185,129,0.08)', color: '#10b981' }}>
@@ -981,7 +981,7 @@ const Inventory = () => {
                         </tr>
                       ))}
                     </tbody>
-                  </table>
+                  </table></div>
                 )}
               </div>
             </motion.div>

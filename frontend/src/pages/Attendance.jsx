@@ -191,7 +191,7 @@ const Attendance = () => {
   };
 
   const gpsStatusConfig = {
-    idle:     { color: '#64748b', bg: '#f1f5f9', label: 'Location not checked' },
+    idle:     { color: 'var(--text-muted)', bg: '#f1f5f9', label: 'Location not checked' },
     checking: { color: '#f59e0b', bg: '#fffbeb', label: 'Checking location...' },
     inside:   { color: '#10b981', bg: '#dcfce7', label: `Inside zone (${gpsDistance}m away)` },
     outside:  { color: '#ef4444', bg: '#fee2e2', label: `Outside zone (${gpsDistance}m away)` },
@@ -210,21 +210,21 @@ const Attendance = () => {
   const tabLabels = { clock: '🕐 Clock In/Out', team: '👥 Team Overview', history: '📋 My History' };
 
   return (
-    <div style={{ padding: 40, minHeight: '100vh', background: '#f8fafc', fontFamily: "'Outfit', sans-serif" }}>
+    <div style={{ padding: 40, minHeight: '100vh', background: 'var(--bg-main)', fontFamily: "'Outfit', sans-serif" }}>
       <header style={{ marginBottom: 32 }}>
-        <h1 style={{ fontSize: 32, fontWeight: 900, color: '#0f172a' }}>Attendance & Time Tracking</h1>
-        <p style={{ color: '#64748b', fontWeight: 600 }}>Manage your work hours and monitor staff presence.</p>
+        <h1 style={{ fontSize: 32, fontWeight: 900, color: 'var(--text-main)' }}>Attendance & Time Tracking</h1>
+        <p style={{ color: 'var(--text-muted)', fontWeight: 600 }}>Manage your work hours and monitor staff presence.</p>
       </header>
 
       {/* Tab Bar */}
-      <div style={{ display: 'flex', gap: 8, background: 'white', padding: 6, borderRadius: 18, border: '1px solid #e2e8f0', marginBottom: 32, width: 'fit-content' }}>
+      <div style={{ display: 'flex', gap: 8, background: 'var(--bg-panel)', padding: 6, borderRadius: 18, border: '1px solid #e2e8f0', marginBottom: 32, width: 'fit-content' }}>
         {TABS.map(tab => (
           <button key={tab} onClick={() => setActiveTab(tab)}
             style={{
               padding: '10px 22px', borderRadius: 14, border: 'none', fontFamily: "'Outfit', sans-serif",
               fontWeight: 800, cursor: 'pointer', fontSize: 14, transition: 'all 0.2s',
-              background: activeTab === tab ? '#0f172a' : 'transparent',
-              color: activeTab === tab ? 'white' : '#64748b'
+              background: activeTab === tab ? 'var(--text-main)' : 'transparent',
+              color: activeTab === tab ? 'var(--bg-panel)' : 'var(--text-muted)'
             }}>
             {tabLabels[tab]}
           </button>
@@ -248,15 +248,15 @@ const Attendance = () => {
             <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
               
               {/* Clock Widget */}
-              <div style={{ background: 'white', padding: 32, borderRadius: 32, border: '1px solid rgba(0,0,0,0.05)', textAlign: 'center' }}>
+              <div style={{ background: 'var(--bg-panel)', padding: 32, borderRadius: 32, border: '1px solid var(--border-color-rgb)', textAlign: 'center' }}>
                 <div style={{ width: 80, height: 80, borderRadius: '50%', background: '#f1f5f9', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 24px' }}>
-                  <Clock size={40} color="#0f172a" />
+                  <Clock size={40} color='var(--text-main)' />
                 </div>
-                <h2 style={{ fontSize: 20, fontWeight: 900, color: '#0f172a', marginBottom: 8 }}>Live Clock</h2>
+                <h2 style={{ fontSize: 20, fontWeight: 900, color: 'var(--text-main)', marginBottom: 8 }}>Live Clock</h2>
                 <div style={{ fontSize: 48, fontWeight: 900, color: '#0a84ff', marginBottom: 4, fontVariantNumeric: 'tabular-nums' }}>
                   {liveTime.toLocaleString('en-PK', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true })}
                 </div>
-                <div style={{ fontSize: 13, color: '#94a3b8', fontWeight: 600, marginBottom: 28 }}>
+                <div style={{ fontSize: 13, color: 'var(--text-muted)', fontWeight: 600, marginBottom: 28 }}>
                   {liveTime.toLocaleDateString('en-PK', { weekday: 'long', month: 'long', day: 'numeric' })} <span style={{ marginLeft: 8, padding: '2px 8px', borderRadius: 8, background: '#e0f2fe', color: '#0369a1', fontSize: 10, fontWeight: 800 }}>PKT UTC+5</span>
                 </div>
                 
@@ -280,8 +280,8 @@ const Attendance = () => {
                     onClick={handleClockIn}
                     style={{ 
                       padding: '16px', borderRadius: 16, 
-                      background: activeAttendance ? '#e2e8f0' : gpsStatus === 'outside' ? '#fee2e2' : '#10b981', 
-                      color: activeAttendance ? '#94a3b8' : gpsStatus === 'outside' ? '#ef4444' : 'white', 
+                      background: activeAttendance ? 'var(--border-color)' : gpsStatus === 'outside' ? '#fee2e2' : '#10b981', 
+                      color: activeAttendance ? 'var(--text-muted)' : gpsStatus === 'outside' ? '#ef4444' : 'var(--bg-panel)', 
                       border: 'none', fontWeight: 800, fontSize: 16, 
                       cursor: (activeAttendance || clockInLoading || gpsStatus === 'outside') ? 'default' : 'pointer',
                       display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, transition: 'all 0.2s'
@@ -294,8 +294,8 @@ const Attendance = () => {
                     disabled={!activeAttendance}
                     onClick={handleClockOut}
                     style={{ 
-                      padding: '16px', borderRadius: 16, background: 'white', 
-                      color: !activeAttendance ? '#e2e8f0' : '#ef4444', 
+                      padding: '16px', borderRadius: 16, background: 'var(--bg-panel)', 
+                      color: !activeAttendance ? 'var(--border-color)' : '#ef4444', 
                       border: `2px solid ${!activeAttendance ? '#f1f5f9' : '#fee2e2'}`, 
                       fontWeight: 800, fontSize: 16, 
                       cursor: !activeAttendance ? 'default' : 'pointer',
@@ -316,9 +316,9 @@ const Attendance = () => {
                         }
                       }}
                       style={{
-                        padding: '12px 16px', borderRadius: 16, background: onBreak ? '#fffbeb' : 'white',
-                        color: onBreak ? '#d97706' : '#64748b',
-                        border: `1.5px solid ${onBreak ? '#fcd34d' : '#e2e8f0'}`,
+                        padding: '12px 16px', borderRadius: 16, background: onBreak ? '#fffbeb' : 'var(--bg-panel)',
+                        color: onBreak ? '#d97706' : 'var(--text-muted)',
+                        border: `1.5px solid ${onBreak ? '#fcd34d' : 'var(--border-color)'}`,
                         fontWeight: 800, fontSize: 14, cursor: 'pointer',
                         display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8
                       }}
@@ -336,7 +336,7 @@ const Attendance = () => {
               </div>
 
               {/* Shift Details & Active Session */}
-              <div style={{ background: 'linear-gradient(135deg, #0f172a, #1e293b)', padding: 32, borderRadius: 32, color: 'white' }}>
+              <div style={{ background: 'linear-gradient(135deg, #0f172a, #1e293b)', padding: 32, borderRadius: 32, color: 'var(--bg-panel)' }}>
                 <h3 style={{ fontSize: 18, fontWeight: 900, marginBottom: 20, display: 'flex', alignItems: 'center', gap: 10 }}>
                   <ShieldCheck size={20} color="#10b981" /> Shift Details
                 </h3>
@@ -367,24 +367,24 @@ const Attendance = () => {
               </div>
 
               {/* Geofence Zone Card */}
-              <div style={{ background: 'white', padding: 24, borderRadius: 24, border: '1px solid rgba(0,0,0,0.05)' }}>
+              <div style={{ background: 'var(--bg-panel)', padding: 24, borderRadius: 24, border: '1px solid var(--border-color-rgb)' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 16 }}>
                   <MapPin size={18} color="#0a84ff" />
-                  <span style={{ fontSize: 14, fontWeight: 800, color: '#0f172a' }}>Geofence Zone</span>
+                  <span style={{ fontSize: 14, fontWeight: 800, color: 'var(--text-main)' }}>Geofence Zone</span>
                 </div>
                 <div style={{ background: 'linear-gradient(135deg, #dbeafe 0%, #ede9fe 100%)', borderRadius: 16, padding: 20, marginBottom: 16, position: 'relative', overflow: 'hidden', height: 100, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                   <div style={{ position: 'absolute', width: 80, height: 80, borderRadius: '50%', border: '2px dashed #93c5fd', opacity: 0.6 }} />
                   <div style={{ position: 'absolute', width: 40, height: 40, borderRadius: '50%', border: '2px solid #60a5fa', opacity: 0.8 }} />
                   <div style={{ width: 12, height: 12, borderRadius: '50%', background: gpsStatus === 'inside' ? '#10b981' : gpsStatus === 'outside' ? '#ef4444' : '#0a84ff', zIndex: 1, boxShadow: '0 0 0 4px rgba(10,132,255,0.2)' }} />
                 </div>
-                <div style={{ fontSize: 11, color: '#64748b', fontWeight: 700, marginBottom: 4 }}>Office Perimeter: {GEOFENCE_RADIUS_M}m</div>
+                <div style={{ fontSize: 11, color: 'var(--text-muted)', fontWeight: 700, marginBottom: 4 }}>Office Perimeter: {GEOFENCE_RADIUS_M}m</div>
                 {userCoords && (
-                  <div style={{ fontSize: 11, color: '#94a3b8', fontWeight: 600, marginBottom: 10 }}>
+                  <div style={{ fontSize: 11, color: 'var(--text-muted)', fontWeight: 600, marginBottom: 10 }}>
                     📍 {userCoords.lat.toFixed(4)}, {userCoords.lng.toFixed(4)}
                   </div>
                 )}
                 {gpsStatus === 'idle' && (
-                  <button onClick={() => checkGPS().catch(() => {})} style={{ width: '100%', padding: '10px', borderRadius: 10, background: '#0a84ff', color: 'white', border: 'none', fontWeight: 800, cursor: 'pointer', fontSize: 12 }}>
+                  <button onClick={() => checkGPS().catch(() => {})} style={{ width: '100%', padding: '10px', borderRadius: 10, background: '#0a84ff', color: 'var(--bg-panel)', border: 'none', fontWeight: 800, cursor: 'pointer', fontSize: 12 }}>
                     📡 Check My Location
                   </button>
                 )}
@@ -398,24 +398,24 @@ const Attendance = () => {
 
             {/* Right Column: Today's Logs */}
             <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
-              <div style={{ background: 'white', padding: 32, borderRadius: 32, border: '1px solid rgba(0,0,0,0.05)' }}>
-                <h2 style={{ fontSize: 20, fontWeight: 900, color: '#0f172a', marginBottom: 24 }}>Today's Activity Log</h2>
+              <div style={{ background: 'var(--bg-panel)', padding: 32, borderRadius: 32, border: '1px solid var(--border-color-rgb)' }}>
+                <h2 style={{ fontSize: 20, fontWeight: 900, color: 'var(--text-main)', marginBottom: 24 }}>Today's Activity Log</h2>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
                   {todayLogs.length === 0 && (
-                    <div style={{ textAlign: 'center', padding: 40, color: '#94a3b8', fontWeight: 700 }}>No attendance records today.</div>
+                    <div style={{ textAlign: 'center', padding: 40, color: 'var(--text-muted)', fontWeight: 700 }}>No attendance records today.</div>
                   )}
                   {todayLogs.map(log => {
                     const duration = log.clockOut
                       ? ((new Date(log.clockOut) - new Date(log.clockIn)) / 3600000).toFixed(1)
                       : null;
                     return (
-                      <div key={log.id} style={{ display: 'flex', alignItems: 'center', gap: 16, padding: '16px 20px', borderRadius: 20, background: '#f8fafc' }}>
-                        <div style={{ width: 44, height: 44, borderRadius: 12, background: log.clockOut ? '#f1f5f9' : '#dcfce7', color: log.clockOut ? '#64748b' : '#10b981', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                      <div key={log.id} style={{ display: 'flex', alignItems: 'center', gap: 16, padding: '16px 20px', borderRadius: 20, background: 'var(--bg-main)' }}>
+                        <div style={{ width: 44, height: 44, borderRadius: 12, background: log.clockOut ? '#f1f5f9' : '#dcfce7', color: log.clockOut ? 'var(--text-muted)' : '#10b981', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
                           <UserCheck size={20} />
                         </div>
                         <div style={{ flex: 1 }}>
-                          <div style={{ fontWeight: 800, color: '#0f172a', fontSize: 14 }}>{log.Employee?.User?.name}</div>
-                          <div style={{ fontSize: 12, color: '#64748b', fontWeight: 600 }}>
+                          <div style={{ fontWeight: 800, color: 'var(--text-main)', fontSize: 14 }}>{log.Employee?.User?.name}</div>
+                          <div style={{ fontSize: 12, color: 'var(--text-muted)', fontWeight: 600 }}>
                             Shift {log.status}
                             {log.lateMinutes > 0 && <span style={{ color: '#ef4444', marginLeft: 8 }}>· {log.lateMinutes}min late</span>}
                           </div>
@@ -423,14 +423,14 @@ const Attendance = () => {
                         <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
                           <div style={{ textAlign: 'center' }}>
                             <div style={{ fontWeight: 800, color: '#10b981', fontSize: 13 }}>{new Date(log.clockIn).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</div>
-                            <div style={{ fontSize: 10, color: '#94a3b8', fontWeight: 700 }}>IN</div>
+                            <div style={{ fontSize: 10, color: 'var(--text-muted)', fontWeight: 700 }}>IN</div>
                           </div>
                           <ArrowRight size={14} color="#cbd5e1" />
                           <div style={{ textAlign: 'center' }}>
-                            <div style={{ fontWeight: 800, color: log.clockOut ? '#ef4444' : '#94a3b8', fontSize: 13 }}>
+                            <div style={{ fontWeight: 800, color: log.clockOut ? '#ef4444' : 'var(--text-muted)', fontSize: 13 }}>
                               {log.clockOut ? new Date(log.clockOut).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '--:--'}
                             </div>
-                            <div style={{ fontSize: 10, color: '#94a3b8', fontWeight: 700 }}>OUT</div>
+                            <div style={{ fontSize: 10, color: 'var(--text-muted)', fontWeight: 700 }}>OUT</div>
                           </div>
                           {duration && (
                             <div style={{ padding: '4px 10px', borderRadius: 8, background: '#f0fdf4', color: '#16a34a', fontSize: 11, fontWeight: 800 }}>
@@ -450,40 +450,40 @@ const Attendance = () => {
         {/* ── TEAM OVERVIEW TAB ── */}
         {activeTab === 'team' && (
           <motion.div key="team" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
-            <div style={{ background: 'white', padding: 32, borderRadius: 32, border: '1px solid rgba(0,0,0,0.05)' }}>
+            <div style={{ background: 'var(--bg-panel)', padding: 32, borderRadius: 32, border: '1px solid var(--border-color-rgb)' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
-                <h2 style={{ fontSize: 20, fontWeight: 900, color: '#0f172a' }}>Currently On Duty</h2>
+                <h2 style={{ fontSize: 20, fontWeight: 900, color: 'var(--text-main)' }}>Currently On Duty</h2>
                 <span style={{ padding: '6px 12px', borderRadius: 20, background: '#dcfce7', color: '#10b981', fontSize: 12, fontWeight: 800 }}>
                   {managerView.length} ACTIVE
                 </span>
               </div>
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: 16 }}>
                 {managerView.map(item => (
-                  <div key={item.id} style={{ padding: 20, borderRadius: 20, background: '#f8fafc', border: '1px solid #e2e8f0' }}>
+                  <div key={item.id} style={{ padding: 20, borderRadius: 20, background: 'var(--bg-main)', border: '1px solid #e2e8f0' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 12 }}>
                       <div style={{ width: 40, height: 40, borderRadius: 12, background: '#dcfce7', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 16, fontWeight: 900, color: '#16a34a' }}>
                         {item.Employee?.User?.name?.[0]}
                       </div>
                       <div>
-                        <div style={{ fontWeight: 800, color: '#0f172a', fontSize: 14 }}>{item.Employee?.User?.name}</div>
+                        <div style={{ fontWeight: 800, color: 'var(--text-main)', fontSize: 14 }}>{item.Employee?.User?.name}</div>
                         {item.lateMinutes > 0 && (
                           <div style={{ fontSize: 10, color: '#ef4444', fontWeight: 700 }}>⚠ {item.lateMinutes}min late</div>
                         )}
                       </div>
                     </div>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                      <div style={{ fontSize: 12, color: '#64748b', fontWeight: 600 }}>
+                      <div style={{ fontSize: 12, color: 'var(--text-muted)', fontWeight: 600 }}>
                         In: {new Date(item.clockIn).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true })}
                       </div>
                       <div style={{ padding: '3px 8px', borderRadius: 6, background: '#dcfce7', color: '#16a34a', fontSize: 10, fontWeight: 800 }}>ON DUTY</div>
                     </div>
-                    <div style={{ marginTop: 8, fontSize: 12, color: '#94a3b8', fontWeight: 600 }}>
+                    <div style={{ marginTop: 8, fontSize: 12, color: 'var(--text-muted)', fontWeight: 600 }}>
                       Duration: {((new Date() - new Date(item.clockIn)) / 3600000).toFixed(1)}h
                     </div>
                   </div>
                 ))}
                 {managerView.length === 0 && (
-                  <div style={{ gridColumn: '1/-1', textAlign: 'center', padding: 60, color: '#94a3b8', fontWeight: 700 }}>
+                  <div style={{ gridColumn: '1/-1', textAlign: 'center', padding: 60, color: 'var(--text-muted)', fontWeight: 700 }}>
                     No employees are currently clocked in.
                   </div>
                 )}
@@ -495,32 +495,32 @@ const Attendance = () => {
         {/* ── MY HISTORY TAB ── */}
         {activeTab === 'history' && (
           <motion.div key="history" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
-            <div style={{ background: 'white', padding: 32, borderRadius: 32, border: '1px solid rgba(0,0,0,0.05)' }}>
+            <div style={{ background: 'var(--bg-panel)', padding: 32, borderRadius: 32, border: '1px solid var(--border-color-rgb)' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 28 }}>
                 <div>
-                  <h2 style={{ fontSize: 20, fontWeight: 900, color: '#0f172a' }}>My Attendance History</h2>
-                  <p style={{ fontSize: 13, color: '#64748b', fontWeight: 600, marginTop: 4 }}>All your past clock-in and clock-out records.</p>
+                  <h2 style={{ fontSize: 20, fontWeight: 900, color: 'var(--text-main)' }}>My Attendance History</h2>
+                  <p style={{ fontSize: 13, color: 'var(--text-muted)', fontWeight: 600, marginTop: 4 }}>All your past clock-in and clock-out records.</p>
                 </div>
-                <div style={{ padding: '6px 14px', borderRadius: 12, background: '#f1f5f9', fontSize: 13, fontWeight: 800, color: '#64748b' }}>
+                <div style={{ padding: '6px 14px', borderRadius: 12, background: '#f1f5f9', fontSize: 13, fontWeight: 800, color: 'var(--text-muted)' }}>
                   {historyLogs.length} records
                 </div>
               </div>
 
               {historyLoading && historyLogs.length === 0 ? (
-                <div style={{ textAlign: 'center', padding: 60, color: '#94a3b8', fontWeight: 700 }}>Loading history...</div>
+                <div style={{ textAlign: 'center', padding: 60, color: 'var(--text-muted)', fontWeight: 700 }}>Loading history...</div>
               ) : historyLogs.length === 0 ? (
-                <div style={{ textAlign: 'center', padding: 60, color: '#94a3b8', fontWeight: 700 }}>
+                <div style={{ textAlign: 'center', padding: 60, color: 'var(--text-muted)', fontWeight: 700 }}>
                   <History size={48} style={{ opacity: 0.2, marginBottom: 16 }} />
                   <p>No past attendance records found.</p>
                 </div>
               ) : (
                 <>
                   <div style={{ overflowX: 'auto' }}>
-                    <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                    <div className="w-full overflow-x-auto"><table style={{ width: '100%', borderCollapse: 'collapse' }}>
                       <thead>
                         <tr style={{ textAlign: 'left', borderBottom: '2px solid #f1f5f9' }}>
                           {['DATE', 'DAY', 'CLOCK IN', 'CLOCK OUT', 'DURATION', 'STATUS'].map(h => (
-                            <th key={h} style={{ padding: '14px 16px', color: '#64748b', fontSize: 12, fontWeight: 800, letterSpacing: 0.5 }}>{h}</th>
+                            <th key={h} style={{ padding: '14px 16px', color: 'var(--text-muted)', fontSize: 12, fontWeight: 800, letterSpacing: 0.5 }}>{h}</th>
                           ))}
                         </tr>
                       </thead>
@@ -532,12 +532,12 @@ const Attendance = () => {
                           const isLate = log.lateMinutes > 0;
                           return (
                             <tr key={log.id} style={{ borderBottom: '1px solid #f8fafc' }}
-                              onMouseEnter={e => e.currentTarget.style.background = '#f8fafc'}
+                              onMouseEnter={e => e.currentTarget.style.background = 'var(--bg-main)'}
                               onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
-                              <td style={{ padding: '14px 16px', fontWeight: 700, color: '#0f172a', fontSize: 13 }}>
+                              <td style={{ padding: '14px 16px', fontWeight: 700, color: 'var(--text-main)', fontSize: 13 }}>
                                 {clockIn.toLocaleDateString('en-PK', { day: '2-digit', month: 'short', year: 'numeric' })}
                               </td>
-                              <td style={{ padding: '14px 16px', fontSize: 12, fontWeight: 700, color: '#64748b' }}>
+                              <td style={{ padding: '14px 16px', fontSize: 12, fontWeight: 700, color: 'var(--text-muted)' }}>
                                 {clockIn.toLocaleDateString('en-PK', { weekday: 'short' })}
                               </td>
                               <td style={{ padding: '14px 16px', fontWeight: 700, color: '#10b981', fontSize: 13 }}>
@@ -565,12 +565,12 @@ const Attendance = () => {
                           );
                         })}
                       </tbody>
-                    </table>
+                    </table></div>
                   </div>
                   {historyLogs.length >= 30 * historyPage && (
                     <div style={{ textAlign: 'center', marginTop: 24 }}>
                       <button onClick={() => fetchHistory(historyPage + 1)} disabled={historyLoading}
-                        style={{ padding: '12px 28px', borderRadius: 14, background: '#f1f5f9', color: '#0f172a', border: 'none', fontWeight: 800, cursor: 'pointer', fontSize: 14 }}>
+                        style={{ padding: '12px 28px', borderRadius: 14, background: '#f1f5f9', color: 'var(--text-main)', border: 'none', fontWeight: 800, cursor: 'pointer', fontSize: 14 }}>
                         {historyLoading ? 'Loading...' : 'Load More'}
                       </button>
                     </div>

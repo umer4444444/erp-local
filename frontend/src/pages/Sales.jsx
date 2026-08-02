@@ -51,26 +51,26 @@ const clearPendingSale = async (localId) => {
 
 const TIER_CONFIG = {
   Bronze: { color: '#cd7f32', bg: '#fdf6ec', min: 0 },
-  Silver: { color: '#94a3b8', bg: '#f1f5f9', min: 500 },
+  Silver: { color: 'var(--text-muted)', bg: '#f1f5f9', min: 500 },
   Gold:   { color: '#f59e0b', bg: '#fffbeb', min: 1500 },
   Platinum: { color: '#8b5cf6', bg: '#f5f3ff', min: 5000 },
 };
 
 const ProductCard = React.memo(({ product, onAdd }) => (
   <motion.div 
-    whileHover={{ y: -5, boxShadow: '0 12px 30px rgba(0,0,0,0.08)' }}
+    whileHover={{ y: -5, boxShadow: '0 12px 30px var(--shadow-strong-rgb)' }}
     whileTap={{ scale: 0.98 }}
     onClick={() => onAdd(product)}
     style={{
-      background: 'white', borderRadius: 16, padding: 14, cursor: 'pointer',
-      border: '1px solid rgba(0,0,0,0.04)', boxShadow: '0 4px 12px rgba(0,0,0,0.02)',
+      background: 'var(--bg-panel)', borderRadius: 16, padding: 14, cursor: 'pointer',
+      border: '1px solid var(--border-color-rgb)', boxShadow: '0 4px 12px var(--shadow-color-rgb)',
       display: 'flex', flexDirection: 'column', gap: 10,
       opacity: product.stock <= 0 ? 0.5 : 1,
       pointerEvents: product.stock <= 0 ? 'none' : 'auto'
     }}
   >
     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start' }}>
-      <div style={{ width: 36, height: 36, borderRadius: 10, background: '#f1f5f9', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#64748b' }}>
+      <div style={{ width: 36, height: 36, borderRadius: 10, background: '#f1f5f9', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text-muted)' }}>
         <Package size={18} />
       </div>
       <div style={{ background: product.stock < 10 ? '#fff1f2' : '#f0fdf4', color: product.stock < 10 ? '#e11d48' : '#16a34a', fontSize: 10, fontWeight: 800, padding: '4px 6px', borderRadius: 6 }}>
@@ -78,8 +78,8 @@ const ProductCard = React.memo(({ product, onAdd }) => (
       </div>
     </div>
     <div>
-      <div style={{ fontSize: 14, fontWeight: 800, color: '#0f172a' }}>{product.name}</div>
-      <div style={{ fontSize: 11, color: '#94a3b8', fontWeight: 600 }}>{product.sku || 'No SKU'}</div>
+      <div style={{ fontSize: 14, fontWeight: 800, color: 'var(--text-main)' }}>{product.name}</div>
+      <div style={{ fontSize: 11, color: 'var(--text-muted)', fontWeight: 600 }}>{product.sku || 'No SKU'}</div>
     </div>
     <div style={{ fontSize: 18, fontWeight: 900, color: '#0a84ff' }}>SAR {product.price}</div>
   </motion.div>
@@ -370,10 +370,10 @@ const Sales = () => {
     <div style={{ display: 'grid', gridTemplateColumns: `${leftPanelWidth}px 6px 1fr`, height: '100vh', background: '#f1f5f9', overflow: 'hidden' }}>
       
       {/* Left Side: Cart & Checkout (Centered & Larger) */}
-      <div style={{ background: 'white', borderRight: '1px solid #e2e8f0', display: 'flex', flexDirection: 'column', overflowY: 'auto' }}>
+      <div style={{ background: 'var(--bg-panel)', borderRight: '1px solid #e2e8f0', display: 'flex', flexDirection: 'column', overflowY: 'auto' }}>
         <div style={{ padding: '24px 28px', borderBottom: '1px solid #f1f5f9' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
-            <h2 style={{ fontSize: 20, fontWeight: 900, color: '#0f172a', margin: 0 }}>Current Cart</h2>
+            <h2 style={{ fontSize: 20, fontWeight: 900, color: 'var(--text-main)', margin: 0 }}>Current Cart</h2>
             <div style={{ display: 'flex', gap: 10 }}>
               <button 
                 onClick={() => setPricingMode(pricingMode === 'retail' ? 'wholesale' : 'retail')}
@@ -389,17 +389,17 @@ const Sales = () => {
           
           {/* Customer Search & Direct Details Input */}
           <div style={{ position: 'relative', marginBottom: 12 }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '10px 14px', borderRadius: 12, border: `1px solid ${selectedCustomer ? '#0a84ff' : '#e2e8f0'}`, background: selectedCustomer ? '#eff6ff' : 'white' }}>
-              <User size={16} color={selectedCustomer ? '#0a84ff' : '#94a3b8'} />
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '10px 14px', borderRadius: 12, border: `1px solid ${selectedCustomer ? '#0a84ff' : 'var(--border-color)'}`, background: selectedCustomer ? '#eff6ff' : 'var(--bg-panel)' }}>
+              <User size={16} color={selectedCustomer ? '#0a84ff' : 'var(--text-muted)'} />
               {selectedCustomer ? (
                 <div style={{ flex: 1, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                   <div>
-                    <div style={{ fontSize: 13, fontWeight: 800, color: '#0f172a' }}>{selectedCustomer.name}</div>
+                    <div style={{ fontSize: 13, fontWeight: 800, color: 'var(--text-main)' }}>{selectedCustomer.name}</div>
                     <div style={{ fontSize: 11, color: '#0a84ff', fontWeight: 700, display: 'flex', alignItems: 'center', gap: 4 }}>
                       <Star size={10} fill="#f59e0b" color="#f59e0b" /> {selectedCustomer.loyaltyPoints || 0} pts · {getTierName(selectedCustomer.loyaltyPoints || 0)}
                     </div>
                   </div>
-                  <button onClick={clearCustomer} style={{ border: 'none', background: 'transparent', cursor: 'pointer', color: '#94a3b8' }}><X size={14} /></button>
+                  <button onClick={clearCustomer} style={{ border: 'none', background: 'transparent', cursor: 'pointer', color: 'var(--text-muted)' }}><X size={14} /></button>
                 </div>
               ) : (
                 <input
@@ -414,18 +414,18 @@ const Sales = () => {
             <AnimatePresence>
               {showCustomerDropdown && customerResults.length > 0 && !selectedCustomer && (
                 <motion.div initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}
-                  style={{ position: 'absolute', top: '100%', left: 0, right: 0, background: 'white', border: '1px solid #e2e8f0', borderRadius: 12, boxShadow: '0 8px 24px rgba(0,0,0,0.1)', zIndex: 100, overflow: 'hidden', marginTop: 4 }}>
+                  style={{ position: 'absolute', top: '100%', left: 0, right: 0, background: 'var(--bg-panel)', border: '1px solid #e2e8f0', borderRadius: 12, boxShadow: '0 8px 24px var(--shadow-strong-rgb)', zIndex: 100, overflow: 'hidden', marginTop: 4 }}>
                   {customerResults.map(c => {
                     const tier = getTierInfo(c.loyaltyPoints || 0);
                     return (
                       <div key={c.id} onClick={() => selectCustomer(c)}
                         style={{ padding: '12px 16px', cursor: 'pointer', display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid #f8fafc' }}
-                        onMouseEnter={e => e.currentTarget.style.background = '#f8fafc'}
+                        onMouseEnter={e => e.currentTarget.style.background = 'var(--bg-main)'}
                         onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
                       >
                         <div>
-                          <div style={{ fontSize: 13, fontWeight: 800, color: '#0f172a' }}>{c.name}</div>
-                          <div style={{ fontSize: 11, color: '#64748b', fontWeight: 600 }}>{c.phone}</div>
+                          <div style={{ fontSize: 13, fontWeight: 800, color: 'var(--text-main)' }}>{c.name}</div>
+                          <div style={{ fontSize: 11, color: 'var(--text-muted)', fontWeight: 600 }}>{c.phone}</div>
                         </div>
                         <div style={{ padding: '3px 8px', borderRadius: 6, background: tier.bg, color: tier.color, fontSize: 10, fontWeight: 800 }}>
                           {getTierName(c.loyaltyPoints || 0)} · {c.loyaltyPoints || 0}pts
@@ -461,7 +461,7 @@ const Sales = () => {
                 <Gift size={14} color="#d97706" />
                 <span style={{ fontSize: 12, fontWeight: 700, color: '#92400e' }}>Redeem {Math.floor(maxRedeem * 100)} pts → -${maxRedeem.toFixed(2)}</span>
               </div>
-              <button onClick={() => setRedeemPoints(!redeemPoints)} style={{ padding: '4px 12px', borderRadius: 8, border: 'none', cursor: 'pointer', fontWeight: 800, fontSize: 11, background: redeemPoints ? '#d97706' : '#e2e8f0', color: redeemPoints ? 'white' : '#64748b' }}>
+              <button onClick={() => setRedeemPoints(!redeemPoints)} style={{ padding: '4px 12px', borderRadius: 8, border: 'none', cursor: 'pointer', fontWeight: 800, fontSize: 11, background: redeemPoints ? '#d97706' : 'var(--border-color)', color: redeemPoints ? 'var(--bg-panel)' : 'var(--text-muted)' }}>
                 {redeemPoints ? 'Applied ✓' : 'Apply'}
               </button>
             </div>
@@ -478,15 +478,15 @@ const Sales = () => {
                   style={{ display: 'flex', gap: 12, alignItems: 'center', padding: '10px 0', borderBottom: '1px solid #f8fafc' }}
                 >
                   <div style={{ flex: 1 }}>
-                    <div style={{ fontSize: 14, fontWeight: 800, color: '#0f172a' }}>{item.name}</div>
-                    <div style={{ fontSize: 11, color: '#64748b', fontWeight: 600 }}>SAR {item.price} each</div>
+                    <div style={{ fontSize: 14, fontWeight: 800, color: 'var(--text-main)' }}>{item.name}</div>
+                    <div style={{ fontSize: 11, color: 'var(--text-muted)', fontWeight: 600 }}>SAR {item.price} each</div>
                   </div>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                    <button onClick={() => updateQty(item.productId, -1)} style={{ width: 26, height: 26, borderRadius: 8, border: '1px solid #e2e8f0', background: 'white', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><Minus size={12} /></button>
+                    <button onClick={() => updateQty(item.productId, -1)} style={{ width: 26, height: 26, borderRadius: 8, border: '1px solid #e2e8f0', background: 'var(--bg-panel)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><Minus size={12} /></button>
                     <span style={{ fontSize: 14, fontWeight: 900, minWidth: 20, textAlign: 'center' }}>{item.quantity}</span>
-                    <button onClick={() => updateQty(item.productId, 1)} style={{ width: 26, height: 26, borderRadius: 8, border: '1px solid #e2e8f0', background: 'white', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><Plus size={12} /></button>
+                    <button onClick={() => updateQty(item.productId, 1)} style={{ width: 26, height: 26, borderRadius: 8, border: '1px solid #e2e8f0', background: 'var(--bg-panel)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><Plus size={12} /></button>
                   </div>
-                  <div style={{ fontSize: 14, fontWeight: 900, color: '#0f172a', minWidth: 65, textAlign: 'right' }}>SAR {(item.price * item.quantity).toFixed(2)}</div>
+                  <div style={{ fontSize: 14, fontWeight: 900, color: 'var(--text-main)', minWidth: 65, textAlign: 'right' }}>SAR {(item.price * item.quantity).toFixed(2)}</div>
                   <button onClick={() => removeFromCart(item.productId)} style={{ border: 'none', background: 'transparent', color: '#ef4444', cursor: 'pointer' }}>
                     <Trash size={16} />
                   </button>
@@ -494,7 +494,7 @@ const Sales = () => {
               ))}
             </AnimatePresence>
             {cart.length === 0 && (
-              <div style={{ textAlign: 'center', padding: 40, color: '#94a3b8' }}>
+              <div style={{ textAlign: 'center', padding: 40, color: 'var(--text-muted)' }}>
                 <ShoppingCart size={36} style={{ margin: '0 auto 12px', opacity: 0.3 }} />
                 <div style={{ fontWeight: 700 }}>Cart is empty</div>
               </div>
@@ -503,18 +503,18 @@ const Sales = () => {
         </div>
 
         {/* Totals & Options */}
-        <div style={{ padding: '20px 28px', background: '#f8fafc', borderTop: '1px solid #e2e8f0', flexShrink: 0 }}>
+        <div style={{ padding: '20px 28px', background: 'var(--bg-main)', borderTop: '1px solid #e2e8f0', flexShrink: 0 }}>
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px 24px', marginBottom: 14 }}>
             {/* Subtotal */}
             <div style={{ flex: '1 1 120px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <span style={{ color: '#64748b', fontWeight: 700, fontSize: 13 }}>Subtotal</span>
+              <span style={{ color: 'var(--text-muted)', fontWeight: 700, fontSize: 13 }}>Subtotal</span>
               <span style={{ fontWeight: 700, fontSize: 13 }}>SAR {subtotal.toFixed(2)}</span>
             </div>
             
             {/* Discount */}
             <div style={{ flex: '1 1 200px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                <span style={{ color: '#64748b', fontWeight: 700, fontSize: 13 }}>Discount</span>
+                <span style={{ color: 'var(--text-muted)', fontWeight: 700, fontSize: 13 }}>Discount</span>
                 <button 
                   onClick={() => setDiscountType(discountType === 'flat' ? 'percent' : 'flat')}
                   style={{ padding: '2px 8px', borderRadius: 6, border: '1px solid #0a84ff', background: '#eff6ff', color: '#0a84ff', fontSize: 11, fontWeight: 800, cursor: 'pointer' }}>
@@ -528,14 +528,14 @@ const Sales = () => {
 
             {/* Tax Field */}
             <div style={{ flex: '1 1 140px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <span style={{ color: '#64748b', fontWeight: 700, fontSize: 13 }}>Tax (%)</span>
+              <span style={{ color: 'var(--text-muted)', fontWeight: 700, fontSize: 13 }}>Tax (%)</span>
               <input type="number" min="0" value={taxRate} onChange={e => setTaxRate(e.target.value)} 
                 style={{ width: 70, padding: '6px 8px', borderRadius: 8, border: '1px solid #e2e8f0', textAlign: 'right', fontWeight: 700, fontSize: 13 }} />
             </div>
 
             {/* Extra Charges */}
             <div style={{ flex: '1 1 260px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <span style={{ color: '#64748b', fontWeight: 700, fontSize: 13 }}>Extra Charges (SAR)</span>
+              <span style={{ color: 'var(--text-muted)', fontWeight: 700, fontSize: 13 }}>Extra Charges (SAR)</span>
               <div style={{ display: 'flex', gap: 6 }}>
                 <input type="text" placeholder="Reason (e.g. Delivery)" value={extraChargeReason} onChange={e => setExtraChargeReason(e.target.value)}
                   style={{ width: 110, padding: '6px 8px', borderRadius: 8, border: '1px solid #e2e8f0', fontSize: 11, fontWeight: 600 }} />
@@ -552,7 +552,7 @@ const Sales = () => {
           </div>
 
           <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 14, paddingTop: 10, borderTop: '2px solid #e2e8f0' }}>
-            <span style={{ fontSize: 16, fontWeight: 900, color: '#0f172a' }}>Grand Total</span>
+            <span style={{ fontSize: 16, fontWeight: 900, color: 'var(--text-main)' }}>Grand Total</span>
             <span style={{ fontSize: 24, fontWeight: 900, color: '#0a84ff' }}>SAR {total.toFixed(2)}</span>
           </div>
 
@@ -562,8 +562,8 @@ const Sales = () => {
               <button key={method} onClick={() => setPaymentMethod(method)}
                 style={{ padding: '10px 2px', borderRadius: 10, fontWeight: 800, fontSize: 10, cursor: 'pointer', border: '2px solid', textTransform: 'capitalize', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
                   borderColor: paymentMethod === method ? '#0a84ff' : 'transparent',
-                  background: paymentMethod === method ? '#eff6ff' : 'white',
-                  color: paymentMethod === method ? '#0a84ff' : '#64748b' }}>
+                  background: paymentMethod === method ? '#eff6ff' : 'var(--bg-panel)',
+                  color: paymentMethod === method ? '#0a84ff' : 'var(--text-muted)' }}>
                 {method === 'credit' ? 'Loan/Credit' : method.replace('_', ' ')}
               </button>
             ))}
@@ -571,7 +571,7 @@ const Sales = () => {
 
           {paymentMethod === 'credit' && (
             <div style={{ marginBottom: 14 }}>
-              <label style={{ fontSize: 11, fontWeight: 800, color: '#64748b', display: 'block', marginBottom: 4 }}>CREDIT REASON / NOTES</label>
+              <label style={{ fontSize: 11, fontWeight: 800, color: 'var(--text-muted)', display: 'block', marginBottom: 4 }}>CREDIT REASON / NOTES</label>
               <input 
                 placeholder="e.g. Approved by Project Director, due next week"
                 value={creditReason}
@@ -584,7 +584,7 @@ const Sales = () => {
           {paymentMethod === 'cash' && (
             <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBottom: 14 }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <span style={{ color: '#64748b', fontWeight: 700, fontSize: 13 }}>Cash Tendered (SAR)</span>
+                <span style={{ color: 'var(--text-muted)', fontWeight: 700, fontSize: 13 }}>Cash Tendered (SAR)</span>
                 <input type="number" min="0" value={cashTendered} onChange={e => setCashTendered(e.target.value)} 
                   style={{ width: 110, padding: '8px 10px', borderRadius: 8, border: '1px solid #0a84ff', textAlign: 'right', fontWeight: 800, fontSize: 14 }} placeholder="0.00" />
               </div>
@@ -600,12 +600,12 @@ const Sales = () => {
           {paymentMethod === 'split' && (
             <div style={{ display: 'flex', gap: 8, marginBottom: 14 }}>
               <div style={{ flex: 1 }}>
-                <label style={{ fontSize: 11, fontWeight: 800, color: '#64748b', display: 'block', marginBottom: 4 }}>CASH</label>
+                <label style={{ fontSize: 11, fontWeight: 800, color: 'var(--text-muted)', display: 'block', marginBottom: 4 }}>CASH</label>
                 <input type="number" value={splitAmount.cash} onChange={e => setSplitAmount({...splitAmount, cash: parseFloat(e.target.value) || 0})}
                   style={{ width: '100%', padding: '8px', borderRadius: 8, border: '1px solid #e2e8f0', fontWeight: 700 }} />
               </div>
               <div style={{ flex: 1 }}>
-                <label style={{ fontSize: 11, fontWeight: 800, color: '#64748b', display: 'block', marginBottom: 4 }}>CARD</label>
+                <label style={{ fontSize: 11, fontWeight: 800, color: 'var(--text-muted)', display: 'block', marginBottom: 4 }}>CARD</label>
                 <input type="number" value={splitAmount.card} onChange={e => setSplitAmount({...splitAmount, card: parseFloat(e.target.value) || 0})}
                   style={{ width: '100%', padding: '8px', borderRadius: 8, border: '1px solid #e2e8f0', fontWeight: 700 }} />
               </div>
@@ -615,7 +615,7 @@ const Sales = () => {
           <button 
             disabled={processing || cart.length === 0}
             onClick={handleCheckout}
-            style={{ width: '100%', padding: '16px', borderRadius: 16, background: '#0f172a', color: 'white',
+            style={{ width: '100%', padding: '16px', borderRadius: 16, background: 'var(--text-main)', color: 'var(--bg-panel)',
               fontSize: 16, fontWeight: 900, border: 'none', cursor: 'pointer', opacity: processing ? 0.7 : 1,
               display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10 }}>
             {processing ? 'Processing...' : `Complete Payment`} <ArrowRight size={18} />
@@ -627,10 +627,10 @@ const Sales = () => {
       <div 
         onMouseDown={(e) => { e.preventDefault(); isDragging.current = true; document.body.style.cursor = 'col-resize'; }}
         style={{ cursor: 'col-resize', background: '#cbd5e1', width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 10, transition: 'background 0.2s' }}
-        onMouseEnter={(e) => e.currentTarget.style.background = '#94a3b8'}
+        onMouseEnter={(e) => e.currentTarget.style.background = 'var(--text-muted)'}
         onMouseLeave={(e) => e.currentTarget.style.background = '#cbd5e1'}
       >
-        <div style={{ width: 2, height: 24, background: 'white', borderRadius: 2 }} />
+        <div style={{ width: 2, height: 24, background: 'var(--bg-panel)', borderRadius: 2 }} />
       </div>
 
       {/* Right Side: Product Grid */}
@@ -638,7 +638,7 @@ const Sales = () => {
         <header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <div>
             <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-              <h1 style={{ fontSize: 28, fontWeight: 900, color: '#0f172a' }}>Sales Terminal</h1>
+              <h1 style={{ fontSize: 28, fontWeight: 900, color: 'var(--text-main)' }}>Sales Terminal</h1>
               <div style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '4px 10px', borderRadius: 20, background: isOnline ? '#dcfce7' : '#fee2e2', color: isOnline ? '#16a34a' : '#ef4444', fontSize: 11, fontWeight: 800 }}>
                 {isOnline ? <Wifi size={12} /> : <WifiOff size={12} />}
                 {isOnline ? 'ONLINE' : 'OFFLINE'}
@@ -649,14 +649,14 @@ const Sales = () => {
                 </button>
               )}
             </div>
-            <p style={{ color: '#64748b', fontWeight: 600 }}>Process orders and manage transactions.</p>
+            <p style={{ color: 'var(--text-muted)', fontWeight: 600 }}>Process orders and manage transactions.</p>
           </div>
           <div style={{ display: 'flex', gap: 12 }}>
-            <button onClick={() => navigate('/sales/history')} style={{ padding: '12px 20px', borderRadius: 14, border: '1px solid #e2e8f0', background: 'white', fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 8 }}>
+            <button onClick={() => navigate('/sales/history')} style={{ padding: '12px 20px', borderRadius: 14, border: '1px solid #e2e8f0', background: 'var(--bg-panel)', fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 8 }}>
               <History size={18} /> History
             </button>
             <div style={{ position: 'relative' }}>
-              <Search size={18} style={{ position: 'absolute', left: 16, top: '50%', transform: 'translateY(-50%)', color: '#94a3b8' }} />
+              <Search size={18} style={{ position: 'absolute', left: 16, top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
               <input 
                 ref={searchRef}
                 value={search} onChange={e => setSearch(e.target.value)}
@@ -685,9 +685,9 @@ const Sales = () => {
       {receipt && (
         <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20 }}>
           <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} 
-            style={{ background: 'white', width: '100%', maxWidth: 450, padding: 32, borderRadius: 32, maxHeight: '90vh', display: 'flex', flexDirection: 'column', position: 'relative' }}>
+            style={{ background: 'var(--bg-panel)', width: '100%', maxWidth: 450, padding: 32, borderRadius: 32, maxHeight: '90vh', display: 'flex', flexDirection: 'column', position: 'relative' }}>
             <button onClick={() => setReceipt(null)} style={{ position: 'absolute', top: 12, right: 12, background: 'transparent', border: 'none', cursor: 'pointer' }}>
-              <X size={20} color="#64748b" />
+              <X size={20} color='var(--text-muted)' />
             </button>
             {receipt.offline && (
               <div style={{ background: '#fef3c7', padding: 10, borderRadius: 10, marginBottom: 16, display: 'flex', alignItems: 'center', gap: 8, fontSize: 13, fontWeight: 700, color: '#92400e' }}>
@@ -698,7 +698,7 @@ const Sales = () => {
               <div style={{ textAlign: 'center', marginBottom: 20 }}>
                 <div style={{ fontSize: 24, fontWeight: 900, letterSpacing: 2, marginBottom: 8 }}>BTG LOGO</div>
                 <h2 style={{ fontSize: 18, fontWeight: 800, margin: '0 0 4px', textTransform: 'uppercase' }}>Tax Invoice / فاتورة ضريبية</h2>
-                <div style={{ fontSize: 12, color: '#64748b', lineHeight: 1.5 }}>
+                <div style={{ fontSize: 12, color: 'var(--text-muted)', lineHeight: 1.5 }}>
                   Txn: {receipt.id?.split('-')[0]?.toUpperCase()}<br/>
                   Cashier: {receipt.cashierName || 'Staff'}<br/>
                   Date: {new Date(receipt.createdAt).toLocaleString()}
@@ -706,14 +706,14 @@ const Sales = () => {
               </div>
               
               {(receipt.customerName || receipt.customerPhone || receipt.customerId) && (
-                <div style={{ marginBottom: 12, padding: '8px 16px', background: '#f8fafc', borderRadius: 10, fontSize: 12, fontWeight: 700, color: '#64748b', display: 'flex', flexDirection: 'column', gap: 2 }}>
+                <div style={{ marginBottom: 12, padding: '8px 16px', background: 'var(--bg-main)', borderRadius: 10, fontSize: 12, fontWeight: 700, color: 'var(--text-muted)', display: 'flex', flexDirection: 'column', gap: 2 }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}><User size={12} /> {receipt.customerName || 'Customer'}</div>
-                  {receipt.customerPhone && <div style={{ fontSize: 11, color: '#94a3b8' }}>Phone: {receipt.customerPhone}</div>}
+                  {receipt.customerPhone && <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>Phone: {receipt.customerPhone}</div>}
                 </div>
               )}
 
               <div style={{ borderTop: '2px dashed #e2e8f0', borderBottom: '2px dashed #e2e8f0', padding: '16px 0', margin: '16px 0' }}>
-                <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1fr', gap: 10, fontSize: 13, fontWeight: 800, color: '#64748b', paddingBottom: 8, borderBottom: '1px solid #e2e8f0' }}>
+                <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1fr', gap: 10, fontSize: 13, fontWeight: 800, color: 'var(--text-muted)', paddingBottom: 8, borderBottom: '1px solid #e2e8f0' }}>
                   <span>Item</span>
                   <span style={{ textAlign: 'center' }}>Qty</span>
                   <span style={{ textAlign: 'right' }}>Total</span>
@@ -721,8 +721,8 @@ const Sales = () => {
                 {receipt.items?.map((item, idx) => (
                   <div key={idx} style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1fr', gap: 10, fontSize: 13, borderBottom: '1px dashed #e2e8f0', paddingBottom: 8 }}>
                     <div>
-                      <div style={{ fontWeight: 700, color: '#0f172a' }}>{item.name}</div>
-                      {item.nameAr && <div style={{ fontSize: 11, color: '#64748b' }}>{item.nameAr}</div>}
+                      <div style={{ fontWeight: 700, color: 'var(--text-main)' }}>{item.name}</div>
+                      {item.nameAr && <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>{item.nameAr}</div>}
                     </div>
                     <div style={{ textAlign: 'center' }}>{item.quantity}</div>
                     <div style={{ textAlign: 'right' }}>SAR {(item.price * item.quantity).toFixed(2)}</div>
@@ -735,7 +735,7 @@ const Sales = () => {
               </div>
 
               <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBottom: 24 }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 14, color: '#64748b', fontWeight: 600 }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 14, color: 'var(--text-muted)', fontWeight: 600 }}>
                   <span>Subtotal</span><span>SAR {parseFloat(receipt.totalAmount || 0).toFixed(2)}</span>
                 </div>
                 {parseFloat(receipt.discount) > 0 && (
@@ -749,40 +749,40 @@ const Sales = () => {
                   </div>
                 )}
                 {parseFloat(receipt.tax) > 0 && (
-                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 14, color: '#64748b', fontWeight: 600 }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 14, color: 'var(--text-muted)', fontWeight: 600 }}>
                     <span>Tax</span><span>+SAR {parseFloat(receipt.tax).toFixed(2)}</span>
                   </div>
                 )}
-                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 18, color: '#0f172a', fontWeight: 900, marginTop: 8, paddingTop: 8, borderTop: '1px solid #f1f5f9' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 18, color: 'var(--text-main)', fontWeight: 900, marginTop: 8, paddingTop: 8, borderTop: '1px solid #f1f5f9' }}>
                   <span>Grand Total</span><span>SAR {parseFloat(receipt.grandTotal || 0).toFixed(2)}</span>
                 </div>
               </div>
 
-              <div style={{ background: '#f8fafc', padding: 16, borderRadius: 16, fontSize: 13 }}>
+              <div style={{ background: 'var(--bg-main)', padding: 16, borderRadius: 16, fontSize: 13 }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 4, fontWeight: 600 }}>
-                  <span style={{ color: '#64748b' }}>Payment Method</span>
-                  <span style={{ textTransform: 'capitalize', color: '#0f172a' }}>{receipt.paymentMethod === 'credit' ? 'Loan / Credit' : receipt.paymentMethod}</span>
+                  <span style={{ color: 'var(--text-muted)' }}>Payment Method</span>
+                  <span style={{ textTransform: 'capitalize', color: 'var(--text-main)' }}>{receipt.paymentMethod === 'credit' ? 'Loan / Credit' : receipt.paymentMethod}</span>
                 </div>
                 {receipt.creditReason && (
                   <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 4, fontWeight: 600, fontSize: 12 }}>
-                    <span style={{ color: '#64748b' }}>Credit Reason</span>
+                    <span style={{ color: 'var(--text-muted)' }}>Credit Reason</span>
                     <span style={{ color: '#d97706' }}>{receipt.creditReason}</span>
                   </div>
                 )}
                 {receipt.paymentMethod === 'cash' && (
                   <>
                     <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 4, fontWeight: 600 }}>
-                      <span style={{ color: '#64748b' }}>Tendered</span>
-                      <span style={{ color: '#0f172a' }}>SAR {parseFloat(receipt.cashTendered || 0).toFixed(2)}</span>
+                      <span style={{ color: 'var(--text-muted)' }}>Tendered</span>
+                      <span style={{ color: 'var(--text-main)' }}>SAR {parseFloat(receipt.cashTendered || 0).toFixed(2)}</span>
                     </div>
                     <div style={{ display: 'flex', justifyContent: 'space-between', fontWeight: 800 }}>
-                      <span style={{ color: '#64748b' }}>Change</span>
+                      <span style={{ color: 'var(--text-muted)' }}>Change</span>
                       <span style={{ color: '#16a34a' }}>SAR {parseFloat(receipt.changeDue || 0).toFixed(2)}</span>
                     </div>
                   </>
                 )}
               </div>
-              <div style={{ textAlign: 'center', marginTop: 24, color: '#94a3b8', fontSize: 12, fontWeight: 600 }}>Thank you for your business!</div>
+              <div style={{ textAlign: 'center', marginTop: 24, color: 'var(--text-muted)', fontSize: 12, fontWeight: 600 }}>Thank you for your business!</div>
             </div>
 
             <div style={{ display: 'flex', gap: 12, marginTop: 20 }}>
@@ -796,7 +796,7 @@ const Sales = () => {
               }} style={{ flex: 1, padding: 14, borderRadius: 16, background: '#f1f5f9', border: 'none', fontWeight: 800, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
                 <Printer size={18} /> Print Invoice
               </button>
-              <button onClick={() => setReceipt(null)} style={{ flex: 1, padding: 14, borderRadius: 16, background: '#0a84ff', color: 'white', border: 'none', fontWeight: 800, cursor: 'pointer' }}>
+              <button onClick={() => setReceipt(null)} style={{ flex: 1, padding: 14, borderRadius: 16, background: '#0a84ff', color: 'var(--bg-panel)', border: 'none', fontWeight: 800, cursor: 'pointer' }}>
                 New Sale
               </button>
             </div>

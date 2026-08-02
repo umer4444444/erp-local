@@ -1,11 +1,11 @@
 import React from 'react';
-import { LayoutDashboard, Package, ShoppingCart, Users, Briefcase, LogOut, User, Zap, DollarSign, Shield, Clock, Calendar, Pill, Truck, TrendingDown, Navigation } from 'lucide-react';
+import { LayoutDashboard, Package, ShoppingCart, Users, Briefcase, LogOut, User, Zap, DollarSign, Shield, Clock, Calendar, Pill, Truck, TrendingDown, Navigation, X } from 'lucide-react';
 import { NavLink } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { settingsAPI } from '../api';
 
-const Sidebar = () => {
+const Sidebar = ({ isOpen, setIsOpen }) => {
   const { user, logout, activeCompany } = useAuth();
   const role = user?.role || 'admin';
   const [companyName, setCompanyName] = React.useState('GlobalAI ERP');
@@ -21,9 +21,9 @@ const Sidebar = () => {
   }, [activeCompany]);
 
   const menuItems = [
-    { name: 'Dashboard',     icon: <LayoutDashboard size={18} />, path: '/',         roles: ['admin'] },
+    { name: 'Dashboard',     icon: <LayoutDashboard size={18} />, path: '/',         roles: ['admin', 'superadmin', 'owner', 'company_admin'] },
     { name: 'Manager Hub',   icon: <Shield size={18} />,          path: '/manager',   roles: ['admin', 'manager'] },
-    { name: 'Inventory',     icon: <Package size={18} />,          path: '/inventory', roles: ['admin', 'inventory', 'manager'] },
+    { name: 'Inventory',     icon: <Package size={18} />,          path: '/inventory', roles: ['admin', 'inventory', 'manager', 'company_admin', 'pharmacist', 'superadmin', 'owner'] },
     { name: 'Accounting',    icon: <DollarSign size={18} />,       path: '/accounting', roles: ['admin', 'manager', 'finance'] },
     { name: 'Sales POS',     icon: <ShoppingCart size={18} />,     path: '/sales',     roles: ['admin', 'cashier', 'manager'] },
     { name: 'Sales History', icon: <DollarSign size={18} />,       path: '/sales/history', roles: ['admin', 'cashier', 'manager'] },
@@ -46,26 +46,30 @@ const Sidebar = () => {
 
   const filtered = menuItems.filter(i => i.roles.includes(role));
 
-  return (
+  const sidebarContent = (
     <div style={{
       width: 260, height: 'calc(100vh - 32px)',
-      position: 'fixed', left: 16, top: 16,
-      zIndex: 50, borderRadius: 24,
-      background: 'white',
-      border: '1px solid rgba(0,0,0,0.07)',
-      boxShadow: '0 8px 32px rgba(0,0,0,0.08)',
+      background: 'var(--bg-panel)',
+      border: '1px solid var(--border-color)',
+      boxShadow: '0 8px 32px var(--shadow-color-rgb)',
       display: 'flex', flexDirection: 'column',
       padding: '24px 16px',
-      fontFamily: "'Outfit', sans-serif"
+      fontFamily: "'Outfit', sans-serif",
+      borderRadius: '24px',
     }}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 32, padding: '0 8px' }}>
-        <motion.div whileHover={{ rotate: 360 }} style={{ width: 38, height: 38, borderRadius: 11, background: '#0a84ff', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white' }}>
-          <Zap size={18} fill="currentColor" />
-        </motion.div>
-        <div>
-          <div style={{ fontSize: 17, fontWeight: 900, color: '#0f172a' }}>{companyName}</div>
-          <div style={{ fontSize: 9, fontWeight: 800, color: '#94a3b8', textTransform: 'uppercase' }}>ERP v2.0</div>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 32, padding: '0 8px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+          <motion.div whileHover={{ rotate: 360 }} style={{ width: 38, height: 38, borderRadius: 11, background: '#0a84ff', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--bg-panel)' }}>
+            <Zap size={18} fill="currentColor" />
+          </motion.div>
+          <div>
+            <div style={{ fontSize: 17, fontWeight: 900, color: 'var(--text-main)' }}>{companyName}</div>
+            <div style={{ fontSize: 9, fontWeight: 800, color: 'var(--text-muted)', textTransform: 'uppercase' }}>ERP v2.0</div>
+          </div>
         </div>
+        <button className="lg:hidden" onClick={() => setIsOpen(false)} style={{ background: 'transparent', border: 'none', color: 'var(--text-muted)', cursor: 'pointer' }}>
+          <X size={20} />
+        </button>
       </div>
 
       <nav style={{ flex: 1, minHeight: 0, overflowY: 'auto', paddingRight: 4, scrollbarWidth: 'none' }}>
@@ -75,7 +79,7 @@ const Sidebar = () => {
               <NavLink to={item.path} style={({ isActive }) => ({
                 display: 'flex', alignItems: 'center', gap: 10, padding: '10px 14px', borderRadius: 12, textDecoration: 'none',
                 fontWeight: 700, fontSize: 14, background: isActive ? 'rgba(10,132,255,0.08)' : 'transparent',
-                color: isActive ? '#0a84ff' : '#64748b',
+                color: isActive ? '#0a84ff' : 'var(--text-muted)',
               })}>
                 {item.icon} {item.name}
               </NavLink>
@@ -89,17 +93,48 @@ const Sidebar = () => {
         style={{ 
           display: 'flex', alignItems: 'center', gap: 10, padding: '12px 14px', 
           borderRadius: 14, border: 'none', background: 'linear-gradient(135deg, #0a84ff, #4f46e5)', 
-          color: 'white', cursor: 'pointer', fontWeight: 800, marginTop: 16, fontSize: 14,
+          color: 'var(--bg-panel)', cursor: 'pointer', fontWeight: 800, marginTop: 16, fontSize: 14,
           boxShadow: '0 4px 14px rgba(10,132,255,0.3)'
         }}
       >
         <Zap size={16} fill="white" /> Ask AI Assistant
       </button>
 
-      <button onClick={logout} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 14px', borderRadius: 12, border: 'none', background: 'transparent', color: '#94a3b8', cursor: 'pointer', fontWeight: 700, marginTop: 16 }}>
+      <button onClick={logout} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 14px', borderRadius: 12, border: 'none', background: 'transparent', color: 'var(--text-muted)', cursor: 'pointer', fontWeight: 700, marginTop: 16 }}>
         <LogOut size={16} /> Sign Out
       </button>
     </div>
+  );
+
+  return (
+    <>
+      {/* Mobile/Tablet Overlay Sidebar */}
+      <AnimatePresence>
+        {isOpen && (
+          <>
+            <motion.div 
+              initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+              onClick={() => setIsOpen(false)}
+              className="lg:hidden"
+              style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', zIndex: 99 }}
+            />
+            <motion.div 
+              initial={{ x: '-100%' }} animate={{ x: 0 }} exit={{ x: '-100%' }}
+              transition={{ type: 'spring', damping: 25, stiffness: 300 }}
+              className="lg:hidden"
+              style={{ position: 'fixed', top: 16, left: 16, zIndex: 100 }}
+            >
+              {sidebarContent}
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
+
+      {/* Desktop Persistent Sidebar */}
+      <div className="hidden lg:block" style={{ position: 'fixed', top: 16, left: 16, zIndex: 50 }}>
+        {sidebarContent}
+      </div>
+    </>
   );
 };
 

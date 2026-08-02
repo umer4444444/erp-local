@@ -11,7 +11,7 @@ import API from '../api';
 
 const TIER_CONFIG = {
   Bronze:   { color: '#cd7f32', bg: '#fdf6ec', label: 'Bronze',   icon: '🥉', min: 0 },
-  Silver:   { color: '#94a3b8', bg: '#f1f5f9', label: 'Silver',   icon: '🥈', min: 500 },
+  Silver:   { color: 'var(--text-muted)', bg: '#f1f5f9', label: 'Silver',   icon: '🥈', min: 500 },
   Gold:     { color: '#f59e0b', bg: '#fffbeb', label: 'Gold',     icon: '🥇', min: 1500 },
   Platinum: { color: '#8b5cf6', bg: '#f5f3ff', label: 'Platinum', icon: '💎', min: 5000 },
 };
@@ -142,26 +142,26 @@ const Customers = () => {
   };
 
   return (
-    <div style={{ padding: 40, minHeight: '100vh', background: '#f8fafc', fontFamily: "'Outfit', sans-serif" }}>
+    <div style={{ padding: 40, minHeight: '100vh', background: 'var(--bg-main)', fontFamily: "'Outfit', sans-serif" }}>
       <header style={{ marginBottom: 40 }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
           <div>
             <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 8 }}>
-              <div style={{ width: 32, height: 32, borderRadius: 8, background: '#0a84ff', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <div style={{ width: 32, height: 32, borderRadius: 8, background: '#0a84ff', color: 'var(--bg-panel)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                 <Users size={18} />
               </div>
-              <span style={{ fontSize: 12, fontWeight: 800, color: '#64748b', textTransform: 'uppercase', letterSpacing: 1 }}>Relationship Management</span>
+              <span style={{ fontSize: 12, fontWeight: 800, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: 1 }}>Relationship Management</span>
             </div>
-            <h1 style={{ fontSize: 32, fontWeight: 900, color: '#0f172a' }}>Customer CRM</h1>
+            <h1 style={{ fontSize: 32, fontWeight: 900, color: 'var(--text-main)' }}>Customer CRM</h1>
           </div>
           <div style={{ display: 'flex', gap: 12 }}>
             <div style={{ position: 'relative' }}>
-              <Search size={18} style={{ position: 'absolute', left: 16, top: '50%', transform: 'translateY(-50%)', color: '#94a3b8' }} />
+              <Search size={18} style={{ position: 'absolute', left: 16, top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
               <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Search by name, phone..."
                 style={{ padding: '12px 12px 12px 44px', borderRadius: 14, border: '1px solid #e2e8f0', width: 260, fontWeight: 600 }} />
             </div>
             <select value={tierFilter} onChange={e => setTierFilter(e.target.value)}
-              style={{ padding: '12px 16px', borderRadius: 14, border: '1px solid #e2e8f0', fontWeight: 700, background: 'white', cursor: 'pointer' }}>
+              style={{ padding: '12px 16px', borderRadius: 14, border: '1px solid #e2e8f0', fontWeight: 700, background: 'var(--bg-panel)', cursor: 'pointer' }}>
               <option value="">All Tiers</option>
               <option value="Bronze">🥉 Bronze</option>
               <option value="Silver">🥈 Silver</option>
@@ -169,7 +169,7 @@ const Customers = () => {
               <option value="Platinum">💎 Platinum</option>
             </select>
             <button onClick={() => { setShowModal(true); setEditingCustomer(null); setNewCustomer({ name: '', email: '', phone: '', address: '' }); }}
-              style={{ padding: '12px 24px', borderRadius: 14, background: '#0f172a', color: 'white', border: 'none', fontWeight: 800, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 8 }}>
+              style={{ padding: '12px 24px', borderRadius: 14, background: 'var(--text-main)', color: 'var(--bg-panel)', border: 'none', fontWeight: 800, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 8 }}>
               <UserPlus size={18} /> Add Customer
             </button>
           </div>
@@ -183,11 +183,11 @@ const Customers = () => {
             { label: 'Outstanding Balance', value: `SAR ${stats.outstanding.toFixed(2)}`, icon: <DollarSign size={18} />, color: '#ef4444', bg: '#fff1f2' },
             { label: 'Total Loyalty Points', value: stats.totalPoints.toLocaleString(), icon: <Star size={18} />, color: '#8b5cf6', bg: '#f5f3ff' },
           ].map(s => (
-            <div key={s.label} style={{ background: 'white', borderRadius: 20, padding: '20px 24px', display: 'flex', alignItems: 'center', gap: 16, border: '1px solid rgba(0,0,0,0.04)' }}>
+            <div key={s.label} style={{ background: 'var(--bg-panel)', borderRadius: 20, padding: '20px 24px', display: 'flex', alignItems: 'center', gap: 16, border: '1px solid var(--border-color-rgb)' }}>
               <div style={{ width: 44, height: 44, borderRadius: 12, background: s.bg, color: s.color, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>{s.icon}</div>
               <div>
-                <div style={{ fontSize: 22, fontWeight: 900, color: '#0f172a' }}>{s.value}</div>
-                <div style={{ fontSize: 12, color: '#64748b', fontWeight: 600 }}>{s.label}</div>
+                <div style={{ fontSize: 22, fontWeight: 900, color: 'var(--text-main)' }}>{s.value}</div>
+                <div style={{ fontSize: 12, color: 'var(--text-muted)', fontWeight: 600 }}>{s.label}</div>
               </div>
             </div>
           ))}
@@ -202,7 +202,7 @@ const Customers = () => {
             const outstanding = parseFloat(c.outstandingBalance || 0);
             return (
               <motion.div layout key={c.id} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: index * 0.04 }}
-                style={{ background: 'white', borderRadius: 28, padding: 28, border: '1px solid rgba(0,0,0,0.05)', boxShadow: '0 4px 20px rgba(0,0,0,0.02)', position: 'relative' }}>
+                style={{ background: 'var(--bg-panel)', borderRadius: 28, padding: 28, border: '1px solid var(--border-color-rgb)', boxShadow: '0 4px 20px var(--shadow-color-rgb)', position: 'relative' }}>
                 
                 {/* Tier badge top-right */}
                 <div style={{ position: 'absolute', top: 20, right: 20, padding: '4px 10px', borderRadius: 10, background: tier.bg, color: tier.color, fontSize: 11, fontWeight: 800 }}>
@@ -214,27 +214,27 @@ const Customers = () => {
                     {c.name[0]}
                   </div>
                   <div style={{ flex: 1, paddingRight: 80 }}>
-                    <div style={{ fontSize: 18, fontWeight: 800, color: '#0f172a' }}>{c.name}</div>
-                    <div style={{ fontSize: 12, fontWeight: 600, color: '#64748b', marginTop: 2 }}>ID: {c.id.slice(0, 8).toUpperCase()}</div>
+                    <div style={{ fontSize: 18, fontWeight: 800, color: 'var(--text-main)' }}>{c.name}</div>
+                    <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--text-muted)', marginTop: 2 }}>ID: {c.id.slice(0, 8).toUpperCase()}</div>
                   </div>
                 </div>
 
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBottom: 16 }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 10, fontSize: 13, color: '#64748b', fontWeight: 600 }}><Phone size={14} /> {c.phone}</div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 10, fontSize: 13, color: '#64748b', fontWeight: 600 }}><Mail size={14} /> {c.email || 'No email provided'}</div>
-                  {c.address && <div style={{ display: 'flex', alignItems: 'center', gap: 10, fontSize: 13, color: '#64748b', fontWeight: 600 }}><MapPin size={14} /> {c.address}</div>}
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 10, fontSize: 13, color: 'var(--text-muted)', fontWeight: 600 }}><Phone size={14} /> {c.phone}</div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 10, fontSize: 13, color: 'var(--text-muted)', fontWeight: 600 }}><Mail size={14} /> {c.email || 'No email provided'}</div>
+                  {c.address && <div style={{ display: 'flex', alignItems: 'center', gap: 10, fontSize: 13, color: 'var(--text-muted)', fontWeight: 600 }}><MapPin size={14} /> {c.address}</div>}
                 </div>
 
                 {/* Loyalty Points Bar */}
-                <div style={{ background: '#f8fafc', borderRadius: 14, padding: '12px 16px', marginBottom: 16 }}>
+                <div style={{ background: 'var(--bg-main)', borderRadius: 14, padding: '12px 16px', marginBottom: 16 }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
                       <Star size={13} color="#f59e0b" fill="#f59e0b" />
-                      <span style={{ fontSize: 12, fontWeight: 800, color: '#0f172a' }}>{(c.loyaltyPoints || 0).toLocaleString()} pts</span>
+                      <span style={{ fontSize: 12, fontWeight: 800, color: 'var(--text-main)' }}>{(c.loyaltyPoints || 0).toLocaleString()} pts</span>
                     </div>
-                    <span style={{ fontSize: 11, color: '#94a3b8', fontWeight: 600 }}>≈ ${((c.loyaltyPoints || 0) / 100).toFixed(2)} value</span>
+                    <span style={{ fontSize: 11, color: 'var(--text-muted)', fontWeight: 600 }}>≈ ${((c.loyaltyPoints || 0) / 100).toFixed(2)} value</span>
                   </div>
-                  <div style={{ height: 6, background: '#e2e8f0', borderRadius: 4, overflow: 'hidden' }}>
+                  <div style={{ height: 6, background: 'var(--border-color)', borderRadius: 4, overflow: 'hidden' }}>
                     <div style={{ height: '100%', background: tier.color, borderRadius: 4, width: `${Math.min(((c.loyaltyPoints || 0) / 5000) * 100, 100)}%`, transition: 'width 0.6s ease' }} />
                   </div>
                 </div>
@@ -246,14 +246,14 @@ const Customers = () => {
                       <DollarSign size={13} /> Outstanding: SAR {outstanding.toFixed(2)}
                     </div>
                     <button onClick={() => { setSelectedCustomer(c); setShowPaymentModal(true); }}
-                      style={{ padding: '4px 12px', borderRadius: 8, background: '#ef4444', color: 'white', border: 'none', fontWeight: 800, fontSize: 11, cursor: 'pointer' }}>
+                      style={{ padding: '4px 12px', borderRadius: 8, background: '#ef4444', color: 'var(--bg-panel)', border: 'none', fontWeight: 800, fontSize: 11, cursor: 'pointer' }}>
                       Pay Now
                     </button>
                   </div>
                 )}
 
                 <div style={{ paddingTop: 16, borderTop: '1px solid #f1f5f9', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <button onClick={() => handleOptions(c)} style={{ border: 'none', background: '#f8fafc', borderRadius: 8, padding: '6px 12px', fontWeight: 700, fontSize: 12, cursor: 'pointer', color: '#64748b' }}>
+                  <button onClick={() => handleOptions(c)} style={{ border: 'none', background: 'var(--bg-main)', borderRadius: 8, padding: '6px 12px', fontWeight: 700, fontSize: 12, cursor: 'pointer', color: 'var(--text-muted)' }}>
                     <MoreVertical size={14} style={{ display: 'inline', marginRight: 4 }} /> Options
                   </button>
                   <button onClick={async () => { setSelectedCustomer(c); await fetchHistory(c.id); setShowHistoryModal(true); }}
@@ -268,7 +268,7 @@ const Customers = () => {
       </div>
 
       {filtered.length === 0 && !loading && (
-        <div style={{ textAlign: 'center', padding: '80px 0', color: '#94a3b8' }}>
+        <div style={{ textAlign: 'center', padding: '80px 0', color: 'var(--text-muted)' }}>
           <Users size={48} style={{ margin: '0 auto 16px', opacity: 0.3 }} />
           <div style={{ fontWeight: 700, fontSize: 18 }}>No customers found</div>
         </div>
@@ -279,7 +279,7 @@ const Customers = () => {
         {showModal && (
           <div style={{ position: 'fixed', inset: 0, zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 24 }}>
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setShowModal(false)} style={{ position: 'absolute', inset: 0, background: 'rgba(15,23,42,0.6)', backdropFilter: 'blur(8px)' }} />
-            <motion.div initial={{ scale: 0.9, y: 40 }} animate={{ scale: 1, y: 0 }} exit={{ scale: 0.9, y: 40 }} style={{ background: 'white', borderRadius: 32, width: '100%', maxWidth: 450, position: 'relative', padding: 40, boxShadow: '0 40px 100px rgba(0,0,0,0.2)' }}>
+            <motion.div initial={{ scale: 0.9, y: 40 }} animate={{ scale: 1, y: 0 }} exit={{ scale: 0.9, y: 40 }} style={{ background: 'var(--bg-panel)', borderRadius: 32, width: '100%', maxWidth: 450, position: 'relative', padding: 40, boxShadow: '0 40px 100px var(--shadow-strong-rgb)' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 32 }}>
                 <h2 style={{ fontSize: 24, fontWeight: 900 }}>{editingCustomer ? 'Edit Customer' : 'New Customer'}</h2>
                 <button onClick={() => setShowModal(false)} style={{ border: 'none', background: 'transparent', cursor: 'pointer' }}><X size={24} /></button>
@@ -292,12 +292,12 @@ const Customers = () => {
                   { label: 'STREET ADDRESS', field: 'address', placeholder: '123 Business Way...' },
                 ].map(({ label, field, placeholder }) => (
                   <div key={field}>
-                    <label style={{ display: 'block', fontSize: 12, fontWeight: 800, color: '#64748b', marginBottom: 8 }}>{label}</label>
+                    <label style={{ display: 'block', fontSize: 12, fontWeight: 800, color: 'var(--text-muted)', marginBottom: 8 }}>{label}</label>
                     <input value={newCustomer[field]} onChange={e => setNewCustomer({...newCustomer, [field]: e.target.value})} placeholder={placeholder}
                       style={{ width: '100%', padding: '14px', borderRadius: 12, border: '1px solid #e2e8f0', fontWeight: 600 }} />
                   </div>
                 ))}
-                <button onClick={handleAddCustomer} style={{ marginTop: 12, padding: 18, borderRadius: 16, background: '#0a84ff', color: 'white', border: 'none', fontWeight: 900, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 10, justifyContent: 'center' }}>
+                <button onClick={handleAddCustomer} style={{ marginTop: 12, padding: 18, borderRadius: 16, background: '#0a84ff', color: 'var(--bg-panel)', border: 'none', fontWeight: 900, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 10, justifyContent: 'center' }}>
                   <Save size={18} /> {editingCustomer ? 'Save Changes' : 'Register Customer'}
                 </button>
               </div>
@@ -311,28 +311,28 @@ const Customers = () => {
         {showPaymentModal && selectedCustomer && (
           <div style={{ position: 'fixed', inset: 0, zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 24 }}>
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setShowPaymentModal(false)} style={{ position: 'absolute', inset: 0, background: 'rgba(15,23,42,0.6)', backdropFilter: 'blur(8px)' }} />
-            <motion.div initial={{ scale: 0.9, y: 40 }} animate={{ scale: 1, y: 0 }} exit={{ scale: 0.9, y: 40 }} style={{ background: 'white', borderRadius: 32, width: '100%', maxWidth: 420, position: 'relative', padding: 40, boxShadow: '0 40px 100px rgba(0,0,0,0.2)' }}>
+            <motion.div initial={{ scale: 0.9, y: 40 }} animate={{ scale: 1, y: 0 }} exit={{ scale: 0.9, y: 40 }} style={{ background: 'var(--bg-panel)', borderRadius: 32, width: '100%', maxWidth: 420, position: 'relative', padding: 40, boxShadow: '0 40px 100px var(--shadow-strong-rgb)' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 24 }}>
                 <h2 style={{ fontSize: 22, fontWeight: 900 }}>Record Payment</h2>
                 <button onClick={() => setShowPaymentModal(false)} style={{ border: 'none', background: 'transparent', cursor: 'pointer' }}><X size={24} /></button>
               </div>
               <div style={{ background: '#fff1f2', borderRadius: 16, padding: 16, marginBottom: 24, fontSize: 14 }}>
-                <div style={{ fontWeight: 800, color: '#0f172a', marginBottom: 4 }}>{selectedCustomer.name}</div>
+                <div style={{ fontWeight: 800, color: 'var(--text-main)', marginBottom: 4 }}>{selectedCustomer.name}</div>
                 <div style={{ color: '#ef4444', fontWeight: 700 }}>Outstanding: SAR {parseFloat(selectedCustomer.outstandingBalance || 0).toFixed(2)}</div>
               </div>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
                 <div>
-                  <label style={{ display: 'block', fontSize: 12, fontWeight: 800, color: '#64748b', marginBottom: 8 }}>PAYMENT AMOUNT (SAR)</label>
+                  <label style={{ display: 'block', fontSize: 12, fontWeight: 800, color: 'var(--text-muted)', marginBottom: 8 }}>PAYMENT AMOUNT (SAR)</label>
                   <input type="number" value={paymentAmount} onChange={e => setPaymentAmount(e.target.value)} placeholder="0.00"
                     style={{ width: '100%', padding: '14px', borderRadius: 12, border: '1px solid #e2e8f0', fontWeight: 700, fontSize: 18 }} />
                 </div>
                 <div>
-                  <label style={{ display: 'block', fontSize: 12, fontWeight: 800, color: '#64748b', marginBottom: 8 }}>NOTE (OPTIONAL)</label>
+                  <label style={{ display: 'block', fontSize: 12, fontWeight: 800, color: 'var(--text-muted)', marginBottom: 8 }}>NOTE (OPTIONAL)</label>
                   <input value={paymentNote} onChange={e => setPaymentNote(e.target.value)} placeholder="Payment method, reference..."
                     style={{ width: '100%', padding: '14px', borderRadius: 12, border: '1px solid #e2e8f0', fontWeight: 600 }} />
                 </div>
                 <button onClick={handlePayOutstanding} disabled={paymentLoading}
-                  style={{ padding: 18, borderRadius: 16, background: '#10b981', color: 'white', border: 'none', fontWeight: 900, cursor: 'pointer', fontSize: 16 }}>
+                  style={{ padding: 18, borderRadius: 16, background: '#10b981', color: 'var(--bg-panel)', border: 'none', fontWeight: 900, cursor: 'pointer', fontSize: 16 }}>
                   {paymentLoading ? 'Processing...' : 'Confirm Payment'}
                 </button>
               </div>
@@ -346,11 +346,11 @@ const Customers = () => {
         {showHistoryModal && selectedCustomer && (
           <div style={{ position: 'fixed', inset: 0, zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 24 }}>
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setShowHistoryModal(false)} style={{ position: 'absolute', inset: 0, background: 'rgba(15,23,42,0.6)', backdropFilter: 'blur(8px)' }} />
-            <motion.div initial={{ scale: 0.9, y: 40 }} animate={{ scale: 1, y: 0 }} exit={{ scale: 0.9, y: 40 }} style={{ background: 'white', borderRadius: 32, width: '90%', maxWidth: 560, position: 'relative', padding: 40, boxShadow: '0 40px 100px rgba(0,0,0,0.2)', maxHeight: '90vh', display: 'flex', flexDirection: 'column' }}>
+            <motion.div initial={{ scale: 0.9, y: 40 }} animate={{ scale: 1, y: 0 }} exit={{ scale: 0.9, y: 40 }} style={{ background: 'var(--bg-panel)', borderRadius: 32, width: '90%', maxWidth: 560, position: 'relative', padding: 40, boxShadow: '0 40px 100px var(--shadow-strong-rgb)', maxHeight: '90vh', display: 'flex', flexDirection: 'column' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 24 }}>
                 <div>
                   <h2 style={{ fontSize: 22, fontWeight: 900, marginBottom: 4 }}>{selectedCustomer.name}</h2>
-                  <div style={{ fontSize: 12, color: '#64748b', fontWeight: 600, display: 'flex', gap: 12 }}>
+                  <div style={{ fontSize: 12, color: 'var(--text-muted)', fontWeight: 600, display: 'flex', gap: 12 }}>
                     <span>🏆 {getTier(selectedCustomer.loyaltyPoints || 0).label}</span>
                     <span>⭐ {selectedCustomer.loyaltyPoints || 0} pts</span>
                     {parseFloat(selectedCustomer.outstandingBalance || 0) > 0 && (
@@ -362,14 +362,14 @@ const Customers = () => {
               </div>
               <div style={{ flex: 1, overflowY: 'auto' }}>
                 {historyLoading ? (
-                  <div style={{ textAlign: 'center', padding: 40, color: '#94a3b8' }}>Loading...</div>
+                  <div style={{ textAlign: 'center', padding: 40, color: 'var(--text-muted)' }}>Loading...</div>
                 ) : history.length === 0 ? (
-                  <div style={{ textAlign: 'center', padding: 40, color: '#94a3b8', fontWeight: 700 }}>No purchase history yet.</div>
+                  <div style={{ textAlign: 'center', padding: 40, color: 'var(--text-muted)', fontWeight: 700 }}>No purchase history yet.</div>
                 ) : (
                   <div>
                     {/* Visual Purchase Trend Chart */}
-                    <div style={{ background: '#f8fafc', padding: 20, borderRadius: 20, marginBottom: 24, border: '1px solid #e2e8f0' }}>
-                      <div style={{ fontSize: 13, fontWeight: 800, color: '#0f172a', marginBottom: 16, display: 'flex', alignItems: 'center', gap: 6 }}>
+                    <div style={{ background: 'var(--bg-main)', padding: 20, borderRadius: 20, marginBottom: 24, border: '1px solid #e2e8f0' }}>
+                      <div style={{ fontSize: 13, fontWeight: 800, color: 'var(--text-main)', marginBottom: 16, display: 'flex', alignItems: 'center', gap: 6 }}>
                         <TrendingUp size={16} color="#0a84ff" /> Purchase History Trend (SAR)
                       </div>
                       <div style={{ display: 'flex', alignItems: 'flex-end', gap: 12, height: 120, paddingBottom: 8, borderBottom: '1px dashed #cbd5e1', overflowX: 'auto' }}>
@@ -390,7 +390,7 @@ const Customers = () => {
                                   transition: 'height 0.4s ease'
                                 }} 
                               />
-                              <span style={{ fontSize: 9, fontWeight: 600, color: '#94a3b8', whiteSpace: 'nowrap' }}>
+                              <span style={{ fontSize: 9, fontWeight: 600, color: 'var(--text-muted)', whiteSpace: 'nowrap' }}>
                                 {new Date(h.createdAt).toLocaleDateString([], { month: 'short', day: 'numeric' })}
                               </span>
                             </div>
@@ -401,13 +401,13 @@ const Customers = () => {
 
                     <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
                       {history.map((item, idx) => (
-                        <div key={idx} style={{ padding: '16px 20px', borderRadius: 16, background: '#f8fafc', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <div key={idx} style={{ padding: '16px 20px', borderRadius: 16, background: 'var(--bg-main)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                           <div>
-                            <div style={{ fontWeight: 800, color: '#0f172a', fontSize: 14 }}>Sale #{item.id?.slice(0, 8).toUpperCase()}</div>
-                            <div style={{ fontSize: 12, color: '#64748b', fontWeight: 600, marginTop: 2 }}>{new Date(item.createdAt).toLocaleDateString()} · {item.paymentMethod}</div>
+                            <div style={{ fontWeight: 800, color: 'var(--text-main)', fontSize: 14 }}>Sale #{item.id?.slice(0, 8).toUpperCase()}</div>
+                            <div style={{ fontSize: 12, color: 'var(--text-muted)', fontWeight: 600, marginTop: 2 }}>{new Date(item.createdAt).toLocaleDateString()} · {item.paymentMethod}</div>
                           </div>
                           <div style={{ textAlign: 'right' }}>
-                            <div style={{ fontWeight: 900, fontSize: 16, color: '#0f172a' }}>SAR {parseFloat(item.grandTotal).toFixed(2)}</div>
+                            <div style={{ fontWeight: 900, fontSize: 16, color: 'var(--text-main)' }}>SAR {parseFloat(item.grandTotal).toFixed(2)}</div>
                             {item.discount > 0 && <div style={{ fontSize: 11, color: '#10b981', fontWeight: 700 }}>-${item.discount} off</div>}
                           </div>
                         </div>

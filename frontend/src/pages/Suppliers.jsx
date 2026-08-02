@@ -56,7 +56,7 @@ const inputStyle = {
   outline: 'none', fontFamily: "'Outfit', sans-serif", boxSizing: 'border-box',
   transition: 'border-color 0.2s',
 };
-const labelStyle = { display: 'block', fontSize: 11, fontWeight: 800, color: '#94a3b8', marginBottom: 7, textTransform: 'uppercase', letterSpacing: 0.5 };
+const labelStyle = { display: 'block', fontSize: 11, fontWeight: 800, color: 'var(--text-muted)', marginBottom: 7, textTransform: 'uppercase', letterSpacing: 0.5 };
 
 // ─── Empty PO line ────────────────────────────────────────────────────────────
 const emptyLine = () => ({ productId: '', productName: '', quantity: 1, unitCost: '' });
@@ -244,30 +244,30 @@ const Suppliers = () => {
 
   // ─── Render ───────────────────────────────────────────────────────────────
   return (
-    <div style={{ padding: 40, minHeight: '100vh', background: '#f8fafc', fontFamily: "'Outfit', sans-serif" }}>
+    <div style={{ padding: 40, minHeight: '100vh', background: 'var(--bg-main)', fontFamily: "'Outfit', sans-serif" }}>
 
       {/* ── Header ── */}
       <header style={{ marginBottom: 40 }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 8 }}>
           <div>
             <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 6 }}>
-              <div style={{ width: 32, height: 32, borderRadius: 8, background: '#0f172a', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <div style={{ width: 32, height: 32, borderRadius: 8, background: 'var(--text-main)', color: 'var(--bg-panel)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                 <Truck size={18} />
               </div>
-              <span style={{ fontSize: 12, fontWeight: 800, color: '#64748b', textTransform: 'uppercase', letterSpacing: 1 }}>
+              <span style={{ fontSize: 12, fontWeight: 800, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: 1 }}>
                 Procurement
               </span>
             </div>
-            <h1 style={{ fontSize: 32, fontWeight: 900, color: '#0f172a', margin: 0 }}>Supply Chain & CRM</h1>
-            <p style={{ color: '#64748b', fontWeight: 600, margin: '4px 0 0' }}>
+            <h1 style={{ fontSize: 32, fontWeight: 900, color: 'var(--text-main)', margin: 0 }}>Supply Chain & CRM</h1>
+            <p style={{ color: 'var(--text-muted)', fontWeight: 600, margin: '4px 0 0' }}>
               Manage vendor relationships, purchase orders, and stock receipts.
             </p>
           </div>
           <div style={{ display: 'flex', gap: 12 }}>
-            <button onClick={fetchAll} style={{ padding: '12px', borderRadius: 14, background: 'white', border: '1px solid #e2e8f0', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              <RefreshCw size={18} color="#64748b" />
+            <button onClick={fetchAll} style={{ padding: '12px', borderRadius: 14, background: 'var(--bg-panel)', border: '1px solid #e2e8f0', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <RefreshCw size={18} color='var(--text-muted)' />
             </button>
-            <button onClick={() => setShowAddModal(true)} style={{ padding: '14px 28px', borderRadius: 16, background: '#0f172a', color: 'white', border: 'none', fontWeight: 800, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 10, fontSize: 14 }}>
+            <button onClick={() => setShowAddModal(true)} style={{ padding: '14px 28px', borderRadius: 16, background: 'var(--text-main)', color: 'var(--bg-panel)', border: 'none', fontWeight: 800, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 10, fontSize: 14 }}>
               <Plus size={18} /> Add Supplier
             </button>
           </div>
@@ -282,7 +282,7 @@ const Suppliers = () => {
               {lowStockProducts.length} product{lowStockProducts.length > 1 ? 's' : ''} running low on stock.
             </span>
             <button onClick={handleAutoPO} disabled={autoPoRunning}
-              style={{ marginLeft: 'auto', padding: '8px 18px', borderRadius: 10, background: autoPoRunning ? '#e2e8f0' : '#f97316', color: autoPoRunning ? '#64748b' : 'white', border: 'none', fontWeight: 800, cursor: autoPoRunning ? 'not-allowed' : 'pointer', fontSize: 13 }}>
+              style={{ marginLeft: 'auto', padding: '8px 18px', borderRadius: 10, background: autoPoRunning ? 'var(--border-color)' : '#f97316', color: autoPoRunning ? 'var(--text-muted)' : 'var(--bg-panel)', border: 'none', fontWeight: 800, cursor: autoPoRunning ? 'not-allowed' : 'pointer', fontSize: 13 }}>
               {autoPoRunning ? 'Generating…' : 'Auto-Generate PO'}
             </button>
           </motion.div>
@@ -291,20 +291,20 @@ const Suppliers = () => {
 
       {/* ── Supplier Cards ── */}
       {loading ? (
-        <div style={{ textAlign: 'center', padding: 80, color: '#94a3b8', fontWeight: 700 }}>Loading suppliers…</div>
+        <div style={{ textAlign: 'center', padding: 80, color: 'var(--text-muted)', fontWeight: 700 }}>Loading suppliers…</div>
       ) : (
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(340px, 1fr))', gap: 24, marginBottom: 48 }}>
           {supplierStats.map(s => (
             <motion.div key={s.id} whileHover={{ y: -4, boxShadow: '0 12px 40px rgba(0,0,0,0.10)' }} transition={{ type: 'spring', stiffness: 300 }}
-              style={{ background: 'white', padding: 28, borderRadius: 28, border: '1px solid rgba(0,0,0,0.05)', display: 'flex', flexDirection: 'column', gap: 20 }}>
+              style={{ background: 'var(--bg-panel)', padding: 28, borderRadius: 28, border: '1px solid var(--border-color-rgb)', display: 'flex', flexDirection: 'column', gap: 20 }}>
 
               {/* Card header */}
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
                 <div style={{ width: 56, height: 56, borderRadius: 18, background: '#f1f5f9', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                  <Truck size={28} color="#0f172a" />
+                  <Truck size={28} color='var(--text-main)' />
                 </div>
                 <div style={{ textAlign: 'right' }}>
-                  <span style={{ display: 'inline-block', padding: '4px 10px', borderRadius: 20, background: '#f1f5f9', color: '#64748b', fontSize: 10, fontWeight: 800, marginBottom: 6 }}>
+                  <span style={{ display: 'inline-block', padding: '4px 10px', borderRadius: 20, background: '#f1f5f9', color: 'var(--text-muted)', fontSize: 10, fontWeight: 800, marginBottom: 6 }}>
                     {s.category?.toUpperCase() || 'GENERAL'}
                   </span>
                   <div><StarRating rating={s.rating || 0} /></div>
@@ -313,15 +313,15 @@ const Suppliers = () => {
 
               {/* Name & contact */}
               <div>
-                <h2 style={{ fontSize: 20, fontWeight: 900, color: '#0f172a', margin: '0 0 4px' }}>{s.name}</h2>
-                <div style={{ fontSize: 13, color: '#64748b', fontWeight: 600 }}>{s.contactPerson || '—'}</div>
+                <h2 style={{ fontSize: 20, fontWeight: 900, color: 'var(--text-main)', margin: '0 0 4px' }}>{s.name}</h2>
+                <div style={{ fontSize: 13, color: 'var(--text-muted)', fontWeight: 600 }}>{s.contactPerson || '—'}</div>
               </div>
 
               {/* Contact info */}
               <div style={{ display: 'flex', flexDirection: 'column', gap: 8, borderTop: '1px solid #f1f5f9', paddingTop: 18 }}>
-                {s.email  && <div style={{ display: 'flex', alignItems: 'center', gap: 8, color: '#64748b', fontSize: 13 }}><Mail size={14} /> {s.email}</div>}
-                {s.phone  && <div style={{ display: 'flex', alignItems: 'center', gap: 8, color: '#64748b', fontSize: 13 }}><Phone size={14} /> {s.phone}</div>}
-                {s.address && <div style={{ display: 'flex', alignItems: 'center', gap: 8, color: '#64748b', fontSize: 13 }}><MapPin size={14} /> {s.address}</div>}
+                {s.email  && <div style={{ display: 'flex', alignItems: 'center', gap: 8, color: 'var(--text-muted)', fontSize: 13 }}><Mail size={14} /> {s.email}</div>}
+                {s.phone  && <div style={{ display: 'flex', alignItems: 'center', gap: 8, color: 'var(--text-muted)', fontSize: 13 }}><Phone size={14} /> {s.phone}</div>}
+                {s.address && <div style={{ display: 'flex', alignItems: 'center', gap: 8, color: 'var(--text-muted)', fontSize: 13 }}><MapPin size={14} /> {s.address}</div>}
               </div>
 
               {/* Performance metrics */}
@@ -331,9 +331,9 @@ const Suppliers = () => {
                   { label: 'Received', value: s.receivedCount },
                   { label: 'Total Spend', value: `SAR ${(s.totalSpend/1000).toFixed(1)}k` },
                 ].map(m => (
-                  <div key={m.label} style={{ textAlign: 'center', padding: '10px 6px', borderRadius: 12, background: '#f8fafc' }}>
-                    <div style={{ fontSize: 18, fontWeight: 900, color: '#0f172a' }}>{m.value}</div>
-                    <div style={{ fontSize: 10, color: '#94a3b8', fontWeight: 700, textTransform: 'uppercase' }}>{m.label}</div>
+                  <div key={m.label} style={{ textAlign: 'center', padding: '10px 6px', borderRadius: 12, background: 'var(--bg-main)' }}>
+                    <div style={{ fontSize: 18, fontWeight: 900, color: 'var(--text-main)' }}>{m.value}</div>
+                    <div style={{ fontSize: 10, color: 'var(--text-muted)', fontWeight: 700, textTransform: 'uppercase' }}>{m.label}</div>
                   </div>
                 ))}
               </div>
@@ -345,14 +345,14 @@ const Suppliers = () => {
                   <Edit2 size={16} color="#475569" />
                 </button>
                 <button onClick={() => openOrder(s)}
-                  style={{ flex: 1, padding: '13px', borderRadius: 14, background: '#0f172a', color: 'white', border: 'none', fontWeight: 800, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, fontSize: 14 }}>
+                  style={{ flex: 1, padding: '13px', borderRadius: 14, background: 'var(--text-main)', color: 'var(--bg-panel)', border: 'none', fontWeight: 800, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, fontSize: 14 }}>
                   <ShoppingCart size={16} /> Create PO
                 </button>
               </div>
             </motion.div>
           ))}
           {suppliers.length === 0 && (
-            <div style={{ gridColumn: '1/-1', textAlign: 'center', padding: 100, color: '#94a3b8' }}>
+            <div style={{ gridColumn: '1/-1', textAlign: 'center', padding: 100, color: 'var(--text-muted)' }}>
               <Truck size={48} style={{ opacity: 0.2, marginBottom: 16 }} />
               <div style={{ fontWeight: 700 }}>No suppliers registered yet.</div>
             </div>
@@ -363,19 +363,19 @@ const Suppliers = () => {
       {/* ── Purchase Orders Table ── */}
       <section>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
-          <h2 style={{ fontSize: 24, fontWeight: 900, color: '#0f172a', margin: 0 }}>Purchase Orders</h2>
+          <h2 style={{ fontSize: 24, fontWeight: 900, color: 'var(--text-main)', margin: 0 }}>Purchase Orders</h2>
           <div style={{ display: 'flex', gap: 10 }}>
             {['all','pending','received'].map(f => (
-              <span key={f} style={{ padding: '6px 14px', borderRadius: 20, background: '#f1f5f9', color: '#64748b', fontWeight: 700, fontSize: 12, cursor: 'default', textTransform: 'capitalize' }}>{f}</span>
+              <span key={f} style={{ padding: '6px 14px', borderRadius: 20, background: '#f1f5f9', color: 'var(--text-muted)', fontWeight: 700, fontSize: 12, cursor: 'default', textTransform: 'capitalize' }}>{f}</span>
             ))}
           </div>
         </div>
-        <div style={{ background: 'white', borderRadius: 28, overflow: 'hidden', border: '1px solid rgba(0,0,0,0.05)' }}>
-          <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+        <div style={{ background: 'var(--bg-panel)', borderRadius: 28, overflow: 'hidden', border: '1px solid var(--border-color-rgb)' }}>
+          <div className="w-full overflow-x-auto"><table style={{ width: '100%', borderCollapse: 'collapse' }}>
             <thead>
-              <tr style={{ background: '#f8fafc', borderBottom: '1px solid #f1f5f9' }}>
+              <tr style={{ background: 'var(--bg-main)', borderBottom: '1px solid #f1f5f9' }}>
                 {['', 'PO ID', 'Supplier', 'Date', 'Items', 'Total', 'Status', 'Actions'].map(h => (
-                  <th key={h} style={{ padding: '16px 18px', fontSize: 11, fontWeight: 800, color: '#94a3b8', textTransform: 'uppercase', textAlign: 'left', letterSpacing: 0.5 }}>{h}</th>
+                  <th key={h} style={{ padding: '16px 18px', fontSize: 11, fontWeight: 800, color: 'var(--text-muted)', textTransform: 'uppercase', textAlign: 'left', letterSpacing: 0.5 }}>{h}</th>
                 ))}
               </tr>
             </thead>
@@ -387,14 +387,14 @@ const Suppliers = () => {
                   <React.Fragment key={o.id}>
                     <tr style={{ borderBottom: '1px solid #f8fafc', transition: 'background 0.15s' }}
                       onMouseEnter={e => e.currentTarget.style.background = '#fafafa'}
-                      onMouseLeave={e => e.currentTarget.style.background = 'white'}>
+                      onMouseLeave={e => e.currentTarget.style.background = 'var(--bg-panel)'}>
 
                       {/* Expand toggle */}
                       <td style={{ padding: '16px 12px 16px 18px', width: 36 }}>
                         {items.length > 0 && (
                           <button onClick={() => setExpandedOrder(isExpanded ? null : o.id)}
-                            style={{ width: 28, height: 28, borderRadius: 8, border: '1px solid #e2e8f0', background: isExpanded ? '#f1f5f9' : 'white', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                            {isExpanded ? <ChevronUp size={14} color="#64748b" /> : <ChevronDown size={14} color="#64748b" />}
+                            style={{ width: 28, height: 28, borderRadius: 8, border: '1px solid #e2e8f0', background: isExpanded ? '#f1f5f9' : 'var(--bg-panel)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                            {isExpanded ? <ChevronUp size={14} color='var(--text-muted)' /> : <ChevronDown size={14} color='var(--text-muted)' />}
                           </button>
                         )}
                       </td>
@@ -402,10 +402,10 @@ const Suppliers = () => {
                       <td style={{ padding: '16px 18px', fontFamily: 'monospace', fontSize: 12, fontWeight: 800, color: '#475569' }}>
                         {o.id?.slice(0, 8).toUpperCase()}
                       </td>
-                      <td style={{ padding: '16px 18px', fontWeight: 800, color: '#0f172a', fontSize: 14 }}>
+                      <td style={{ padding: '16px 18px', fontWeight: 800, color: 'var(--text-main)', fontSize: 14 }}>
                         {o.Supplier?.name || '—'}
                       </td>
-                      <td style={{ padding: '16px 18px', color: '#64748b', fontWeight: 600, fontSize: 13 }}>
+                      <td style={{ padding: '16px 18px', color: 'var(--text-muted)', fontWeight: 600, fontSize: 13 }}>
                         {new Date(o.createdAt).toLocaleDateString('en-US', { day: 'numeric', month: 'short', year: 'numeric' })}
                       </td>
                       <td style={{ padding: '16px 18px' }}>
@@ -413,7 +413,7 @@ const Suppliers = () => {
                           <Package size={12} /> {items.length || '—'} item{items.length !== 1 ? 's' : ''}
                         </span>
                       </td>
-                      <td style={{ padding: '16px 18px', fontWeight: 900, color: '#0f172a', fontSize: 15 }}>
+                      <td style={{ padding: '16px 18px', fontWeight: 900, color: 'var(--text-main)', fontSize: 15 }}>
                         SAR {parseFloat(o.totalAmount || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                       </td>
                       <td style={{ padding: '16px 18px' }}>
@@ -422,13 +422,13 @@ const Suppliers = () => {
                       <td style={{ padding: '16px 18px' }}>
                         {o.status === 'pending' && (
                           <button onClick={() => handleReceive(o.id)} disabled={receiving === o.id}
-                            style={{ padding: '8px 16px', borderRadius: 10, background: receiving === o.id ? '#e2e8f0' : '#dcfce7', color: receiving === o.id ? '#94a3b8' : '#16a34a', border: 'none', fontWeight: 800, cursor: receiving === o.id ? 'not-allowed' : 'pointer', display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 12, transition: 'all 0.2s' }}>
+                            style={{ padding: '8px 16px', borderRadius: 10, background: receiving === o.id ? 'var(--border-color)' : '#dcfce7', color: receiving === o.id ? 'var(--text-muted)' : '#16a34a', border: 'none', fontWeight: 800, cursor: receiving === o.id ? 'not-allowed' : 'pointer', display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 12, transition: 'all 0.2s' }}>
                             <PackageCheck size={14} />
                             {receiving === o.id ? 'Receiving…' : 'Receive'}
                           </button>
                         )}
                         {o.status === 'received' && (
-                          <span style={{ fontSize: 12, color: '#94a3b8', fontWeight: 700 }}>✓ Done</span>
+                          <span style={{ fontSize: 12, color: 'var(--text-muted)', fontWeight: 700 }}>✓ Done</span>
                         )}
                       </td>
                     </tr>
@@ -437,23 +437,23 @@ const Suppliers = () => {
                     <AnimatePresence>
                       {isExpanded && items.length > 0 && (
                         <tr>
-                          <td colSpan={8} style={{ padding: 0, background: '#f8fafc' }}>
+                          <td colSpan={8} style={{ padding: 0, background: 'var(--bg-main)' }}>
                             <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} exit={{ opacity: 0, height: 0 }} style={{ overflow: 'hidden' }}>
                               <div style={{ padding: '16px 56px 20px' }}>
-                                <div style={{ fontSize: 11, fontWeight: 800, color: '#94a3b8', textTransform: 'uppercase', letterSpacing: 0.5, marginBottom: 10 }}>Line Items</div>
+                                <div style={{ fontSize: 11, fontWeight: 800, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: 0.5, marginBottom: 10 }}>Line Items</div>
                                 <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
                                   {items.map((item, idx) => (
-                                    <div key={item.id || idx} style={{ display: 'flex', alignItems: 'center', gap: 16, padding: '10px 14px', background: 'white', borderRadius: 10, border: '1px solid #e2e8f0' }}>
-                                      <div style={{ flex: 1, fontWeight: 700, fontSize: 13, color: '#0f172a' }}>
+                                    <div key={item.id || idx} style={{ display: 'flex', alignItems: 'center', gap: 16, padding: '10px 14px', background: 'var(--bg-panel)', borderRadius: 10, border: '1px solid #e2e8f0' }}>
+                                      <div style={{ flex: 1, fontWeight: 700, fontSize: 13, color: 'var(--text-main)' }}>
                                         {item.Product?.name || `Product ${idx + 1}`}
                                       </div>
-                                      <div style={{ fontSize: 12, color: '#64748b', fontWeight: 600 }}>
-                                        Qty: <strong style={{ color: '#0f172a' }}>{item.quantity}</strong>
+                                      <div style={{ fontSize: 12, color: 'var(--text-muted)', fontWeight: 600 }}>
+                                        Qty: <strong style={{ color: 'var(--text-main)' }}>{item.quantity}</strong>
                                       </div>
-                                      <div style={{ fontSize: 12, color: '#64748b', fontWeight: 600 }}>
-                                        Unit: <strong style={{ color: '#0f172a' }}>SAR {parseFloat(item.unitCost || 0).toFixed(2)}</strong>
+                                      <div style={{ fontSize: 12, color: 'var(--text-muted)', fontWeight: 600 }}>
+                                        Unit: <strong style={{ color: 'var(--text-main)' }}>SAR {parseFloat(item.unitCost || 0).toFixed(2)}</strong>
                                       </div>
-                                      <div style={{ fontWeight: 900, fontSize: 14, color: '#0f172a', minWidth: 90, textAlign: 'right' }}>
+                                      <div style={{ fontWeight: 900, fontSize: 14, color: 'var(--text-main)', minWidth: 90, textAlign: 'right' }}>
                                         ${(item.quantity * parseFloat(item.unitCost || 0)).toFixed(2)}
                                       </div>
                                     </div>
@@ -470,14 +470,14 @@ const Suppliers = () => {
               })}
               {orders.length === 0 && (
                 <tr>
-                  <td colSpan={8} style={{ padding: 60, textAlign: 'center', color: '#94a3b8' }}>
+                  <td colSpan={8} style={{ padding: 60, textAlign: 'center', color: 'var(--text-muted)' }}>
                     <Package size={40} style={{ opacity: 0.2, marginBottom: 12, display: 'block', margin: '0 auto 12px' }} />
                     <div style={{ fontWeight: 700 }}>No purchase orders found.</div>
                   </td>
                 </tr>
               )}
             </tbody>
-          </table>
+          </table></div>
         </div>
       </section>
 
@@ -549,7 +549,7 @@ const Suppliers = () => {
                   {/* Column headers */}
                   <div style={{ display: 'grid', gridTemplateColumns: '1fr 80px 100px 90px 36px', gap: 8, marginBottom: 8 }}>
                     {['Product', 'Qty', 'Unit Cost', 'Subtotal', ''].map(h => (
-                      <div key={h} style={{ fontSize: 10, fontWeight: 800, color: '#94a3b8', textTransform: 'uppercase', letterSpacing: 0.5 }}>{h}</div>
+                      <div key={h} style={{ fontSize: 10, fontWeight: 800, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: 0.5 }}>{h}</div>
                     ))}
                   </div>
 
@@ -581,7 +581,7 @@ const Suppliers = () => {
                           style={{ ...inputStyle }} />
 
                         {/* Subtotal (read-only) */}
-                        <div style={{ padding: '11px 12px', borderRadius: 12, background: '#f8fafc', fontSize: 13, fontWeight: 800, color: '#0f172a', textAlign: 'right', border: '1.5px solid #e2e8f0' }}>
+                        <div style={{ padding: '11px 12px', borderRadius: 12, background: 'var(--bg-main)', fontSize: 13, fontWeight: 800, color: 'var(--text-main)', textAlign: 'right', border: '1.5px solid #e2e8f0' }}>
                           ${((parseFloat(line.quantity) || 0) * (parseFloat(line.unitCost) || 0)).toFixed(2)}
                         </div>
 
@@ -596,8 +596,8 @@ const Suppliers = () => {
 
                   {/* Total row */}
                   <div style={{ marginTop: 14, display: 'flex', justifyContent: 'flex-end', alignItems: 'center', gap: 12 }}>
-                    <span style={{ fontSize: 13, fontWeight: 700, color: '#64748b' }}>Order Total:</span>
-                    <span style={{ fontSize: 22, fontWeight: 900, color: '#0f172a' }}>
+                    <span style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-muted)' }}>Order Total:</span>
+                    <span style={{ fontSize: 22, fontWeight: 900, color: 'var(--text-main)' }}>
                       ${poTotal.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                     </span>
                   </div>
@@ -635,23 +635,23 @@ const ModalWrapper = ({ children, onClose }) => (
 
 const ModalCard = ({ children, maxWidth = 520 }) => (
   <motion.div initial={{ scale: 0.92, y: 30, opacity: 0 }} animate={{ scale: 1, y: 0, opacity: 1 }} exit={{ scale: 0.92, y: 20, opacity: 0 }}
-    style={{ background: 'white', borderRadius: 32, width: '100%', maxWidth, position: 'relative', padding: 40, maxHeight: '90vh', overflowY: 'auto', boxShadow: '0 32px 80px rgba(0,0,0,0.18)' }}>
+    style={{ background: 'var(--bg-panel)', borderRadius: 32, width: '100%', maxWidth, position: 'relative', padding: 40, maxHeight: '90vh', overflowY: 'auto', boxShadow: '0 32px 80px rgba(0,0,0,0.18)' }}>
     {children}
   </motion.div>
 );
 
 const ModalHeader = ({ title, onClose }) => (
   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 28 }}>
-    <h2 style={{ fontSize: 22, fontWeight: 900, color: '#0f172a', margin: 0 }}>{title}</h2>
-    <button onClick={onClose} style={{ width: 36, height: 36, borderRadius: 10, border: '1px solid #e2e8f0', background: 'white', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-      <X size={18} color="#64748b" />
+    <h2 style={{ fontSize: 22, fontWeight: 900, color: 'var(--text-main)', margin: 0 }}>{title}</h2>
+    <button onClick={onClose} style={{ width: 36, height: 36, borderRadius: 10, border: '1px solid #e2e8f0', background: 'var(--bg-panel)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+      <X size={18} color='var(--text-muted)' />
     </button>
   </div>
 );
 
 const SubmitBtn = ({ children, loading }) => (
   <button type="submit" disabled={loading}
-    style={{ marginTop: 8, padding: '16px 24px', borderRadius: 16, background: loading ? '#e2e8f0' : '#0f172a', color: loading ? '#94a3b8' : 'white', border: 'none', fontWeight: 900, cursor: loading ? 'not-allowed' : 'pointer', fontSize: 15, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10, transition: 'all 0.2s' }}>
+    style={{ marginTop: 8, padding: '16px 24px', borderRadius: 16, background: loading ? 'var(--border-color)' : 'var(--text-main)', color: loading ? 'var(--text-muted)' : 'var(--bg-panel)', border: 'none', fontWeight: 900, cursor: loading ? 'not-allowed' : 'pointer', fontSize: 15, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10, transition: 'all 0.2s' }}>
     {loading ? 'Saving…' : children}
   </button>
 );
@@ -691,7 +691,7 @@ const SupplierFormFields = ({ form, setForm }) => {
         <label style={labelStyle}>Supplier Rating</label>
         <div style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '12px 14px', borderRadius: 12, border: '1.5px solid #e2e8f0', background: '#fafafa' }}>
           <StarRating rating={form.rating || 0} editable onChange={v => f('rating', v)} size={22} />
-          <span style={{ fontSize: 13, fontWeight: 700, color: '#64748b' }}>
+          <span style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-muted)' }}>
             {form.rating ? `${form.rating} / 5` : 'Not rated'}
           </span>
         </div>

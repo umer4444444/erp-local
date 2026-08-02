@@ -159,38 +159,38 @@ const Expenses = () => {
     { name: 'Inventory', icon: <ShoppingBag size={18} />, color: '#f59e0b' },
     { name: 'Payroll', icon: <DollarSign size={18} />, color: '#10b981' },
     { name: 'Logistics', icon: <ArrowUpRight size={18} />, color: '#a855f7' },
-    { name: 'Other', icon: <FileText size={18} />, color: '#64748b' }
+    { name: 'Other', icon: <FileText size={18} />, color: 'var(--text-muted)' }
   ];
 
   return (
-    <div style={{ padding: 40, minHeight: '100vh', background: '#f8fafc', fontFamily: "'Outfit', sans-serif" }}>
+    <div style={{ padding: 40, minHeight: '100vh', background: 'var(--bg-main)', fontFamily: "'Outfit', sans-serif" }}>
       <header style={{ marginBottom: 40, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <div>
-          <h1 style={{ fontSize: 32, fontWeight: 900, color: '#0f172a' }}>Expense Management</h1>
-          <p style={{ color: '#64748b', fontWeight: 600 }}>Track operational costs and business overheads.</p>
+          <h1 style={{ fontSize: 32, fontWeight: 900, color: 'var(--text-main)' }}>Expense Management</h1>
+          <p style={{ color: 'var(--text-muted)', fontWeight: 600 }}>Track operational costs and business overheads.</p>
         </div>
         <button 
           onClick={() => setShowModal(true)}
-          style={{ padding: '14px 28px', borderRadius: 16, background: '#0f172a', color: 'white', border: 'none', fontWeight: 800, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 10 }}
+          style={{ padding: '14px 28px', borderRadius: 16, background: 'var(--text-main)', color: 'var(--bg-panel)', border: 'none', fontWeight: 800, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 10 }}
         >
           <Plus size={20} /> Log Expense
         </button>
       </header>
 
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 24, marginBottom: 40 }}>
-        <div style={{ background: 'white', padding: 32, borderRadius: 32, border: '1px solid rgba(0,0,0,0.05)', gridColumn: 'span 2' }}>
-          <div style={{ fontSize: 14, fontWeight: 700, color: '#64748b', marginBottom: 8 }}>TOTAL ACCUMULATED BURN</div>
-          <div style={{ fontSize: 48, fontWeight: 900, color: '#0f172a' }}>SAR {totalExpense.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</div>
+        <div style={{ background: 'var(--bg-panel)', padding: 32, borderRadius: 32, border: '1px solid var(--border-color-rgb)', gridColumn: 'span 2' }}>
+          <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--text-muted)', marginBottom: 8 }}>TOTAL ACCUMULATED BURN</div>
+          <div style={{ fontSize: 48, fontWeight: 900, color: 'var(--text-main)' }}>SAR {totalExpense.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</div>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8, color: stats.monthOverMonthChange > 0 ? '#ef4444' : '#10b981', fontSize: 14, fontWeight: 800, marginTop: 12 }}>
             <TrendingDown size={18} style={{ transform: stats.monthOverMonthChange > 0 ? 'scaleY(-1)' : 'none' }} /> 
             {stats.monthOverMonthChange > 0 ? '+' : ''}{stats.monthOverMonthChange.toFixed(1)}% from last month
           </div>
         </div>
-        <div style={{ background: '#0a84ff', padding: 32, borderRadius: 32, color: 'white', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+        <div style={{ background: '#0a84ff', padding: 32, borderRadius: 32, color: 'var(--bg-panel)', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
           <div style={{ opacity: 0.8, fontSize: 13, fontWeight: 700 }}>ACTIVE VENDORS</div>
           <div style={{ fontSize: 32, fontWeight: 900 }}>{stats.activeVendors}</div>
         </div>
-        <div style={{ background: 'linear-gradient(135deg, #0f172a, #1e293b)', padding: 32, borderRadius: 32, color: 'white', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+        <div style={{ background: 'linear-gradient(135deg, #0f172a, #1e293b)', padding: 32, borderRadius: 32, color: 'var(--bg-panel)', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
           <div style={{ opacity: 0.8, fontSize: 13, fontWeight: 700 }}>REVENUE RATIO</div>
           <div style={{ fontSize: 32, fontWeight: 900 }}>{stats.revenueRatio.toFixed(1)}%</div>
         </div>
@@ -198,25 +198,25 @@ const Expenses = () => {
 
       <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: 32 }}>
         {/* Expense List */}
-        <div style={{ background: 'white', borderRadius: 32, border: '1px solid rgba(0,0,0,0.05)', padding: 32 }}>
+        <div style={{ background: 'var(--bg-panel)', borderRadius: 32, border: '1px solid var(--border-color-rgb)', padding: 32 }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
-            <h2 style={{ fontSize: 20, fontWeight: 900, color: '#0f172a' }}>Transaction Audit</h2>
+            <h2 style={{ fontSize: 20, fontWeight: 900, color: 'var(--text-main)' }}>Transaction Audit</h2>
             <div style={{ display: 'flex', gap: 12 }}>
-              <button onClick={() => setFilterType('all')} style={{ padding: '8px 16px', borderRadius: 10, background: filterType === 'all' ? '#0f172a' : '#f1f5f9', border: 'none', color: filterType === 'all' ? 'white' : '#64748b', fontWeight: 800, fontSize: 12, cursor: 'pointer' }}>All</button>
-              <button onClick={() => setFilterType('daily')} style={{ padding: '8px 16px', borderRadius: 10, background: filterType === 'daily' ? '#0f172a' : '#f1f5f9', border: 'none', color: filterType === 'daily' ? 'white' : '#64748b', fontWeight: 800, fontSize: 12, cursor: 'pointer' }}>Daily</button>
-              <button onClick={() => setFilterType('monthly')} style={{ padding: '8px 16px', borderRadius: 10, background: filterType === 'monthly' ? '#0f172a' : '#f1f5f9', border: 'none', color: filterType === 'monthly' ? 'white' : '#64748b', fontWeight: 800, fontSize: 12, cursor: 'pointer' }}>Monthly</button>
+              <button onClick={() => setFilterType('all')} style={{ padding: '8px 16px', borderRadius: 10, background: filterType === 'all' ? 'var(--text-main)' : '#f1f5f9', border: 'none', color: filterType === 'all' ? 'var(--bg-panel)' : 'var(--text-muted)', fontWeight: 800, fontSize: 12, cursor: 'pointer' }}>All</button>
+              <button onClick={() => setFilterType('daily')} style={{ padding: '8px 16px', borderRadius: 10, background: filterType === 'daily' ? 'var(--text-main)' : '#f1f5f9', border: 'none', color: filterType === 'daily' ? 'var(--bg-panel)' : 'var(--text-muted)', fontWeight: 800, fontSize: 12, cursor: 'pointer' }}>Daily</button>
+              <button onClick={() => setFilterType('monthly')} style={{ padding: '8px 16px', borderRadius: 10, background: filterType === 'monthly' ? 'var(--text-main)' : '#f1f5f9', border: 'none', color: filterType === 'monthly' ? 'var(--bg-panel)' : 'var(--text-muted)', fontWeight: 800, fontSize: 12, cursor: 'pointer' }}>Monthly</button>
             </div>
           </div>
           
           <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
             {filteredExpenses.map(expense => (
-              <div key={expense.id} style={{ display: 'flex', alignItems: 'center', gap: 16, padding: '16px 24px', borderRadius: 20, background: '#f8fafc', border: '1px solid transparent' }}>
-                <div style={{ width: 44, height: 44, borderRadius: 14, background: 'white', border: '1px solid #e2e8f0', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#0a84ff' }}>
+              <div key={expense.id} style={{ display: 'flex', alignItems: 'center', gap: 16, padding: '16px 24px', borderRadius: 20, background: 'var(--bg-main)', border: '1px solid transparent' }}>
+                <div style={{ width: 44, height: 44, borderRadius: 14, background: 'var(--bg-panel)', border: '1px solid #e2e8f0', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#0a84ff' }}>
                   {categories.find(c => c.name === expense.category)?.icon || <FileText size={20} />}
                 </div>
                 <div style={{ flex: 1 }}>
-                  <div style={{ fontWeight: 800, color: '#0f172a' }}>{expense.description}</div>
-                  <div style={{ fontSize: 12, color: '#64748b', fontWeight: 600 }}>{expense.category} • {expense.date ? parseExpenseDate(expense.date).toLocaleDateString() : 'N/A'}</div>
+                  <div style={{ fontWeight: 800, color: 'var(--text-main)' }}>{expense.description}</div>
+                  <div style={{ fontSize: 12, color: 'var(--text-muted)', fontWeight: 600 }}>{expense.category} • {expense.date ? parseExpenseDate(expense.date).toLocaleDateString() : 'N/A'}</div>
                 </div>
                 <div style={{ textAlign: 'right', display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 4 }}>
                   <div style={{ fontWeight: 900, color: '#ef4444' }}>-SAR {parseFloat(expense.amount).toFixed(2)}</div>
@@ -229,18 +229,18 @@ const Expenses = () => {
                       <button onClick={() => handleUpdateStatus(expense.id, 'rejected')} style={{ background: 'transparent', border: 'none', color: '#ef4444', cursor: 'pointer' }} title="Reject"><XCircle size={18} /></button>
                     </>
                   )}
-                  <button onClick={() => openEditModal(expense)} style={{ background: 'transparent', border: 'none', color: '#64748b', cursor: 'pointer' }} title="Edit"><Edit size={18} /></button>
+                  <button onClick={() => openEditModal(expense)} style={{ background: 'transparent', border: 'none', color: 'var(--text-muted)', cursor: 'pointer' }} title="Edit"><Edit size={18} /></button>
                   <button onClick={() => handleDelete(expense.id)} style={{ background: 'transparent', border: 'none', color: '#ef4444', cursor: 'pointer' }} title="Delete"><Trash2 size={18} /></button>
                 </div>
               </div>
             ))}
-            {filteredExpenses.length === 0 && <div style={{ textAlign: 'center', padding: 60, color: '#94a3b8' }}>No expenses found.</div>}
+            {filteredExpenses.length === 0 && <div style={{ textAlign: 'center', padding: 60, color: 'var(--text-muted)' }}>No expenses found.</div>}
           </div>
         </div>
 
         {/* Category Breakdown */}
-        <div style={{ background: 'white', borderRadius: 32, border: '1px solid rgba(0,0,0,0.05)', padding: 32 }}>
-          <h2 style={{ fontSize: 20, fontWeight: 900, color: '#0f172a', marginBottom: 24 }}>Budget Breakdown</h2>
+        <div style={{ background: 'var(--bg-panel)', borderRadius: 32, border: '1px solid var(--border-color-rgb)', padding: 32 }}>
+          <h2 style={{ fontSize: 20, fontWeight: 900, color: 'var(--text-main)', marginBottom: 24 }}>Budget Breakdown</h2>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
             {categories.map(cat => {
               const catTotal = filteredExpenses.filter(e => e.category === cat.name).reduce((sum, e) => sum + parseFloat(e.amount), 0);
@@ -250,9 +250,9 @@ const Expenses = () => {
                   <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8 }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
                       <div style={{ width: 10, height: 10, borderRadius: '50%', background: cat.color }} />
-                      <span style={{ fontSize: 14, fontWeight: 800, color: '#0f172a' }}>{cat.name}</span>
+                      <span style={{ fontSize: 14, fontWeight: 800, color: 'var(--text-main)' }}>{cat.name}</span>
                     </div>
-                    <span style={{ fontSize: 14, fontWeight: 700, color: '#64748b' }}>{percentage}%</span>
+                    <span style={{ fontSize: 14, fontWeight: 700, color: 'var(--text-muted)' }}>{percentage}%</span>
                   </div>
                   <div style={{ height: 6, background: '#f1f5f9', borderRadius: 3, overflow: 'hidden' }}>
                     <div style={{ width: `${percentage}%`, height: '100%', background: cat.color }} />
@@ -268,28 +268,28 @@ const Expenses = () => {
       {showModal && (
         <div style={{ position: 'fixed', inset: 0, zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 24 }}>
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} onClick={() => { setShowModal(false); setEditId(null); setForm({ category: 'Utilities', amount: '', description: '', date: new Date().toISOString().split('T')[0] }); }} style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.3)' }} />
-          <motion.div initial={{ scale: 0.9, y: 20 }} animate={{ scale: 1, y: 0 }} style={{ background: 'white', borderRadius: 32, width: '100%', maxWidth: 450, position: 'relative', padding: 40 }}>
+          <motion.div initial={{ scale: 0.9, y: 20 }} animate={{ scale: 1, y: 0 }} style={{ background: 'var(--bg-panel)', borderRadius: 32, width: '100%', maxWidth: 450, position: 'relative', padding: 40 }}>
             <h2 style={{ fontSize: 24, fontWeight: 900, marginBottom: 32 }}>{editId ? 'Edit Business Expense' : 'Log Business Expense'}</h2>
             <form onSubmit={handleAdd} style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
               <div>
-                <label style={{ display: 'block', fontSize: 13, fontWeight: 800, color: '#64748b', marginBottom: 8 }}>CATEGORY</label>
+                <label style={{ display: 'block', fontSize: 13, fontWeight: 800, color: 'var(--text-muted)', marginBottom: 8 }}>CATEGORY</label>
                 <select value={form.category} onChange={e => setForm({...form, category: e.target.value})} style={{ width: '100%', padding: '14px', borderRadius: 16, border: '1px solid #e2e8f0', fontSize: 14, fontWeight: 600 }}>
                   {categories.map(c => <option key={c.name} value={c.name}>{c.name}</option>)}
                 </select>
               </div>
               <div>
-                <label style={{ display: 'block', fontSize: 13, fontWeight: 800, color: '#64748b', marginBottom: 8 }}>AMOUNT (SAR)</label>
+                <label style={{ display: 'block', fontSize: 13, fontWeight: 800, color: 'var(--text-muted)', marginBottom: 8 }}>AMOUNT (SAR)</label>
                 <input required type="number" step="0.01" value={form.amount} onChange={e => setForm({...form, amount: e.target.value})} placeholder="0.00" style={{ width: '100%', padding: '14px', borderRadius: 16, border: '1px solid #e2e8f0', fontSize: 14, fontWeight: 600 }} />
               </div>
               <div>
-                <label style={{ display: 'block', fontSize: 13, fontWeight: 800, color: '#64748b', marginBottom: 8 }}>DESCRIPTION</label>
+                <label style={{ display: 'block', fontSize: 13, fontWeight: 800, color: 'var(--text-muted)', marginBottom: 8 }}>DESCRIPTION</label>
                 <input required value={form.description} onChange={e => setForm({...form, description: e.target.value})} placeholder="e.g. Monthly Electricity Bill" style={{ width: '100%', padding: '14px', borderRadius: 16, border: '1px solid #e2e8f0', fontSize: 14, fontWeight: 600 }} />
               </div>
               <div>
-                <label style={{ display: 'block', fontSize: 13, fontWeight: 800, color: '#64748b', marginBottom: 8 }}>DATE</label>
+                <label style={{ display: 'block', fontSize: 13, fontWeight: 800, color: 'var(--text-muted)', marginBottom: 8 }}>DATE</label>
                 <input required type="date" value={form.date} onChange={e => setForm({...form, date: e.target.value})} style={{ width: '100%', padding: '14px', borderRadius: 16, border: '1px solid #e2e8f0', fontSize: 14, fontWeight: 600 }} />
               </div>
-              <button type="submit" style={{ marginTop: 16, padding: 18, borderRadius: 20, background: '#0f172a', color: 'white', border: 'none', fontWeight: 900, cursor: 'pointer' }}>{editId ? 'Save Changes' : 'Add to Audit Ledger'}</button>
+              <button type="submit" style={{ marginTop: 16, padding: 18, borderRadius: 20, background: 'var(--text-main)', color: 'var(--bg-panel)', border: 'none', fontWeight: 900, cursor: 'pointer' }}>{editId ? 'Save Changes' : 'Add to Audit Ledger'}</button>
             </form>
           </motion.div>
         </div>

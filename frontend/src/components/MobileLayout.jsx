@@ -14,13 +14,13 @@ const MobileLayout = () => {
   ];
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', height: '100vh', background: '#f8fafc', fontFamily: 'Outfit, sans-serif' }}>
+    <div style={{ display: 'flex', flexDirection: 'column', height: '100vh', background: 'var(--bg-main)', fontFamily: 'Outfit, sans-serif' }}>
       
       {/* Top Header */}
       <div style={{ 
-        background: '#2563eb', color: 'white', padding: '16px 20px',
+        background: '#2563eb', color: 'var(--bg-panel)', padding: '16px 20px',
         display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-        boxShadow: '0 2px 4px rgba(0,0,0,0.1)', zIndex: 10
+        boxShadow: '0 2px 4px var(--shadow-strong-rgb)', zIndex: 10
       }}>
         <h2 style={{ margin: 0, fontSize: 18, fontWeight: 700 }}>Field Sales</h2>
         <div style={{ width: 8, height: 8, background: '#10b981', borderRadius: '50%' }} />
@@ -34,7 +34,7 @@ const MobileLayout = () => {
       {/* Bottom Navigation */}
       <div style={{
         position: 'fixed', bottom: 0, left: 0, right: 0,
-        background: 'white', borderTop: '1px solid #e2e8f0',
+        background: 'var(--bg-panel)', borderTop: '1px solid #e2e8f0',
         display: 'flex', justifyContent: 'space-around', alignItems: 'center',
         padding: '12px 0', zIndex: 10
       }}>
@@ -47,7 +47,7 @@ const MobileLayout = () => {
               style={{
                 display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4,
                 background: 'transparent', border: 'none',
-                color: isActive ? '#2563eb' : '#64748b',
+                color: isActive ? '#2563eb' : 'var(--text-muted)',
                 cursor: 'pointer'
               }}
             >

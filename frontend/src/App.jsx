@@ -41,6 +41,9 @@ import { getDefaultRoute } from './utils/routing';
 import NotificationCenter from './components/NotificationCenter';
 import GlobalAIAssistant from './components/GlobalAIAssistant';
 
+import { ThemeProvider, useTheme } from './context/ThemeContext';
+import { Menu, Moon, Sun } from 'lucide-react';
+
 const PageTransition = ({ children }) => (
   <motion.div
     initial={{ opacity: 0, y: 15 }}
@@ -55,6 +58,13 @@ const PageTransition = ({ children }) => (
 function AppContent() {
   const { token, user, logout } = useAuth();
   const location = useLocation();
+  const { isDarkMode, toggleDarkMode } = useTheme();
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+
+  // Close sidebar on route change on mobile
+  useEffect(() => {
+    setIsSidebarOpen(false);
+  }, [location.pathname]);
 
   if (!token) {
     return (
@@ -85,18 +95,36 @@ function AppContent() {
 
   // Otherwise, Desktop ERP Experience
   return (
-    <div className="flex bg-gray-50 min-h-screen relative text-gray-900 font-sans overflow-hidden">
+    <div className="flex min-h-screen relative font-sans overflow-hidden" style={{ backgroundColor: 'var(--bg-main)', color: 'var(--text-main)' }}>
       <div className="orb-container">
         <div className="orb orb-1" />
         <div className="orb orb-2" />
       </div>
       
-      <Sidebar onLogout={logout} user={user} />
-      <div className="flex-1 flex flex-col relative z-0" style={{ marginLeft: 260 + 32, width: 'calc(100% - 292px)' }}>
-        <div style={{ display: 'flex', justifyContent: 'flex-end', padding: '24px 40px 0 40px', zIndex: 50 }}>
-          <NotificationCenter user={user} />
+      <Sidebar onLogout={logout} user={user} isOpen={isSidebarOpen} setIsOpen={setIsSidebarOpen} />
+      
+      {/* Main Content Area */}
+      <div className={`flex-1 flex flex-col relative z-0 transition-all duration-300 w-full lg:ml-[292px]`}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '24px 20px 0 20px', zIndex: 50 }}>
+          <button 
+            className="lg:hidden p-2 rounded-xl" 
+            style={{ background: 'var(--bg-panel)', border: '1px solid var(--border-color)', color: 'var(--text-main)' }}
+            onClick={() => setIsSidebarOpen(true)}
+          >
+            <Menu size={24} />
+          </button>
+          
+          <div style={{ display: 'flex', gap: '12px', alignItems: 'center', marginLeft: 'auto' }}>
+            <button 
+              onClick={toggleDarkMode}
+              style={{ width: 48, height: 48, borderRadius: 16, background: 'var(--bg-panel)', border: '1px solid var(--border-color)', color: 'var(--text-main)', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}
+            >
+              {isDarkMode ? <Sun size={22} /> : <Moon size={22} />}
+            </button>
+            <NotificationCenter user={user} />
+          </div>
         </div>
-        <div className="flex-1 overflow-y-auto relative">
+        <div className="flex-1 overflow-y-auto relative p-4 lg:p-8">
           <AnimatePresence mode="wait">
             <Routes location={location} key={location.pathname}>
               <Route path="/" element={<PrivateRoute roles={['admin', 'superadmin', 'owner', 'company_admin']}><PageTransition><Dashboard user={user} /></PageTransition></PrivateRoute>} />
@@ -133,11 +161,13 @@ function AppContent() {
 
 function App() {
   return (
-    <AuthProvider>
-      <Router future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
-        <AppContent />
-      </Router>
-    </AuthProvider>
+    <ThemeProvider>
+      <AuthProvider>
+        <Router future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
+          <AppContent />
+        </Router>
+      </AuthProvider>
+    </ThemeProvider>
   );
 }
 

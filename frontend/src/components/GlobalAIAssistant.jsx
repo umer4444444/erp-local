@@ -68,7 +68,7 @@ const GlobalAIAssistant = () => {
           bottom: 24,
           right: 24,
           background: 'linear-gradient(135deg, #0a84ff, #4f46e5)',
-          color: 'white',
+          color: 'var(--bg-panel)',
           padding: 16,
           borderRadius: '50%',
           boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
@@ -111,7 +111,7 @@ const GlobalAIAssistant = () => {
       <div 
         style={{
           background: 'linear-gradient(135deg, #0a84ff, #4f46e5)',
-          color: 'white',
+          color: 'var(--bg-panel)',
           padding: 16,
           display: 'flex',
           justifyContent: 'space-between',
@@ -127,13 +127,13 @@ const GlobalAIAssistant = () => {
         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
           <button 
             onClick={(e) => { e.stopPropagation(); setIsMinimized(!isMinimized); }}
-            style={{ background: 'transparent', border: 'none', color: 'white', cursor: 'pointer', padding: 4 }}
+            style={{ background: 'transparent', border: 'none', color: 'var(--bg-panel)', cursor: 'pointer', padding: 4 }}
           >
             {isMinimized ? <Maximize2 size={16} /> : <Minimize2 size={16} />}
           </button>
           <button 
             onClick={(e) => { e.stopPropagation(); setIsOpen(false); }}
-            style={{ background: 'transparent', border: 'none', color: 'white', cursor: 'pointer', padding: 4 }}
+            style={{ background: 'transparent', border: 'none', color: 'var(--bg-panel)', cursor: 'pointer', padding: 4 }}
           >
             <X size={16} />
           </button>
@@ -143,9 +143,9 @@ const GlobalAIAssistant = () => {
       {!isMinimized && (
         <>
           {/* Chat Area */}
-          <div style={{ flex: 1, overflowY: 'auto', padding: 16, display: 'flex', flexDirection: 'column', gap: 16, background: '#f8fafc' }}>
+          <div style={{ flex: 1, overflowY: 'auto', padding: 16, display: 'flex', flexDirection: 'column', gap: 16, background: 'var(--bg-main)' }}>
             {messages.length === 0 && (
-              <div style={{ textAlign: 'center', color: '#94a3b8', marginTop: 40 }}>
+              <div style={{ textAlign: 'center', color: 'var(--text-muted)', marginTop: 40 }}>
                 <Sparkles size={48} style={{ margin: '0 auto 16px', opacity: 0.2 }} />
                 <p style={{ margin: 0, fontWeight: 800 }}>Hello {user.name}!</p>
                 <p style={{ margin: '8px 0 0', fontSize: 14, fontWeight: 600 }}>Ask me about your sales, inventory, or customers.</p>
@@ -163,10 +163,10 @@ const GlobalAIAssistant = () => {
                   borderRadius: 16,
                   borderBottomRightRadius: msg.sender === 'user' ? 0 : 16,
                   borderBottomLeftRadius: msg.sender === 'user' ? 16 : 0,
-                  background: msg.sender === 'user' ? '#0a84ff' : (msg.sender === 'system' ? '#fef2f2' : '#ffffff'),
-                  color: msg.sender === 'user' ? '#ffffff' : (msg.sender === 'system' ? '#dc2626' : '#0f172a'),
+                  background: msg.sender === 'user' ? '#0a84ff' : (msg.sender === 'system' ? '#fef2f2' : 'var(--bg-panel)'),
+                  color: msg.sender === 'user' ? 'var(--bg-panel)' : (msg.sender === 'system' ? '#dc2626' : 'var(--text-main)'),
                   border: msg.sender === 'system' ? '1px solid #fee2e2' : (msg.sender === 'ai' ? '1px solid #e2e8f0' : 'none'),
-                  boxShadow: msg.sender === 'ai' ? '0 2px 4px rgba(0,0,0,0.02)' : 'none'
+                  boxShadow: msg.sender === 'ai' ? '0 2px 4px var(--shadow-color-rgb)' : 'none'
                 }}>
                   <p style={{ margin: 0, whiteSpace: 'pre-wrap' }}>{msg.text}</p>
                 </div>
@@ -175,7 +175,7 @@ const GlobalAIAssistant = () => {
             {isLoading && (
               <div style={{ display: 'flex', justifyContent: 'flex-start' }}>
                 <div style={{
-                  background: '#ffffff',
+                  background: 'var(--bg-panel)',
                   border: '1px solid #e2e8f0',
                   borderRadius: 16,
                   borderBottomLeftRadius: 0,
@@ -194,7 +194,7 @@ const GlobalAIAssistant = () => {
           </div>
 
           {/* Input Area */}
-          <form onSubmit={handleSend} style={{ padding: 16, background: '#ffffff', borderTop: '1px solid #f1f5f9' }}>
+          <form onSubmit={handleSend} style={{ padding: 16, background: 'var(--bg-panel)', borderTop: '1px solid #f1f5f9' }}>
             <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
               <input
                 type="text"
@@ -204,14 +204,14 @@ const GlobalAIAssistant = () => {
                 disabled={isLoading}
                 style={{
                   width: '100%',
-                  background: '#f8fafc',
+                  background: 'var(--bg-main)',
                   border: '1px solid #e2e8f0',
                   borderRadius: 9999,
                   padding: '12px 48px 12px 16px',
                   fontSize: 14,
                   fontWeight: 500,
                   outline: 'none',
-                  color: '#0f172a',
+                  color: 'var(--text-main)',
                   boxSizing: 'border-box'
                 }}
               />
@@ -222,7 +222,7 @@ const GlobalAIAssistant = () => {
                   position: 'absolute',
                   right: 8,
                   background: (isLoading || !input.trim()) ? '#cbd5e1' : '#0a84ff',
-                  color: 'white',
+                  color: 'var(--bg-panel)',
                   border: 'none',
                   borderRadius: '50%',
                   width: 32,
