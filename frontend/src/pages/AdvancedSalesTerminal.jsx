@@ -89,10 +89,9 @@ const AdvancedSalesTerminal = ({ onClose }) => {
          e.preventDefault();
          setGridItems(prev => [...prev, { id: Date.now(), itemNo: '', desc: '', unit: 'PCS', qty: 1, price: 0, discountPercent: 0, discountAmt: 0, total: 0, includeTax: true, tax: 0, net: 0 }]);
          setSelectedRow(gridItems.length);
-      }
       if (e.key === 'F8') {
          e.preventDefault();
-         alert("Wholesale Checkout is not fully connected to the database yet. Press F11 to Print the draft invoice.");
+         handleCheckout();
       }
       if (e.key === 'F11') {
          e.preventDefault();
@@ -140,6 +139,60 @@ const AdvancedSalesTerminal = ({ onClose }) => {
     } else if (e.key === 'ArrowUp') {
       e.preventDefault();
       if (index > 0) setSelectedRow(index - 1);
+    }
+  };
+
+  const handleCheckout = async () => {
+    if (isProcessing) return;
+    
+    const validItems = gridItems.filter(item => item.productId && item.qty > 0);
+    if (validItems.length === 0) {
+      alert("No valid products in grid to checkout.");
+      return;
+    }
+
+    setIsProcessing(true);
+    try {
+      const items = validItems.map(item => ({
+         productId: item.productId,
+         quantity: Number(item.qty),
+         price: Number(item.price),
+         tax: Number(item.tax) || 0,
+         discountAmount: Number(item.discountAmt) || 0
+      }));
+
+      const isCredit = invoiceData.type === 'Credit';
+      const saleData = {
+        items,
+        customerId: customerData.customer?.id || null,
+        customerName: customerData.customer?.name || 'Walk-in',
+        customerPhone: customerData.tel || '',
+        totalAmount: totals.sTotal,
+        discount: 0,
+        tax: totals.totalTaxes,
+        grandTotal: totals.netWithTaxes,
+        paymentMethod: isCredit ? 'credit' : 'cash',
+        cashAmount: isCredit ? 0 : totals.netWithTaxes,
+        cardAmount: 0,
+        discountType: 'amount',
+        extraCharges: 0,
+        notes: `Wholesale - ${invoiceData.reference || ''}`,
+        cashierName: 'Staff'
+      };
+
+      const res = await salesAPI.createSale(saleData);
+      
+      if (res.data && res.data._id) {
+         setInvoiceData(prev => ({ ...prev, invoiceNo: res.data.invoiceNumber || res.data._id.substring(res.data._id.length - 6) }));
+      }
+      
+      alert("Wholesale Checkout Successful! You can now press F11 to print the invoice.");
+      
+    } catch (err) {
+      console.error(err);
+      alert("Checkout failed: " + (err.response?.data?.error || err.message));
+    } finally {
+      setIsProcessing(false);
     }
   };
 
