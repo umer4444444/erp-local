@@ -489,7 +489,33 @@ const Sales = () => {
     const iframe = document.createElement('iframe');
     document.body.appendChild(iframe);
     iframe.style.display = 'none';
-    iframe.contentDocument.write(`<html><head><title>Invoice</title><style>body{font-family:sans-serif;padding:40px;max-width:400px;margin:0 auto}</style></head><body onload="window.print(); setTimeout(() => window.parent.document.body.removeChild(window.frameElement), 100);">${printContent}</body></html>`);
+    iframe.contentDocument.write(`
+      <html>
+        <head>
+          <title>Invoice</title>
+          <style>
+            body { font-family: 'Courier New', Courier, monospace; padding: 20px; color: #000; margin: 0 auto; max-width: 320px; }
+            @media print {
+              @page { margin: 0; }
+              body { padding: 10px; }
+            }
+          </style>
+        </head>
+        <body>
+          ${printContent}
+          <script>
+            window.onload = function() { 
+              window.print(); 
+              setTimeout(() => {
+                if (window.frameElement && window.parent.document.body.contains(window.frameElement)) {
+                  window.parent.document.body.removeChild(window.frameElement);
+                }
+              }, 500); 
+            }
+          </script>
+        </body>
+      </html>
+    `);
     iframe.contentDocument.close();
   };
 
