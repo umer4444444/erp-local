@@ -115,7 +115,9 @@ const Sales = () => {
   const [pendingCount, setPendingCount] = useState(0);
   const [syncingOffline, setSyncingOffline] = useState(false);
   const [pricingMode, setPricingMode] = useState('retail');
-
+  const [unknownBarcode, setUnknownBarcode] = useState(null);
+  const [newProductName, setNewProductName] = useState('');
+  const [newProductPrice, setNewProductPrice] = useState('');
   const [leftPanelWidth, setLeftPanelWidth] = useState(700);
   const isDragging = useRef(false);
   const barcodeBuffer = useRef('');
@@ -286,7 +288,7 @@ const Sales = () => {
   const changeDue = paymentMethod === 'cash' && cashTendered ? Math.max(parseFloat(cashTendered) - total, 0) : 0;
 
   const handleCheckout = async () => {
-    if (cart.length === 0) return alert('Cart is empty');
+    if (cart.length === 0 || processing || unknownBarcode) return alert('Cart is empty');
     setProcessing(true);
     
     let lat = null;
@@ -381,6 +383,12 @@ const Sales = () => {
       if (e.key === 'F4') { e.preventDefault(); setPricingMode(prev => prev === 'retail' ? 'wholesale' : 'retail'); return; }
       if (e.key === 'F8') { e.preventDefault(); handleCheckout(); return; }
       if (e.key === 'Escape') {
+         if (unknownBarcode) {
+             setUnknownBarcode(null);
+             setNewProductName('');
+             setNewProductPrice('');
+             return;
+         }
          if (showKeyboardShortcuts) {
              setShowKeyboardShortcuts(false);
              return;
@@ -406,6 +414,8 @@ const Sales = () => {
           if (match) {
             addToCart(match);
             setSearch(''); 
+          } else {
+            setUnknownBarcode(scannedCode);
           }
           barcodeBuffer.current = '';
         } else if (e.key.length === 1 && !e.ctrlKey && !e.altKey && !e.metaKey) {
@@ -443,7 +453,29 @@ const Sales = () => {
     
     window.addEventListener('keydown', handleGlobalKey);
     return () => window.removeEventListener('keydown', handleGlobalKey);
-  }, [selectedCartIndex, receipt, showKeyboardShortcuts, addToCart, removeFromCart, updateQty, handleCheckout]);
+  }, [selectedCartIndex, receipt, showKeyboardShortcuts, unknownBarcode, addToCart, removeFromCart, updateQty, handleCheckout]);
+
+  const handleQuickAddProduct = async () => {
+    if (!newProductName || !newProductPrice) return;
+    try {
+      const res = await inventoryAPI.createProduct({
+        name: newProductName,
+        price: Number(newProductPrice),
+        barcode: unknownBarcode,
+        sku: unknownBarcode,
+        category: 'Uncategorized',
+        stock: 100 // default stock so it can be sold immediately
+      });
+      const newProd = res.data;
+      setProducts(prev => [...prev, newProd]);
+      addToCart(newProd);
+      setUnknownBarcode(null);
+      setNewProductName('');
+      setNewProductPrice('');
+    } catch (e) {
+      alert("Failed to add product: " + (e.response?.data?.message || e.message));
+    }
+  };
 
   const handlePrint = () => {
     if (!document.getElementById('printable-invoice')) return;
@@ -958,6 +990,78 @@ const Sales = () => {
           </motion.div>
         </div>
       )}
+      
+      {/* Unknown Barcode Quick Add Modal */}
+      <AnimatePresence>
+        {unknownBarcode && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.6)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 100000 }}
+            onClick={() => setUnknownBarcode(null)}
+          >
+            <motion.div
+              initial={{ scale: 0.95, y: 20 }}
+              animate={{ scale: 1, y: 0 }}
+              exit={{ scale: 0.95, y: 20 }}
+              onClick={e => e.stopPropagation()}
+              style={{ background: 'var(--bg-panel)', padding: 32, borderRadius: 24, width: '100%', maxWidth: 400, boxShadow: '0 25px 50px -12px rgba(0,0,0,0.5)' }}
+            >
+              <h2 style={{ fontSize: 24, fontWeight: 900, marginBottom: 8, color: 'var(--text-main)' }}>Unknown Barcode</h2>
+              <p style={{ color: 'var(--text-muted)', marginBottom: 24 }}>Barcode <strong>{unknownBarcode}</strong> was not found. Register it now?</p>
+              
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+                <div>
+                  <label style={{ display: 'block', fontSize: 13, fontWeight: 700, marginBottom: 6, color: 'var(--text-muted)' }}>Product Name</label>
+                  <input
+                    autoFocus
+                    value={newProductName}
+                    onChange={e => setNewProductName(e.target.value)}
+                    onKeyDown={e => {
+                        if (e.key === 'Enter') document.getElementById('quick-add-price').focus();
+                        e.stopPropagation();
+                    }}
+                    style={{ width: '100%', padding: '12px 16px', borderRadius: 12, border: '2px solid var(--border-color)', fontSize: 16, background: 'var(--bg-main)', color: 'var(--text-main)', outline: 'none' }}
+                    placeholder="e.g. Coca Cola 330ml"
+                  />
+                </div>
+                
+                <div>
+                  <label style={{ display: 'block', fontSize: 13, fontWeight: 700, marginBottom: 6, color: 'var(--text-muted)' }}>Price (SAR)</label>
+                  <input
+                    id="quick-add-price"
+                    type="number"
+                    value={newProductPrice}
+                    onChange={e => setNewProductPrice(e.target.value)}
+                    onKeyDown={e => {
+                        if (e.key === 'Enter') handleQuickAddProduct();
+                        e.stopPropagation();
+                    }}
+                    style={{ width: '100%', padding: '12px 16px', borderRadius: 12, border: '2px solid var(--border-color)', fontSize: 16, background: 'var(--bg-main)', color: 'var(--text-main)', outline: 'none' }}
+                    placeholder="0.00"
+                  />
+                </div>
+              </div>
+
+              <div style={{ display: 'flex', gap: 12, marginTop: 28 }}>
+                <button
+                  onClick={() => setUnknownBarcode(null)}
+                  style={{ flex: 1, padding: 16, borderRadius: 16, background: 'var(--bg-main)', color: 'var(--text-main)', border: 'none', fontWeight: 800, cursor: 'pointer' }}
+                >
+                  Cancel (Esc)
+                </button>
+                <button
+                  onClick={handleQuickAddProduct}
+                  style={{ flex: 1, padding: 16, borderRadius: 16, background: '#16a34a', color: '#fff', border: 'none', fontWeight: 800, cursor: 'pointer' }}
+                >
+                  Save & Add
+                </button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 };
