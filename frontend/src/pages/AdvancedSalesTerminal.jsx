@@ -89,6 +89,7 @@ const AdvancedSalesTerminal = ({ onClose }) => {
          e.preventDefault();
          setGridItems(prev => [...prev, { id: Date.now(), itemNo: '', desc: '', unit: 'PCS', qty: 1, price: 0, discountPercent: 0, discountAmt: 0, total: 0, includeTax: true, tax: 0, net: 0 }]);
          setSelectedRow(gridItems.length);
+      }
       if (e.key === 'F8') {
          e.preventDefault();
          handleCheckout();
