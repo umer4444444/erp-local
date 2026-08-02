@@ -90,6 +90,10 @@ const AdvancedSalesTerminal = ({ onClose }) => {
          setGridItems(prev => [...prev, { id: Date.now(), itemNo: '', desc: '', unit: 'PCS', qty: 1, price: 0, discountPercent: 0, discountAmt: 0, total: 0, includeTax: true, tax: 0, net: 0 }]);
          setSelectedRow(gridItems.length);
       }
+      if (e.key === 'F8') {
+         e.preventDefault();
+         alert("Wholesale Checkout is not fully connected to the database yet. Press F11 to Print the draft invoice.");
+      }
       if (e.key === 'F11') {
          e.preventDefault();
          handlePrint();
@@ -110,12 +114,14 @@ const AdvancedSalesTerminal = ({ onClose }) => {
         newItems[index].desc = match.name;
         newItems[index].price = match.price;
         newItems[index].itemNo = match.sku || match.barcode || match._id;
+        newItems[index].productId = match._id;
       }
     } else if (field === 'desc' && value.length > 2) {
       const match = products.find(p => p.name === value);
       if (match) {
         newItems[index].itemNo = match.sku || match.barcode || match._id;
         newItems[index].price = match.price;
+        newItems[index].productId = match._id;
       }
     }
     
@@ -211,38 +217,17 @@ const AdvancedSalesTerminal = ({ onClose }) => {
         </div>
       </div>
     `;
-
-    const iframe = document.createElement('iframe');
-    document.body.appendChild(iframe);
-    iframe.style.display = 'none';
-    iframe.contentDocument.write(`
-      <html>
-        <head>
-          <title>Wholesale Invoice</title>
-          <style>
-            @media print {
-              @page { margin: 15mm; }
-              body { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-            }
-          </style>
-        </head>
-        <body>
-          ${printContent}
-          <script>
-            setTimeout(() => {
-              window.focus();
-              window.print();
-              setTimeout(() => {
-                if (window.frameElement && window.parent.document.body.contains(window.frameElement)) {
-                  window.parent.document.body.removeChild(window.frameElement);
-                }
-              }, 500);
-            }, 250);
-          </script>
-        </body>
-      </html>
-    `);
-    iframe.contentDocument.close();
+    const printContainer = document.createElement('div');
+    printContainer.id = 'print-container';
+    printContainer.innerHTML = printContent;
+    
+    document.body.appendChild(printContainer);
+    document.body.classList.add('printing');
+    
+    window.print();
+    
+    document.body.classList.remove('printing');
+    document.body.removeChild(printContainer);
   };
 
   return (

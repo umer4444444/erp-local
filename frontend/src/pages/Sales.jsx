@@ -380,6 +380,8 @@ const Sales = () => {
 
   useEffect(() => {
     const handleGlobalKey = (e) => {
+      if (pricingMode === 'wholesale') return; // Let AdvancedSalesTerminal handle its own hotkeys
+      
       const isInput = e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || e.target.tagName === 'SELECT';
 
       // Hotkeys
@@ -465,7 +467,7 @@ const Sales = () => {
     
     window.addEventListener('keydown', handleGlobalKey);
     return () => window.removeEventListener('keydown', handleGlobalKey);
-  }, [selectedCartIndex, receipt, showKeyboardShortcuts, unknownBarcode, addToCart, removeFromCart, updateQty, handleCheckout]);
+  }, [selectedCartIndex, receipt, showKeyboardShortcuts, unknownBarcode, addToCart, removeFromCart, updateQty, handleCheckout, pricingMode]);
 
   const handleQuickAddProduct = async () => {
     if (!newProductName || !newProductPrice) return;
