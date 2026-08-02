@@ -113,15 +113,15 @@ const AdvancedSalesTerminal = ({ onClose }) => {
       if (match) {
         newItems[index].desc = match.name;
         newItems[index].price = match.price;
-        newItems[index].itemNo = match.sku || match.barcode || match._id;
-        newItems[index].productId = match._id;
+        newItems[index].itemNo = match.sku || match.barcode || match.id || match._id;
+        newItems[index].productId = match.id || match._id;
       }
     } else if (field === 'desc' && value.length > 2) {
       const match = products.find(p => p.name === value);
       if (match) {
-        newItems[index].itemNo = match.sku || match.barcode || match._id;
+        newItems[index].itemNo = match.sku || match.barcode || match.id || match._id;
         newItems[index].price = match.price;
-        newItems[index].productId = match._id;
+        newItems[index].productId = match.id || match._id;
       }
     }
     
@@ -352,12 +352,12 @@ const AdvancedSalesTerminal = ({ onClose }) => {
           </div>
           <div style={{ padding: 8, display: 'grid', gridTemplateColumns: 'auto 1fr auto 1fr', gap: '4px 12px', fontSize: 12 }}>
             <label style={{ fontWeight: 'bold', color: '#1d4ed8' }}>Customer :</label>
-            <select style={{ border: '1px solid #94a3b8', padding: 2, gridColumn: 'span 3' }} onChange={e => {
-               const c = customers.find(x => x._id === e.target.value);
-               if(c) setCustomerData({...customerData, customer: c, taxNo: '123456', balance: c.loyaltyPoints || 0, tel: c.phone, address: 'N/A'});
-            }}>
+            <select onChange={e => {
+               const c = customers.find(x => (x.id || x._id) === e.target.value);
+               if(c) setCustomerData({...customerData, customer: c, tel: c.phone || c.tel, taxNo: c.taxNo || ''});
+            }} style={{ border: '1px solid #94a3b8', padding: 2, gridColumn: 'span 3' }}>
               <option value="">Select Customer...</option>
-              {customers.map(c => <option key={c._id} value={c._id}>{c.name}</option>)}
+              {customers.map(c => <option key={c.id || c._id} value={c.id || c._id}>{c.name}</option>)}
             </select>
             
             <label style={{ fontWeight: 'bold', color: '#1d4ed8' }}>Sub Account :</label>
@@ -388,7 +388,7 @@ const AdvancedSalesTerminal = ({ onClose }) => {
         
         {/* Table Header */}
         <datalist id="pro-products-list">
-          {products.map(p => <option key={p._id} value={p.name} />)}
+          {products.map(p => <option key={p.id || p._id} value={p.name} />)}
         </datalist>
         <div style={{ display: 'grid', gridTemplateColumns: '40px 120px 1fr 60px 60px 80px 80px 80px 80px 40px 80px 100px', background: '#3b82f6', color: 'white', fontSize: 11, fontWeight: 'bold', textAlign: 'center', borderBottom: '2px solid #1e3a8a' }}>
           <div style={{ padding: 4, borderRight: '1px solid #60a5fa' }}>#</div>
