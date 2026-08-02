@@ -8,6 +8,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { salesAPI, inventoryAPI, customerAPI, shiftAPI } from '../api';
 import Barcode from 'react-barcode';
+import AdvancedSalesTerminal from './AdvancedSalesTerminal';
 
 // IndexedDB helpers for offline queue
 const DB_NAME = 'erp_offline';
@@ -453,6 +454,10 @@ const Sales = () => {
     iframe.contentDocument.write(`<html><head><title>Invoice</title><style>body{font-family:sans-serif;padding:40px;max-width:400px;margin:0 auto}</style></head><body onload="window.print(); setTimeout(() => window.parent.document.body.removeChild(window.frameElement), 100);">${printContent}</body></html>`);
     iframe.contentDocument.close();
   };
+
+  if (pricingMode === 'wholesale') {
+    return <AdvancedSalesTerminal onClose={() => setPricingMode('retail')} />;
+  }
 
   return (
     <div style={{ position: 'fixed', inset: 0, zIndex: 9999, display: 'grid', gridTemplateColumns: `${leftPanelWidth}px 6px 1fr`, height: '100vh', background: '#f1f5f9', overflow: 'hidden' }}>
