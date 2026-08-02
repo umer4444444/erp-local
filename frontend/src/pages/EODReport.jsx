@@ -9,7 +9,7 @@ import { salesAPI, shiftAPI } from '../api';
 
 const EODReport = () => {
   const navigate = useNavigate();
-  const [summary, setSummary] = useState({ total: 0, cash: 0, card: 0 });
+  const [summary, setSummary] = useState({ total: 0, cash: 0, card: 0, credit: 0 });
   const [cashCount, setCashCount] = useState('');
   const [notes, setNotes] = useState('');
   const [loading, setLoading] = useState(true);
@@ -86,6 +86,7 @@ const EODReport = () => {
           <div class="divider"></div>
           <div class="row"><span>Cash Expected:</span> <strong>SAR ${summary.cash.toFixed(2)}</strong></div>
           <div class="row"><span>Card Expected:</span> <strong>SAR ${summary.card.toFixed(2)}</strong></div>
+          <div class="row"><span>Credit Expected:</span> <strong>SAR ${(summary.credit || 0).toFixed(2)}</strong></div>
           <div class="row total"><span>Total Expected:</span> <span>SAR ${summary.total.toFixed(2)}</span></div>
           <div class="divider"></div>
           <div class="row"><span>Actual Cash:</span> <strong>SAR ${parseFloat(cashCount || 0).toFixed(2)}</strong></div>
@@ -208,6 +209,15 @@ const EODReport = () => {
                   <span style={{ fontWeight: 700, color: 'var(--text-muted)' }}>Card Sales</span>
                 </div>
                 <span style={{ fontSize: 18, fontWeight: 900, color: 'var(--text-main)' }}>SAR {summary.card.toFixed(2)}</span>
+              </div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                  <div style={{ width: 40, height: 40, borderRadius: 12, background: '#fef3c7', color: '#d97706', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <FileText size={20} />
+                  </div>
+                  <span style={{ fontWeight: 700, color: 'var(--text-muted)' }}>Credit Sales</span>
+                </div>
+                <span style={{ fontSize: 18, fontWeight: 900, color: 'var(--text-main)' }}>SAR {(summary.credit || 0).toFixed(2)}</span>
               </div>
               <div style={{ borderTop: '2px dashed #f1f5f9', paddingTop: 24, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <span style={{ fontWeight: 800, color: 'var(--text-main)' }}>Total Expected</span>
