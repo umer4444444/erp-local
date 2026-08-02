@@ -103,13 +103,19 @@ const AdvancedSalesTerminal = ({ onClose }) => {
     const newItems = [...gridItems];
     newItems[index][field] = value;
     
-    // Auto-fill product details if Item No is entered
+    // Auto-fill product details if Item No or Description is entered
     if (field === 'itemNo' && value.length > 2) {
       const match = products.find(p => p.sku === value || p.barcode === value || p.name.includes(value));
       if (match) {
         newItems[index].desc = match.name;
         newItems[index].price = match.price;
         newItems[index].itemNo = match.sku || match.barcode || match._id;
+      }
+    } else if (field === 'desc' && value.length > 2) {
+      const match = products.find(p => p.name === value);
+      if (match) {
+        newItems[index].itemNo = match.sku || match.barcode || match._id;
+        newItems[index].price = match.price;
       }
     }
     
@@ -234,6 +240,9 @@ const AdvancedSalesTerminal = ({ onClose }) => {
         </div>
         
         {/* Table Header */}
+        <datalist id="pro-products-list">
+          {products.map(p => <option key={p._id} value={p.name} />)}
+        </datalist>
         <div style={{ display: 'grid', gridTemplateColumns: '40px 120px 1fr 60px 60px 80px 80px 80px 80px 40px 80px 100px', background: '#3b82f6', color: 'white', fontSize: 11, fontWeight: 'bold', textAlign: 'center', borderBottom: '2px solid #1e3a8a' }}>
           <div style={{ padding: 4, borderRight: '1px solid #60a5fa' }}>#</div>
           <div style={{ padding: 4, borderRight: '1px solid #60a5fa' }}>Item No</div>
@@ -254,8 +263,8 @@ const AdvancedSalesTerminal = ({ onClose }) => {
           {gridItems.map((item, index) => (
             <div key={item.id} onClick={() => setSelectedRow(index)} style={{ display: 'grid', gridTemplateColumns: '40px 120px 1fr 60px 60px 80px 80px 80px 80px 40px 80px 100px', background: selectedRow === index ? '#bfdbfe' : (index % 2 === 0 ? '#f8fafc' : '#f1f5f9'), fontSize: 12, borderBottom: '1px solid #cbd5e1' }}>
               <div style={{ padding: 4, textAlign: 'center', borderRight: '1px solid #cbd5e1', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>{index + 1}</div>
-              <input value={item.itemNo} onChange={e => handleGridChange(index, 'itemNo', e.target.value)} onKeyDown={e => handleKeyDown(e, index, 'itemNo')} style={{ padding: 4, border: 'none', background: 'transparent', width: '100%', borderRight: '1px solid #cbd5e1', outline: 'none' }} />
-              <input value={item.desc} onChange={e => handleGridChange(index, 'desc', e.target.value)} onKeyDown={e => handleKeyDown(e, index, 'desc')} style={{ padding: 4, border: 'none', background: 'transparent', width: '100%', borderRight: '1px solid #cbd5e1', outline: 'none' }} />
+              <input value={item.itemNo} onChange={e => handleGridChange(index, 'itemNo', e.target.value)} onKeyDown={e => handleKeyDown(e, index, 'itemNo')} style={{ padding: 4, border: 'none', background: 'transparent', width: '100%', borderRight: '1px solid #cbd5e1', outline: 'none' }} placeholder="Item No" />
+              <input list="pro-products-list" value={item.desc} onChange={e => handleGridChange(index, 'desc', e.target.value)} onKeyDown={e => handleKeyDown(e, index, 'desc')} style={{ padding: 4, border: 'none', background: 'transparent', width: '100%', borderRight: '1px solid #cbd5e1', outline: 'none' }} placeholder="Type product name..." />
               <input value={item.unit} onChange={e => handleGridChange(index, 'unit', e.target.value)} onKeyDown={e => handleKeyDown(e, index, 'unit')} style={{ padding: 4, border: 'none', background: 'transparent', width: '100%', borderRight: '1px solid #cbd5e1', outline: 'none', textAlign: 'center' }} />
               <input type="number" value={item.qty} onChange={e => handleGridChange(index, 'qty', Number(e.target.value))} onKeyDown={e => handleKeyDown(e, index, 'qty')} style={{ padding: 4, border: 'none', background: 'transparent', width: '100%', borderRight: '1px solid #cbd5e1', outline: 'none', textAlign: 'right' }} />
               <input type="number" value={item.price} onChange={e => handleGridChange(index, 'price', Number(e.target.value))} onKeyDown={e => handleKeyDown(e, index, 'price')} style={{ padding: 4, border: 'none', background: 'transparent', width: '100%', borderRight: '1px solid #cbd5e1', outline: 'none', textAlign: 'right' }} />
