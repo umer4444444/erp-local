@@ -185,7 +185,7 @@ const AdvancedSalesTerminal = ({ onClose }) => {
         paymentMethod: isCredit ? 'credit' : 'cash',
         cashAmount: isCredit ? 0 : totals.netWithTaxes,
         cardAmount: 0,
-        discountType: 'amount',
+        discountType: 'flat',
         extraCharges: 0,
         notes: `Wholesale - ${invoiceData.reference || ''}`,
         cashierName: 'Staff'
