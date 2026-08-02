@@ -101,7 +101,7 @@ const AdvancedSalesTerminal = ({ onClose }) => {
     };
     window.addEventListener('keydown', handleGlobalKey);
     return () => window.removeEventListener('keydown', handleGlobalKey);
-  }, [onClose, gridItems.length]);
+  }, [onClose, gridItems, totals, invoiceData, customerData]);
 
   const handleGridChange = (index, field, value) => {
     const newItems = [...gridItems];
@@ -218,10 +218,10 @@ const AdvancedSalesTerminal = ({ onClose }) => {
             <td style="padding: 6px; border-bottom: 1px solid #e2e8f0;">${item.desc}</td>
             <td style="padding: 6px; border-bottom: 1px solid #e2e8f0;">${item.unit}</td>
             <td style="padding: 6px; border-bottom: 1px solid #e2e8f0; text-align: right;">${item.qty}</td>
-            <td style="padding: 6px; border-bottom: 1px solid #e2e8f0; text-align: right;">${item.price.toFixed(2)}</td>
-            <td style="padding: 6px; border-bottom: 1px solid #e2e8f0; text-align: right;">${item.discountAmt.toFixed(2)}</td>
-            <td style="padding: 6px; border-bottom: 1px solid #e2e8f0; text-align: right;">${item.tax.toFixed(2)}</td>
-            <td style="padding: 6px; border-bottom: 1px solid #e2e8f0; text-align: right; font-weight: bold;">${item.net.toFixed(2)}</td>
+            <td style="padding: 6px; border-bottom: 1px solid #e2e8f0; text-align: right;">${Number(item.price).toFixed(2)}</td>
+            <td style="padding: 6px; border-bottom: 1px solid #e2e8f0; text-align: right;">${Number(item.discountAmt).toFixed(2)}</td>
+            <td style="padding: 6px; border-bottom: 1px solid #e2e8f0; text-align: right;">${Number(item.tax).toFixed(2)}</td>
+            <td style="padding: 6px; border-bottom: 1px solid #e2e8f0; text-align: right; font-weight: bold;">${Number(item.net).toFixed(2)}</td>
           </tr>
         `;
       }
