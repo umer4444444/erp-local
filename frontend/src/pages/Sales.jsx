@@ -486,38 +486,27 @@ const Sales = () => {
   const handlePrint = () => {
     if (!document.getElementById('printable-invoice')) return;
     const printContent = document.getElementById('printable-invoice').innerHTML;
-    const iframe = document.createElement('iframe');
-    document.body.appendChild(iframe);
-    iframe.style.display = 'none';
-    iframe.contentDocument.write(`
-      <html>
-        <head>
-          <title>Invoice</title>
-          <style>
-            body { font-family: 'Courier New', Courier, monospace; padding: 20px; color: #000; margin: 0 auto; max-width: 320px; }
-            @media print {
-              @page { margin: 0; }
-              body { padding: 10px; }
-            }
-          </style>
-        </head>
-        <body>
-          ${printContent}
-          <script>
-            setTimeout(() => {
-              window.focus();
-              window.print();
-              setTimeout(() => {
-                if (window.frameElement && window.parent.document.body.contains(window.frameElement)) {
-                  window.parent.document.body.removeChild(window.frameElement);
-                }
-              }, 500);
-            }, 250);
-          </script>
-        </body>
-      </html>
-    `);
-    iframe.contentDocument.close();
+    
+    // Create a temporary container at the root of the document
+    const printContainer = document.createElement('div');
+    printContainer.id = 'print-container';
+    
+    // Set thermal receipt specific styles
+    printContainer.innerHTML = `
+      <div style="font-family: 'Courier New', Courier, monospace; padding: 20px; color: #000; margin: 0 auto; max-width: 320px; text-align: left; direction: ltr;">
+        ${printContent}
+      </div>
+    `;
+    
+    document.body.appendChild(printContainer);
+    document.body.classList.add('printing');
+    
+    // Trigger native print dialog
+    window.print();
+    
+    // Cleanup immediately after print dialog closes
+    document.body.classList.remove('printing');
+    document.body.removeChild(printContainer);
   };
 
   if (pricingMode === 'wholesale') {
