@@ -25,6 +25,7 @@
   --border-color-rgb: rgba(255,255,255,0.05);
   --shadow-color-rgb: rgba(0,0,0,0.2);
   --shadow-strong-rgb: rgba(0,0,0,0.4);
+  color-scheme: dark;
 }
 
 body {
@@ -33,6 +34,16 @@ body {
   background-color: var(--bg-main);
   color: var(--text-main);
   overflow-x: hidden;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* Global fix for native date/time pickers having solid white backgrounds in dark mode */
+.dark input[type="date"],
+.dark input[type="time"],
+.dark input[type="month"],
+.dark input[type="datetime-local"] {
+  background-color: transparent;
+  color-scheme: dark;
 }
 
 .orb-container {

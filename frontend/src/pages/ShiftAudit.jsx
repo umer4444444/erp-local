@@ -71,12 +71,12 @@ const ShiftAudit = () => {
           <p style={{ color: 'var(--text-muted)', fontWeight: 600 }}>Calculate earnings and analyze shift productivity.</p>
         </div>
         <div style={{ display: 'flex', gap: 12 }}>
-          <div style={{ display: 'flex', background: 'var(--bg-panel)', padding: '6px', borderRadius: 16, border: '1px solid #e2e8f0' }}>
+          <div style={{ display: 'flex', background: 'var(--bg-panel)', padding: '6px', borderRadius: 16, border: '1px solid var(--border-color)' }}>
             <input type="date" value={dateRange.start} onChange={e => setDateRange({...dateRange, start: e.target.value})}
-              style={{ border: 'none', padding: '8px 12px', fontSize: 13, fontWeight: 700, color: 'var(--text-main)', outline: 'none' }} />
+              style={{ background: 'transparent', border: 'none', padding: '8px 12px', fontSize: 13, fontWeight: 700, color: 'var(--text-main)', outline: 'none' }} />
             <div style={{ padding: '8px 4px', color: 'var(--text-muted)' }}>—</div>
             <input type="date" value={dateRange.end} onChange={e => setDateRange({...dateRange, end: e.target.value})}
-              style={{ border: 'none', padding: '8px 12px', fontSize: 13, fontWeight: 700, color: 'var(--text-main)', outline: 'none' }} />
+              style={{ background: 'transparent', border: 'none', padding: '8px 12px', fontSize: 13, fontWeight: 700, color: 'var(--text-main)', outline: 'none' }} />
           </div>
           <button
             onClick={exportReport}

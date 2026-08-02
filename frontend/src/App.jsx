@@ -104,7 +104,7 @@ function AppContent() {
       <Sidebar onLogout={logout} user={user} isOpen={isSidebarOpen} setIsOpen={setIsSidebarOpen} />
       
       {/* Main Content Area */}
-      <div className={`flex-1 flex flex-col relative z-0 transition-all duration-300 w-full lg:ml-[292px]`}>
+      <div className={`flex flex-col relative z-0 transition-all duration-300 w-full lg:w-[calc(100%-292px)] lg:ml-[292px]`}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '24px 20px 0 20px', zIndex: 50 }}>
           <button 
             className="lg:hidden p-2 rounded-xl" 
