@@ -118,6 +118,10 @@ const Sales = () => {
   const [unknownBarcode, setUnknownBarcode] = useState(null);
   const [newProductName, setNewProductName] = useState('');
   const [newProductPrice, setNewProductPrice] = useState('');
+  
+  const [inlineSearch, setInlineSearch] = useState('');
+  const [showInlineDropdown, setShowInlineDropdown] = useState(false);
+  const inlineSearchRef = useRef(null);
   const [leftPanelWidth, setLeftPanelWidth] = useState(700);
   const isDragging = useRef(false);
   const barcodeBuffer = useRef('');
@@ -271,6 +275,8 @@ const Sales = () => {
       return { ...i, quantity: newQty };
     }).filter(Boolean));
   }, []);
+
+  const inlineFilteredProducts = inlineSearch.trim() ? products.filter(p => p.name.toLowerCase().includes(inlineSearch.toLowerCase()) || p.sku?.toLowerCase() === inlineSearch.toLowerCase() || p.barcode === inlineSearch) : [];
 
   const subtotal = cart.reduce((sum, i) => sum + (i.price * i.quantity) - i.discountAmount, 0);
   
@@ -618,12 +624,54 @@ const Sales = () => {
                 </motion.div>
               ))}
             </AnimatePresence>
-            {cart.length === 0 && (
-              <div style={{ textAlign: 'center', padding: 40, color: 'var(--text-muted)' }}>
-                <ShoppingCart size={36} style={{ margin: '0 auto 12px', opacity: 0.3 }} />
-                <div style={{ fontWeight: 700 }}>Cart is empty</div>
+            {/* Inline Product Search */}
+            <div style={{ position: 'relative', marginTop: 8 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '12px 16px', background: 'var(--bg-panel)', borderRadius: 12, border: '2px dashed var(--border-color)' }}>
+                <Search size={18} color="var(--text-muted)" />
+                <input 
+                  ref={inlineSearchRef}
+                  value={inlineSearch}
+                  onChange={e => { setInlineSearch(e.target.value); setShowInlineDropdown(true); }}
+                  placeholder="Type product name or barcode to add a row..."
+                  style={{ flex: 1, border: 'none', background: 'transparent', outline: 'none', fontSize: 13, fontWeight: 700, color: 'var(--text-main)' }}
+                  onKeyDown={e => {
+                    if (e.key === 'Enter') {
+                      if (inlineFilteredProducts.length > 0) {
+                        addToCart(inlineFilteredProducts[0]);
+                        setInlineSearch('');
+                        setShowInlineDropdown(false);
+                      } else {
+                        // trigger unknown barcode logic if not empty
+                        if (inlineSearch.trim()) {
+                          setUnknownBarcode(inlineSearch.trim());
+                          setInlineSearch('');
+                        }
+                      }
+                    }
+                  }}
+                />
               </div>
-            )}
+              <AnimatePresence>
+                {showInlineDropdown && inlineFilteredProducts.length > 0 && (
+                  <motion.div initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}
+                    style={{ position: 'absolute', top: '100%', left: 0, right: 0, background: 'var(--bg-panel)', border: '1px solid #e2e8f0', borderRadius: 12, boxShadow: '0 8px 24px var(--shadow-strong-rgb)', zIndex: 100, overflow: 'hidden', marginTop: 4 }}>
+                    {inlineFilteredProducts.slice(0, 5).map(p => (
+                      <div key={p._id} onClick={() => { addToCart(p); setInlineSearch(''); setShowInlineDropdown(false); inlineSearchRef.current?.focus(); }}
+                        style={{ padding: '12px 16px', cursor: 'pointer', display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid #f8fafc' }}
+                        onMouseEnter={e => e.currentTarget.style.background = 'var(--bg-main)'}
+                        onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
+                      >
+                        <div>
+                          <div style={{ fontSize: 13, fontWeight: 800, color: 'var(--text-main)' }}>{p.name}</div>
+                          <div style={{ fontSize: 11, color: 'var(--text-muted)', fontWeight: 600 }}>{p.sku || p.barcode}</div>
+                        </div>
+                        <div style={{ fontSize: 13, fontWeight: 900, color: '#0a84ff' }}>SAR {p.price}</div>
+                      </div>
+                    ))}
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
           </div>
         </div>
 
