@@ -132,7 +132,7 @@ const AdvancedSalesTerminal = ({ onClose }) => {
     if (e.key === 'Enter' || e.key === 'ArrowDown') {
       e.preventDefault();
       if (index === gridItems.length - 1) {
-        setGridItems([...gridItems, { id: Date.now(), itemNo: '', desc: '', unit: 'PCS', qty: 1, price: 0, discountPercent: 0, discountAmt: 0, total: 0, includeTax: true, tax: 0, net: 0 }]);
+        setGridItems(prev => [...prev, { id: Date.now(), itemNo: '', desc: '', unit: 'PCS', qty: 1, price: 0, discountPercent: 0, discountAmt: 0, total: 0, includeTax: true, tax: 0, net: 0 }]);
         setSelectedRow(index + 1);
       } else {
         setSelectedRow(index + 1);
@@ -146,21 +146,31 @@ const AdvancedSalesTerminal = ({ onClose }) => {
   const handleCheckout = async () => {
     if (isProcessing) return;
     
-    const validItems = gridItems.filter(item => item.productId && item.qty > 0);
-    if (validItems.length === 0) {
+    const items = [];
+    gridItems.forEach(item => {
+      let pid = item.productId;
+      if (!pid && (item.itemNo || item.desc)) {
+         const match = products.find(p => p.sku === item.itemNo || p.barcode === item.itemNo || p.name === item.desc || p.name === item.itemNo);
+         if (match) pid = match.id || match._id;
+      }
+      if (pid && item.qty > 0) {
+         items.push({
+           productId: pid,
+           quantity: Number(item.qty),
+           price: Number(item.price),
+           tax: Number(item.tax) || 0,
+           discountAmount: Number(item.discountAmt) || 0
+         });
+      }
+    });
+
+    if (items.length === 0) {
       alert("No valid products in grid to checkout.");
       return;
     }
 
     setIsProcessing(true);
     try {
-      const items = validItems.map(item => ({
-         productId: item.productId,
-         quantity: Number(item.qty),
-         price: Number(item.price),
-         tax: Number(item.tax) || 0,
-         discountAmount: Number(item.discountAmt) || 0
-      }));
 
       const isCredit = invoiceData.type === 'Credit';
       const saleData = {
