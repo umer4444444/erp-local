@@ -358,7 +358,7 @@ const Inventory = () => {
   };
 
   const addBulkRow = () => {
-    setBulkRows([...bulkRows, { id: Date.now(), name: '', categoryId: '', price: '', cost: '', stock: '', expiry: '', manufacturer: '' }]);
+    setBulkRows([...bulkRows, { id: Date.now(), name: '', nameAr: '', categoryId: '', price: '', cost: '', stock: '', expiry: '', manufacturer: '' }]);
   };
 
   const removeBulkRow = (id) => {
@@ -378,6 +378,7 @@ const Inventory = () => {
       for (const row of validRows) {
         await inventoryAPI.addProduct({
           name: row.name,
+          nameAr: row.nameAr || null,
           categoryId: row.categoryId || null,
           price: parseFloat(row.price),
           costPrice: parseFloat(row.cost),
@@ -388,7 +389,7 @@ const Inventory = () => {
         });
       }
       setShowBulkModal(false);
-      setBulkRows([{ id: Date.now(), name: '', categoryId: '', price: '', cost: '', stock: '', expiry: '', manufacturer: '' }]);
+      setBulkRows([{ id: Date.now(), name: '', nameAr: '', categoryId: '', price: '', cost: '', stock: '', expiry: '', manufacturer: '' }]);
       fetchData();
       alert(`Successfully imported ${validRows.length} items!`);
     } catch (err) {
@@ -582,9 +583,13 @@ const Inventory = () => {
               <h2 style={{ fontSize: 24, fontWeight: 900, marginBottom: 32 }}>Edit Product Details</h2>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
-                  <div style={{ gridColumn: 'span 2' }}>
+                  <div style={{ gridColumn: 'span 1' }}>
                     <label style={{ display: 'block', fontSize: 12, fontWeight: 800, color: 'var(--text-muted)', marginBottom: 8 }}>PRODUCT NAME</label>
-                    <input value={editingProduct.name} onChange={e => setEditingProduct({...editingProduct, name: e.target.value})} style={{ width: '100%', padding: '14px', borderRadius: 12, border: '1px solid #e2e8f0', fontWeight: 600 }} />
+                    <input value={editingProduct.name} onChange={e => setEditingProduct({...editingProduct, name: e.target.value})} style={{ width: '100%', padding: '14px', borderRadius: 12, border: '1px solid var(--border-color)', background: 'var(--bg-main)', color: 'var(--text-main)', fontWeight: 600 }} />
+                  </div>
+                  <div style={{ gridColumn: 'span 1' }}>
+                    <label style={{ display: 'block', fontSize: 12, fontWeight: 800, color: 'var(--text-muted)', marginBottom: 8 }}>ARABIC NAME</label>
+                    <input value={editingProduct.nameAr || ''} dir="rtl" onChange={e => setEditingProduct({...editingProduct, nameAr: e.target.value})} placeholder="الاسم بالعربي" style={{ width: '100%', padding: '14px', borderRadius: 12, border: '1px solid var(--border-color)', background: 'var(--bg-main)', color: 'var(--text-main)', fontWeight: 600 }} />
                   </div>
                   <div style={{ gridColumn: 'span 2' }}>
                     <label style={{ display: 'block', fontSize: 12, fontWeight: 800, color: 'var(--text-muted)', marginBottom: 8 }}>CATEGORY</label>
@@ -725,7 +730,7 @@ const Inventory = () => {
                 <div className="w-full overflow-x-auto"><table style={{ width: '100%', borderCollapse: 'separate', borderSpacing: '0 8px' }}>
                   <thead>
                     <tr style={{ textAlign: 'left' }}>
-                      <th style={{ padding: '0 8px', fontSize: 11, fontWeight: 800, color: 'var(--text-muted)' }}>PRODUCT NAME</th>
+                      <th style={{ padding: '0 8px', fontSize: 11, fontWeight: 800, color: 'var(--text-muted)' }}>PRODUCT NAME (EN / AR)</th>
                       <th style={{ padding: '0 8px', fontSize: 11, fontWeight: 800, color: 'var(--text-muted)' }}>CATEGORY</th>
                       <th style={{ padding: '0 8px', fontSize: 11, fontWeight: 800, color: 'var(--text-muted)' }}>COMPANY</th>
                       <th style={{ padding: '0 8px', fontSize: 11, fontWeight: 800, color: 'var(--text-muted)' }}>PRICE (SAR)</th>
@@ -738,7 +743,10 @@ const Inventory = () => {
                   <tbody>
                     {bulkRows.map(row => (
                       <tr key={row.id}>
-                        <td><input value={row.name} onChange={e => updateBulkRow(row.id, 'name', e.target.value)} placeholder="Product..." style={{ width: '100%', padding: 12, borderRadius: 10, border: '1px solid #e2e8f0', fontSize: 13, fontWeight: 600 }} /></td>
+                        <td>
+                          <input value={row.name} onChange={e => updateBulkRow(row.id, 'name', e.target.value)} placeholder="Product (EN)..." style={{ width: '100%', padding: '12px', borderRadius: '10px 10px 0 0', border: '1px solid var(--border-color)', borderBottom: 'none', fontSize: 13, fontWeight: 600, background: 'var(--bg-main)', color: 'var(--text-main)', outline: 'none' }} />
+                          <input value={row.nameAr || ''} dir="rtl" onChange={e => updateBulkRow(row.id, 'nameAr', e.target.value)} placeholder="المنتج (AR)..." style={{ width: '100%', padding: '12px', borderRadius: '0 0 10px 10px', border: '1px solid var(--border-color)', fontSize: 13, fontWeight: 600, background: 'var(--bg-main)', color: 'var(--text-main)', outline: 'none' }} />
+                        </td>
                         <td>
                           <select value={row.categoryId} onChange={e => updateBulkRow(row.id, 'categoryId', e.target.value)} style={{ width: '100%', padding: 12, borderRadius: 10, border: '1px solid #e2e8f0', fontSize: 13, fontWeight: 600 }}>
                             <option value="">None</option>

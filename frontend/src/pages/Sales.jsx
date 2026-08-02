@@ -694,11 +694,12 @@ const Sales = () => {
                 <WifiOff size={14} /> Saved offline — will sync when connection restored
               </div>
             )}
-            <div id="printable-invoice" style={{ flex: 1, overflowY: 'auto', paddingRight: 8 }}>
+            <div id="printable-invoice" style={{ flex: 1, overflowY: 'auto', paddingRight: 8, direction: 'ltr' }}>
               <div style={{ textAlign: 'center', marginBottom: 20 }}>
-                <div style={{ fontSize: 24, fontWeight: 900, letterSpacing: 2, marginBottom: 8 }}>BTG LOGO</div>
-                <h2 style={{ fontSize: 18, fontWeight: 800, margin: '0 0 4px', textTransform: 'uppercase' }}>Tax Invoice / فاتورة ضريبية</h2>
-                <div style={{ fontSize: 12, color: 'var(--text-muted)', lineHeight: 1.5 }}>
+                {/* Simulated BTG Logo */}
+                <div style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: 60, height: 60, borderRadius: '50%', background: '#0a84ff', color: '#fff', fontSize: 24, fontWeight: 900, letterSpacing: -1, marginBottom: 12 }}>BTG</div>
+                <h2 style={{ fontSize: 18, fontWeight: 900, margin: '0 0 4px', textTransform: 'uppercase' }}>Tax Invoice / فاتورة ضريبية</h2>
+                <div style={{ fontSize: 12, color: 'var(--text-muted)', lineHeight: 1.5, fontWeight: 600 }}>
                   Txn: {receipt.id?.split('-')[0]?.toUpperCase()}<br/>
                   Cashier: {receipt.cashierName || 'Staff'}<br/>
                   Date: {new Date(receipt.createdAt).toLocaleString()}
@@ -706,26 +707,29 @@ const Sales = () => {
               </div>
               
               {(receipt.customerName || receipt.customerPhone || receipt.customerId) && (
-                <div style={{ marginBottom: 12, padding: '8px 16px', background: 'var(--bg-main)', borderRadius: 10, fontSize: 12, fontWeight: 700, color: 'var(--text-muted)', display: 'flex', flexDirection: 'column', gap: 2 }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}><User size={12} /> {receipt.customerName || 'Customer'}</div>
-                  {receipt.customerPhone && <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>Phone: {receipt.customerPhone}</div>}
+                <div style={{ marginBottom: 16, padding: '12px 16px', background: '#f8fafc', borderRadius: 12, border: '1px solid #e2e8f0', display: 'flex', flexDirection: 'column', gap: 4 }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <span style={{ fontSize: 11, fontWeight: 800, color: '#94a3b8', textTransform: 'uppercase' }}>Customer / العميل</span>
+                  </div>
+                  <div style={{ fontSize: 13, fontWeight: 800, color: 'var(--text-main)', display: 'flex', alignItems: 'center', gap: 6 }}><User size={14} /> {receipt.customerName || 'Customer'}</div>
+                  {receipt.customerPhone && <div style={{ fontSize: 12, color: 'var(--text-muted)', fontWeight: 600, display: 'flex', alignItems: 'center', gap: 6 }}><Phone size={12} /> {receipt.customerPhone}</div>}
                 </div>
               )}
 
-              <div style={{ borderTop: '2px dashed #e2e8f0', borderBottom: '2px dashed #e2e8f0', padding: '16px 0', margin: '16px 0' }}>
-                <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1fr', gap: 10, fontSize: 13, fontWeight: 800, color: 'var(--text-muted)', paddingBottom: 8, borderBottom: '1px solid #e2e8f0' }}>
-                  <span>Item</span>
-                  <span style={{ textAlign: 'center' }}>Qty</span>
-                  <span style={{ textAlign: 'right' }}>Total</span>
+              <div style={{ borderTop: '2px dashed #cbd5e1', borderBottom: '2px dashed #cbd5e1', padding: '16px 0', margin: '16px 0' }}>
+                <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1fr', gap: 10, fontSize: 11, fontWeight: 900, color: '#64748b', textTransform: 'uppercase', paddingBottom: 8, borderBottom: '1px solid #e2e8f0', marginBottom: 8 }}>
+                  <span>Item / الصنف</span>
+                  <span style={{ textAlign: 'center' }}>Qty / الكمية</span>
+                  <span style={{ textAlign: 'right' }}>Total / المجموع</span>
                 </div>
                 {receipt.items?.map((item, idx) => (
-                  <div key={idx} style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1fr', gap: 10, fontSize: 13, borderBottom: '1px dashed #e2e8f0', paddingBottom: 8 }}>
+                  <div key={idx} style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1fr', gap: 10, fontSize: 13, paddingBottom: 8, paddingTop: 8, borderBottom: '1px dashed #f1f5f9' }}>
                     <div>
-                      <div style={{ fontWeight: 700, color: 'var(--text-main)' }}>{item.name}</div>
-                      {item.nameAr && <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>{item.nameAr}</div>}
+                      <div style={{ fontWeight: 800, color: 'var(--text-main)' }}>{item.name}</div>
+                      {item.nameAr && <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--text-muted)', direction: 'rtl' }}>{item.nameAr}</div>}
                     </div>
-                    <div style={{ textAlign: 'center' }}>{item.quantity}</div>
-                    <div style={{ textAlign: 'right' }}>SAR {(item.price * item.quantity).toFixed(2)}</div>
+                    <div style={{ textAlign: 'center', fontWeight: 700 }}>{item.quantity}</div>
+                    <div style={{ textAlign: 'right', fontWeight: 800 }}>SAR {(item.price * item.quantity).toFixed(2)}</div>
                   </div>
                 ))}
                 
@@ -734,34 +738,38 @@ const Sales = () => {
                 </div>
               </div>
 
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBottom: 24 }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 14, color: 'var(--text-muted)', fontWeight: 600 }}>
-                  <span>Subtotal</span><span>SAR {parseFloat(receipt.totalAmount || 0).toFixed(2)}</span>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginBottom: 24, padding: '0 8px' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 14, color: 'var(--text-muted)', fontWeight: 700 }}>
+                  <span>Subtotal <span style={{ fontSize: 11, opacity: 0.7, marginLeft: 4 }}>المجموع الفرعي</span></span><span>SAR {parseFloat(receipt.totalAmount || 0).toFixed(2)}</span>
                 </div>
                 {parseFloat(receipt.discount) > 0 && (
-                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 14, color: '#ef4444', fontWeight: 700 }}>
-                    <span>Discount</span><span>-SAR {parseFloat(receipt.discount).toFixed(2)}</span>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 14, color: '#ef4444', fontWeight: 800 }}>
+                    <span>Discount <span style={{ fontSize: 11, opacity: 0.7, marginLeft: 4 }}>الخصم</span></span><span>-SAR {parseFloat(receipt.discount).toFixed(2)}</span>
                   </div>
                 )}
                 {parseFloat(receipt.extraCharges) > 0 && (
-                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 14, color: '#0a84ff', fontWeight: 700 }}>
-                    <span>Extra ({receipt.extraChargeReason || 'Charges'})</span><span>+SAR {parseFloat(receipt.extraCharges).toFixed(2)}</span>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 14, color: '#0a84ff', fontWeight: 800 }}>
+                    <span>Extra <span style={{ fontSize: 11, opacity: 0.7, marginLeft: 4 }}>إضافي</span></span><span>+SAR {parseFloat(receipt.extraCharges).toFixed(2)}</span>
                   </div>
                 )}
                 {parseFloat(receipt.tax) > 0 && (
-                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 14, color: 'var(--text-muted)', fontWeight: 600 }}>
-                    <span>Tax</span><span>+SAR {parseFloat(receipt.tax).toFixed(2)}</span>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 14, color: 'var(--text-muted)', fontWeight: 700 }}>
+                    <span>VAT 15% <span style={{ fontSize: 11, opacity: 0.7, marginLeft: 4 }}>ضريبة القيمة المضافة</span></span><span>+SAR {parseFloat(receipt.tax).toFixed(2)}</span>
                   </div>
                 )}
-                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 18, color: 'var(--text-main)', fontWeight: 900, marginTop: 8, paddingTop: 8, borderTop: '1px solid #f1f5f9' }}>
-                  <span>Grand Total</span><span>SAR {parseFloat(receipt.grandTotal || 0).toFixed(2)}</span>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: 20, color: 'var(--text-main)', fontWeight: 900, marginTop: 12, paddingTop: 12, borderTop: '2px solid #e2e8f0' }}>
+                  <div style={{ display: 'flex', flexDirection: 'column' }}>
+                    <span>Grand Total</span>
+                    <span style={{ fontSize: 13, color: 'var(--text-muted)', direction: 'rtl' }}>الإجمالي النهائي</span>
+                  </div>
+                  <span>SAR {parseFloat(receipt.grandTotal || 0).toFixed(2)}</span>
                 </div>
               </div>
 
-              <div style={{ background: 'var(--bg-main)', padding: 16, borderRadius: 16, fontSize: 13 }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 4, fontWeight: 600 }}>
-                  <span style={{ color: 'var(--text-muted)' }}>Payment Method</span>
-                  <span style={{ textTransform: 'capitalize', color: 'var(--text-main)' }}>{receipt.paymentMethod === 'credit' ? 'Loan / Credit' : receipt.paymentMethod}</span>
+              <div style={{ background: '#f8fafc', border: '1px solid #e2e8f0', padding: 16, borderRadius: 16, fontSize: 13 }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8, fontWeight: 700 }}>
+                  <span style={{ color: 'var(--text-muted)' }}>Payment Method <span style={{ fontSize: 11, marginLeft: 4 }}>طريقة الدفع</span></span>
+                  <span style={{ textTransform: 'capitalize', color: 'var(--text-main)', fontWeight: 900 }}>{receipt.paymentMethod === 'credit' ? 'Credit / أجل' : (receipt.paymentMethod === 'card' ? 'Card / بطاقة' : 'Cash / نقداً')}</span>
                 </div>
                 {receipt.creditReason && (
                   <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 4, fontWeight: 600, fontSize: 12 }}>
@@ -771,18 +779,21 @@ const Sales = () => {
                 )}
                 {receipt.paymentMethod === 'cash' && (
                   <>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 4, fontWeight: 600 }}>
-                      <span style={{ color: 'var(--text-muted)' }}>Tendered</span>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 6, fontWeight: 700 }}>
+                      <span style={{ color: 'var(--text-muted)' }}>Tendered <span style={{ fontSize: 11, marginLeft: 4 }}>المدفوع</span></span>
                       <span style={{ color: 'var(--text-main)' }}>SAR {parseFloat(receipt.cashTendered || 0).toFixed(2)}</span>
                     </div>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', fontWeight: 800 }}>
-                      <span style={{ color: 'var(--text-muted)' }}>Change</span>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', fontWeight: 900, fontSize: 14 }}>
+                      <span style={{ color: 'var(--text-muted)' }}>Change <span style={{ fontSize: 11, marginLeft: 4 }}>الباقي</span></span>
                       <span style={{ color: '#16a34a' }}>SAR {parseFloat(receipt.changeDue || 0).toFixed(2)}</span>
                     </div>
                   </>
                 )}
               </div>
-              <div style={{ textAlign: 'center', marginTop: 24, color: 'var(--text-muted)', fontSize: 12, fontWeight: 600 }}>Thank you for your business!</div>
+              <div style={{ textAlign: 'center', marginTop: 32, paddingBottom: 16 }}>
+                <div style={{ fontWeight: 800, color: 'var(--text-main)', fontSize: 14, marginBottom: 4 }}>Thank you for your business!</div>
+                <div style={{ fontWeight: 700, color: 'var(--text-muted)', fontSize: 13, direction: 'rtl' }}>شكراً لتعاملكم معنا!</div>
+              </div>
             </div>
 
             <div style={{ display: 'flex', gap: 12, marginTop: 20 }}>

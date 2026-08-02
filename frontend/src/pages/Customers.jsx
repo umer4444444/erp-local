@@ -286,15 +286,16 @@ const Customers = () => {
               </div>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
                 {[
-                  { label: 'FULL NAME', field: 'name', placeholder: 'John Doe' },
+                  { label: 'FULL NAME (EN)', field: 'name', placeholder: 'John Doe' },
+                  { label: 'ARABIC NAME', field: 'nameAr', placeholder: 'الاسم بالعربي', isArabic: true },
                   { label: 'PHONE NUMBER', field: 'phone', placeholder: '+1 234 567 890' },
                   { label: 'EMAIL ADDRESS', field: 'email', placeholder: 'john@example.com' },
                   { label: 'STREET ADDRESS', field: 'address', placeholder: '123 Business Way...' },
-                ].map(({ label, field, placeholder }) => (
+                ].map(({ label, field, placeholder, isArabic }) => (
                   <div key={field}>
                     <label style={{ display: 'block', fontSize: 12, fontWeight: 800, color: 'var(--text-muted)', marginBottom: 8 }}>{label}</label>
-                    <input value={newCustomer[field]} onChange={e => setNewCustomer({...newCustomer, [field]: e.target.value})} placeholder={placeholder}
-                      style={{ width: '100%', padding: '14px', borderRadius: 12, border: '1px solid #e2e8f0', fontWeight: 600 }} />
+                    <input value={newCustomer[field] || ''} dir={isArabic ? "rtl" : "ltr"} onChange={e => setNewCustomer({...newCustomer, [field]: e.target.value})} placeholder={placeholder}
+                      style={{ width: '100%', padding: '14px', borderRadius: 12, border: '1px solid var(--border-color)', background: 'var(--bg-main)', color: 'var(--text-main)', fontWeight: 600 }} />
                   </div>
                 ))}
                 <button onClick={handleAddCustomer} style={{ marginTop: 12, padding: 18, borderRadius: 16, background: '#0a84ff', color: 'var(--bg-panel)', border: 'none', fontWeight: 900, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 10, justifyContent: 'center' }}>
