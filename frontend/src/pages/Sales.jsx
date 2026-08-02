@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { 
   ShoppingCart, Package, Plus, Trash, CreditCard, Banknote, Search, 
-  ArrowRight, Zap, Target, X, Printer, Minus, UserPlus, History, DollarSign,
+  ArrowRight, ArrowLeft, Zap, Target, X, Printer, Minus, UserPlus, History, DollarSign,
   Star, User, Gift, ChevronDown, AlertCircle, Wifi, WifiOff
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -115,8 +115,16 @@ const Sales = () => {
   const [syncingOffline, setSyncingOffline] = useState(false);
   const [pricingMode, setPricingMode] = useState('retail');
 
-  const [leftPanelWidth, setLeftPanelWidth] = useState(480);
+  const [leftPanelWidth, setLeftPanelWidth] = useState(700);
   const isDragging = useRef(false);
+  const barcodeBuffer = useRef('');
+  const barcodeTimeout = useRef(null);
+  const cartRef = useRef(cart);
+  const productsRef = useRef(products);
+  const [selectedCartIndex, setSelectedCartIndex] = useState(-1);
+
+  useEffect(() => { cartRef.current = cart; }, [cart]);
+  useEffect(() => { productsRef.current = products; }, [products]);
 
   const handleMouseMove = useCallback((e) => {
     if (!isDragging.current) return;
@@ -142,6 +150,8 @@ const Sales = () => {
 
   const searchRef = useRef();
   const customerSearchRef = useRef();
+
+  const [showKeyboardShortcuts, setShowKeyboardShortcuts] = useState(false);
 
   // Online/offline detection
   useEffect(() => {
@@ -180,17 +190,10 @@ const Sales = () => {
     const fetchProducts = () => inventoryAPI.getProducts().then(res => setProducts(res.data)).catch(() => {});
     fetchProducts();
     const interval = setInterval(fetchProducts, 30000);
-    window.addEventListener('keydown', handleGlobalKey);
-    return () => {
-      window.removeEventListener('keydown', handleGlobalKey);
-      clearInterval(interval);
-    };
+    return () => clearInterval(interval);
   }, []);
 
-  const handleGlobalKey = (e) => {
-    if (e.key === 'F2') searchRef.current?.focus();
-    if (e.key === 'F8') handleCheckout();
-  };
+
 
   // Customer search with debounce
   useEffect(() => {
@@ -366,8 +369,93 @@ const Sales = () => {
     return 'Bronze';
   };
 
+  useEffect(() => {
+    const handleGlobalKey = (e) => {
+      const isInput = e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || e.target.tagName === 'SELECT';
+
+      // Hotkeys
+      if (e.key === 'F1') { e.preventDefault(); setShowKeyboardShortcuts(true); return; }
+      if (e.key === 'F2') { e.preventDefault(); searchRef.current?.focus(); return; }
+      if (e.key === 'F3') { e.preventDefault(); customerSearchRef.current?.focus(); return; }
+      if (e.key === 'F4') { e.preventDefault(); setPricingMode(prev => prev === 'retail' ? 'wholesale' : 'retail'); return; }
+      if (e.key === 'F8') { e.preventDefault(); handleCheckout(); return; }
+      if (e.key === 'Escape') {
+         if (showKeyboardShortcuts) {
+             setShowKeyboardShortcuts(false);
+             return;
+         }
+         if (receipt) setReceipt(null);
+         setCustomerSearch('');
+         setSearch('');
+         return;
+      }
+
+      if (receipt && e.key === 'Enter') {
+         e.preventDefault();
+         handlePrint();
+         return;
+      }
+      
+      // Barcode Scanner logic (fast typing)
+      if (!isInput || e.target === searchRef.current) {
+        if (e.key === 'Enter' && barcodeBuffer.current.length > 2) {
+          e.preventDefault();
+          const scannedCode = barcodeBuffer.current.toLowerCase();
+          const match = productsRef.current.find(p => (p.sku && p.sku.toLowerCase() === scannedCode) || (p.barcode && p.barcode.toLowerCase() === scannedCode));
+          if (match) {
+            addToCart(match);
+            setSearch(''); 
+          }
+          barcodeBuffer.current = '';
+        } else if (e.key.length === 1 && !e.ctrlKey && !e.altKey && !e.metaKey) {
+           barcodeBuffer.current += e.key;
+           if (barcodeTimeout.current) clearTimeout(barcodeTimeout.current);
+           barcodeTimeout.current = setTimeout(() => {
+             barcodeBuffer.current = ''; 
+           }, 80);
+        }
+      }
+      
+      // Cart Navigation (when not typing)
+      if (!isInput && cartRef.current.length > 0 && !receipt) {
+         if (e.key === 'ArrowDown') {
+            e.preventDefault();
+            setSelectedCartIndex(prev => prev < cartRef.current.length - 1 ? prev + 1 : prev);
+         } else if (e.key === 'ArrowUp') {
+            e.preventDefault();
+            setSelectedCartIndex(prev => prev > 0 ? prev - 1 : prev);
+         } else if ((e.key === '+' || e.key === '=') && selectedCartIndex >= 0 && selectedCartIndex < cartRef.current.length) {
+            e.preventDefault();
+            const item = cartRef.current[selectedCartIndex];
+            if (item.quantity < item.stock) updateQty(item.productId, 1);
+         } else if ((e.key === '-' || e.key === '_') && selectedCartIndex >= 0 && selectedCartIndex < cartRef.current.length) {
+            e.preventDefault();
+            const item = cartRef.current[selectedCartIndex];
+            updateQty(item.productId, -1);
+         } else if ((e.key === 'Delete' || e.key === 'Backspace') && selectedCartIndex >= 0 && selectedCartIndex < cartRef.current.length) {
+            e.preventDefault();
+            removeFromCart(cartRef.current[selectedCartIndex].productId);
+            setSelectedCartIndex(prev => prev > 0 ? prev - 1 : 0);
+         }
+      }
+    };
+    
+    window.addEventListener('keydown', handleGlobalKey);
+    return () => window.removeEventListener('keydown', handleGlobalKey);
+  }, [selectedCartIndex, receipt, showKeyboardShortcuts, addToCart, removeFromCart, updateQty, handleCheckout]);
+
+  const handlePrint = () => {
+    if (!document.getElementById('printable-invoice')) return;
+    const printContent = document.getElementById('printable-invoice').innerHTML;
+    const iframe = document.createElement('iframe');
+    document.body.appendChild(iframe);
+    iframe.style.display = 'none';
+    iframe.contentDocument.write(`<html><head><title>Invoice</title><style>body{font-family:sans-serif;padding:40px;max-width:400px;margin:0 auto}</style></head><body onload="window.print(); setTimeout(() => window.parent.document.body.removeChild(window.frameElement), 100);">${printContent}</body></html>`);
+    iframe.contentDocument.close();
+  };
+
   return (
-    <div style={{ display: 'grid', gridTemplateColumns: `${leftPanelWidth}px 6px 1fr`, height: '100vh', background: '#f1f5f9', overflow: 'hidden' }}>
+    <div style={{ position: 'fixed', inset: 0, zIndex: 9999, display: 'grid', gridTemplateColumns: `${leftPanelWidth}px 6px 1fr`, height: '100vh', background: '#f1f5f9', overflow: 'hidden' }}>
       
       {/* Left Side: Cart & Checkout (Centered & Larger) */}
       <div style={{ background: 'var(--bg-panel)', borderRight: '1px solid #e2e8f0', display: 'flex', flexDirection: 'column', overflowY: 'auto' }}>
@@ -379,7 +467,7 @@ const Sales = () => {
                 onClick={() => setPricingMode(pricingMode === 'retail' ? 'wholesale' : 'retail')}
                 style={{ fontSize: 11, fontWeight: 800, color: pricingMode === 'wholesale' ? '#fff' : '#0a84ff', background: pricingMode === 'wholesale' ? '#8b5cf6' : '#eff6ff', border: 'none', padding: '4px 10px', borderRadius: 8, cursor: 'pointer' }}
               >
-                {pricingMode === 'retail' ? 'RETAIL' : 'WHOLESALE'} MODE
+                {pricingMode === 'retail' ? 'RETAIL' : 'WHOLESALE'} MODE (F4)
               </button>
               <div style={{ fontSize: 12, fontWeight: 800, color: '#0a84ff', background: '#eff6ff', padding: '4px 10px', borderRadius: 8 }}>
                 Cashier: {currentUser.name || 'Staff'}
@@ -406,7 +494,7 @@ const Sales = () => {
                   ref={customerSearchRef}
                   value={customerSearch}
                   onChange={e => { setCustomerSearch(e.target.value); setShowCustomerDropdown(true); }}
-                  placeholder="Search existing customer..."
+                  placeholder="Search existing customer... (F3)"
                   style={{ flex: 1, border: 'none', outline: 'none', fontSize: 13, fontWeight: 600, background: 'transparent' }}
                 />
               )}
@@ -472,10 +560,10 @@ const Sales = () => {
         <div style={{ flex: 1, padding: '16px 28px', overflowY: 'auto' }}>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
             <AnimatePresence>
-              {cart.map(item => (
+              {cart.map((item, index) => (
                 <motion.div 
                   layout key={item.productId} initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, scale: 0.9 }}
-                  style={{ display: 'flex', gap: 12, alignItems: 'center', padding: '10px 0', borderBottom: '1px solid #f8fafc' }}
+                  style={{ display: 'flex', gap: 12, alignItems: 'center', padding: '10px 14px', borderBottom: '1px solid var(--border-color)', background: index === selectedCartIndex ? 'rgba(10, 132, 255, 0.1)' : 'transparent', borderRadius: 12, border: index === selectedCartIndex ? '1px solid #0a84ff' : '1px solid transparent' }}
                 >
                   <div style={{ flex: 1 }}>
                     <div style={{ fontSize: 14, fontWeight: 800, color: 'var(--text-main)' }}>{item.name}</div>
@@ -618,7 +706,7 @@ const Sales = () => {
             style={{ width: '100%', padding: '16px', borderRadius: 16, background: 'var(--text-main)', color: 'var(--bg-panel)',
               fontSize: 16, fontWeight: 900, border: 'none', cursor: 'pointer', opacity: processing ? 0.7 : 1,
               display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10 }}>
-            {processing ? 'Processing...' : `Complete Payment`} <ArrowRight size={18} />
+            {processing ? 'Processing...' : `Complete Payment (F8)`} <ArrowRight size={18} />
           </button>
         </div>
       </div>
@@ -652,6 +740,12 @@ const Sales = () => {
             <p style={{ color: 'var(--text-muted)', fontWeight: 600 }}>Process orders and manage transactions.</p>
           </div>
           <div style={{ display: 'flex', gap: 12 }}>
+            <button onClick={() => setShowKeyboardShortcuts(true)} style={{ padding: '12px 20px', borderRadius: 14, border: '1px solid #e2e8f0', background: 'var(--bg-panel)', fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 8 }}>
+              Shortcuts
+            </button>
+            <button onClick={() => navigate('/')} style={{ padding: '12px 20px', borderRadius: 14, border: '1px solid #e2e8f0', background: 'var(--bg-panel)', fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 8 }}>
+              <ArrowLeft size={18} /> Dashboard
+            </button>
             <button onClick={() => navigate('/sales/history')} style={{ padding: '12px 20px', borderRadius: 14, border: '1px solid #e2e8f0', background: 'var(--bg-panel)', fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 8 }}>
               <History size={18} /> History
             </button>
@@ -797,19 +891,64 @@ const Sales = () => {
             </div>
 
             <div style={{ display: 'flex', gap: 12, marginTop: 20 }}>
-              <button onClick={() => {
-                const printContent = document.getElementById('printable-invoice').innerHTML;
-                const iframe = document.createElement('iframe');
-                document.body.appendChild(iframe);
-                iframe.style.display = 'none';
-                iframe.contentDocument.write(`<html><head><title>Invoice</title><style>body{font-family:sans-serif;padding:40px;max-width:400px;margin:0 auto}</style></head><body onload="window.print(); setTimeout(() => window.parent.document.body.removeChild(window.frameElement), 100);">${printContent}</body></html>`);
-                iframe.contentDocument.close();
-              }} style={{ flex: 1, padding: 14, borderRadius: 16, background: '#f1f5f9', border: 'none', fontWeight: 800, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
-                <Printer size={18} /> Print Invoice
+              <button onClick={handlePrint} style={{ flex: 1, padding: 14, borderRadius: 16, background: '#f1f5f9', border: 'none', fontWeight: 800, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
+                <Printer size={18} /> Print Invoice (Enter)
               </button>
               <button onClick={() => setReceipt(null)} style={{ flex: 1, padding: 14, borderRadius: 16, background: '#0a84ff', color: 'var(--bg-panel)', border: 'none', fontWeight: 800, cursor: 'pointer' }}>
-                New Sale
+                New Sale (Esc)
               </button>
+            </div>
+          </motion.div>
+        </div>
+      )}
+      
+      {/* Keyboard Shortcuts Modal */}
+      {showKeyboardShortcuts && (
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20 }}>
+          <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} 
+            style={{ background: 'var(--bg-panel)', width: '100%', maxWidth: 500, padding: 32, borderRadius: 24, maxHeight: '90vh', overflowY: 'auto', position: 'relative' }}>
+            <button onClick={() => setShowKeyboardShortcuts(false)} style={{ position: 'absolute', top: 20, right: 20, background: 'transparent', border: 'none', cursor: 'pointer' }}>
+              <X size={24} color='var(--text-muted)' />
+            </button>
+            <h2 style={{ fontSize: 24, fontWeight: 900, marginBottom: 20 }}>Keyboard Shortcuts</h2>
+            
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid #f1f5f9', paddingBottom: 10 }}>
+                <span style={{ fontWeight: 700, color: 'var(--text-main)' }}>Search Products</span>
+                <span style={{ fontWeight: 900, color: '#0a84ff', background: '#eff6ff', padding: '4px 10px', borderRadius: 8 }}>F2</span>
+              </div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid #f1f5f9', paddingBottom: 10 }}>
+                <span style={{ fontWeight: 700, color: 'var(--text-main)' }}>Search Customer</span>
+                <span style={{ fontWeight: 900, color: '#0a84ff', background: '#eff6ff', padding: '4px 10px', borderRadius: 8 }}>F3</span>
+              </div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid #f1f5f9', paddingBottom: 10 }}>
+                <span style={{ fontWeight: 700, color: 'var(--text-main)' }}>Toggle Retail/Wholesale</span>
+                <span style={{ fontWeight: 900, color: '#0a84ff', background: '#eff6ff', padding: '4px 10px', borderRadius: 8 }}>F4</span>
+              </div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid #f1f5f9', paddingBottom: 10 }}>
+                <span style={{ fontWeight: 700, color: 'var(--text-main)' }}>Complete Payment</span>
+                <span style={{ fontWeight: 900, color: '#0a84ff', background: '#eff6ff', padding: '4px 10px', borderRadius: 8 }}>F8</span>
+              </div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid #f1f5f9', paddingBottom: 10 }}>
+                <span style={{ fontWeight: 700, color: 'var(--text-main)' }}>Select Cart Item (Up/Down)</span>
+                <span style={{ fontWeight: 900, color: '#0a84ff', background: '#eff6ff', padding: '4px 10px', borderRadius: 8 }}>↑ / ↓</span>
+              </div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid #f1f5f9', paddingBottom: 10 }}>
+                <span style={{ fontWeight: 700, color: 'var(--text-main)' }}>Adjust Quantity of Selected Item</span>
+                <span style={{ fontWeight: 900, color: '#0a84ff', background: '#eff6ff', padding: '4px 10px', borderRadius: 8 }}>+ / -</span>
+              </div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid #f1f5f9', paddingBottom: 10 }}>
+                <span style={{ fontWeight: 700, color: 'var(--text-main)' }}>Remove Selected Item</span>
+                <span style={{ fontWeight: 900, color: '#ef4444', background: '#fef2f2', padding: '4px 10px', borderRadius: 8 }}>Delete</span>
+              </div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid #f1f5f9', paddingBottom: 10 }}>
+                <span style={{ fontWeight: 700, color: 'var(--text-main)' }}>Print Invoice (when open)</span>
+                <span style={{ fontWeight: 900, color: '#0a84ff', background: '#eff6ff', padding: '4px 10px', borderRadius: 8 }}>Enter</span>
+              </div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', paddingBottom: 10 }}>
+                <span style={{ fontWeight: 700, color: 'var(--text-main)' }}>Close Modal / New Sale</span>
+                <span style={{ fontWeight: 900, color: '#0a84ff', background: '#eff6ff', padding: '4px 10px', borderRadius: 8 }}>Esc</span>
+              </div>
             </div>
           </motion.div>
         </div>

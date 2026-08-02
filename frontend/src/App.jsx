@@ -59,11 +59,13 @@ function AppContent() {
   const { token, user, logout } = useAuth();
   const location = useLocation();
   const { isDarkMode, toggleDarkMode } = useTheme();
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(window.innerWidth >= 1024);
 
   // Close sidebar on route change on mobile
   useEffect(() => {
-    setIsSidebarOpen(false);
+    if (window.innerWidth < 1024) {
+      setIsSidebarOpen(false);
+    }
   }, [location.pathname]);
 
   if (!token) {
@@ -104,10 +106,10 @@ function AppContent() {
       <Sidebar onLogout={logout} user={user} isOpen={isSidebarOpen} setIsOpen={setIsSidebarOpen} />
       
       {/* Main Content Area */}
-      <div className={`flex flex-col relative z-0 transition-all duration-300 w-full lg:w-[calc(100%-292px)] lg:ml-[292px]`}>
+      <div className={`flex flex-col relative z-0 transition-all duration-300 w-full ${isSidebarOpen ? 'lg:w-[calc(100%-292px)] lg:ml-[292px]' : 'lg:w-full lg:ml-0'}`}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '24px 20px 0 20px', zIndex: 50 }}>
           <button 
-            className="lg:hidden p-2 rounded-xl" 
+            className={`p-2 rounded-xl ${isSidebarOpen ? 'lg:hidden' : ''}`} 
             style={{ background: 'var(--bg-panel)', border: '1px solid var(--border-color)', color: 'var(--text-main)' }}
             onClick={() => setIsSidebarOpen(true)}
           >

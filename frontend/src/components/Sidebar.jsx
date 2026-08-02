@@ -67,7 +67,7 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
             <div style={{ fontSize: 9, fontWeight: 800, color: 'var(--text-muted)', textTransform: 'uppercase' }}>ERP v2.0</div>
           </div>
         </div>
-        <button className="lg:hidden" onClick={() => setIsOpen(false)} style={{ background: 'transparent', border: 'none', color: 'var(--text-muted)', cursor: 'pointer' }}>
+        <button onClick={() => setIsOpen(false)} style={{ background: 'transparent', border: 'none', color: 'var(--text-muted)', cursor: 'pointer', padding: 8 }}>
           <X size={20} />
         </button>
       </div>
@@ -108,20 +108,21 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
 
   return (
     <>
-      {/* Mobile/Tablet Overlay Sidebar */}
       <AnimatePresence>
         {isOpen && (
           <>
+            {/* Mobile Overlay */}
             <motion.div 
               initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
               onClick={() => setIsOpen(false)}
               className="lg:hidden"
               style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', zIndex: 99 }}
             />
+            
+            {/* Sidebar Content (Both Desktop & Mobile) */}
             <motion.div 
-              initial={{ x: '-100%' }} animate={{ x: 0 }} exit={{ x: '-100%' }}
+              initial={{ x: '-100%', opacity: 0 }} animate={{ x: 0, opacity: 1 }} exit={{ x: '-100%', opacity: 0 }}
               transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-              className="lg:hidden"
               style={{ position: 'fixed', top: 16, left: 16, zIndex: 100 }}
             >
               {sidebarContent}
@@ -129,11 +130,6 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
           </>
         )}
       </AnimatePresence>
-
-      {/* Desktop Persistent Sidebar */}
-      <div className="hidden lg:block" style={{ position: 'fixed', top: 16, left: 16, zIndex: 50 }}>
-        {sidebarContent}
-      </div>
     </>
   );
 };
