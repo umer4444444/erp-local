@@ -388,6 +388,12 @@ const Sales = () => {
       if (e.key === 'F3') { e.preventDefault(); customerSearchRef.current?.focus(); return; }
       if (e.key === 'F4') { e.preventDefault(); setPricingMode(prev => prev === 'retail' ? 'wholesale' : 'retail'); return; }
       if (e.key === 'F8') { e.preventDefault(); handleCheckout(); return; }
+      if (e.key === 'F11') { 
+        e.preventDefault(); 
+        if (receipt) handlePrint(); 
+        else alert("Please checkout (F8) first to print a retail receipt."); 
+        return; 
+      }
       if (e.key === 'Escape') {
          if (unknownBarcode) {
              setUnknownBarcode(null);
@@ -993,7 +999,7 @@ const Sales = () => {
 
             <div style={{ display: 'flex', gap: 12, marginTop: 20 }}>
               <button onClick={handlePrint} style={{ flex: 1, padding: 14, borderRadius: 16, background: '#f1f5f9', border: 'none', fontWeight: 800, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
-                <Printer size={18} /> Print Invoice (Enter)
+                <Printer size={18} /> Print Invoice (F11/Enter)
               </button>
               <button onClick={() => setReceipt(null)} style={{ flex: 1, padding: 14, borderRadius: 16, background: '#0a84ff', color: 'var(--bg-panel)', border: 'none', fontWeight: 800, cursor: 'pointer' }}>
                 New Sale (Esc)
