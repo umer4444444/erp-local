@@ -504,14 +504,15 @@ const Sales = () => {
         <body>
           ${printContent}
           <script>
-            window.onload = function() { 
-              window.print(); 
+            setTimeout(() => {
+              window.focus();
+              window.print();
               setTimeout(() => {
                 if (window.frameElement && window.parent.document.body.contains(window.frameElement)) {
                   window.parent.document.body.removeChild(window.frameElement);
                 }
-              }, 500); 
-            }
+              }, 500);
+            }, 250);
           </script>
         </body>
       </html>
