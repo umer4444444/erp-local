@@ -92,7 +92,7 @@ const AdvancedSalesTerminal = ({ onClose }) => {
       }
       if (e.key === 'F11') {
          e.preventDefault();
-         alert("Printing Wholesale Invoice...");
+         handlePrint();
       }
     };
     window.addEventListener('keydown', handleGlobalKey);
@@ -135,6 +135,114 @@ const AdvancedSalesTerminal = ({ onClose }) => {
       e.preventDefault();
       if (index > 0) setSelectedRow(index - 1);
     }
+  };
+
+  const handlePrint = () => {
+    let itemsHTML = '';
+    gridItems.forEach((item, index) => {
+      if (item.desc || item.itemNo) {
+        itemsHTML += `
+          <tr>
+            <td style="padding: 6px; border-bottom: 1px solid #e2e8f0;">${index + 1}</td>
+            <td style="padding: 6px; border-bottom: 1px solid #e2e8f0;">${item.itemNo}</td>
+            <td style="padding: 6px; border-bottom: 1px solid #e2e8f0;">${item.desc}</td>
+            <td style="padding: 6px; border-bottom: 1px solid #e2e8f0;">${item.unit}</td>
+            <td style="padding: 6px; border-bottom: 1px solid #e2e8f0; text-align: right;">${item.qty}</td>
+            <td style="padding: 6px; border-bottom: 1px solid #e2e8f0; text-align: right;">${item.price.toFixed(2)}</td>
+            <td style="padding: 6px; border-bottom: 1px solid #e2e8f0; text-align: right;">${item.discountAmt.toFixed(2)}</td>
+            <td style="padding: 6px; border-bottom: 1px solid #e2e8f0; text-align: right;">${item.tax.toFixed(2)}</td>
+            <td style="padding: 6px; border-bottom: 1px solid #e2e8f0; text-align: right; font-weight: bold;">${item.net.toFixed(2)}</td>
+          </tr>
+        `;
+      }
+    });
+
+    const printContent = `
+      <div style="font-family: Arial, sans-serif; max-width: 800px; margin: 0 auto; color: #0f172a;">
+        <div style="text-align: center; margin-bottom: 30px;">
+          <h1 style="color: #1e3a8a; margin: 0; font-size: 28px;">TAX INVOICE</h1>
+          <p style="margin: 4px 0; color: #64748b; font-weight: bold;">Wholesale Division</p>
+        </div>
+        
+        <div style="display: flex; justify-content: space-between; margin-bottom: 30px; border-bottom: 2px solid #cbd5e1; padding-bottom: 20px;">
+          <div style="line-height: 1.6;">
+            <strong>Invoice No:</strong> ${invoiceData.invoiceNo || 'DRAFT'}<br/>
+            <strong>Date:</strong> ${invoiceData.date}<br/>
+            <strong>Type:</strong> ${invoiceData.type}
+          </div>
+          <div style="line-height: 1.6; text-align: right;">
+            <strong>Customer:</strong> ${customerData.customer?.name || 'Walk-in'}<br/>
+            <strong>Phone:</strong> ${customerData.tel || '-'}<br/>
+            <strong>Tax No:</strong> ${customerData.taxNo || '-'}
+          </div>
+        </div>
+        
+        <table style="width: 100%; border-collapse: collapse; font-size: 13px; margin-bottom: 40px;">
+          <thead>
+            <tr style="background: #f1f5f9; border-bottom: 2px solid #94a3b8;">
+              <th style="padding: 10px 6px; text-align: left; color: #334155;">#</th>
+              <th style="padding: 10px 6px; text-align: left; color: #334155;">Item No</th>
+              <th style="padding: 10px 6px; text-align: left; color: #334155;">Description</th>
+              <th style="padding: 10px 6px; text-align: left; color: #334155;">Unit</th>
+              <th style="padding: 10px 6px; text-align: right; color: #334155;">Qty</th>
+              <th style="padding: 10px 6px; text-align: right; color: #334155;">Price</th>
+              <th style="padding: 10px 6px; text-align: right; color: #334155;">Disc</th>
+              <th style="padding: 10px 6px; text-align: right; color: #334155;">Tax</th>
+              <th style="padding: 10px 6px; text-align: right; color: #334155;">Net Total</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${itemsHTML}
+          </tbody>
+        </table>
+
+        <div style="display: flex; justify-content: flex-end;">
+          <div style="width: 300px; border: 1px solid #cbd5e1; padding: 20px; border-radius: 8px; background: #f8fafc;">
+            <div style="display: flex; justify-content: space-between; margin-bottom: 12px; font-size: 14px; color: #475569;">
+              <span>Subtotal:</span> <strong>SAR ${totals.sTotal.toFixed(2)}</strong>
+            </div>
+            <div style="display: flex; justify-content: space-between; margin-bottom: 16px; font-size: 14px; color: #475569;">
+              <span>Taxes (VAT):</span> <strong>SAR ${totals.totalTaxes.toFixed(2)}</strong>
+            </div>
+            <div style="display: flex; justify-content: space-between; font-size: 18px; border-top: 2px solid #cbd5e1; padding-top: 16px; margin-top: 8px;">
+              <span style="color: #0f172a; font-weight: bold;">Net Total:</span> <strong style="color: #1e3a8a;">SAR ${totals.netWithTaxes.toFixed(2)}</strong>
+            </div>
+          </div>
+        </div>
+      </div>
+    `;
+
+    const iframe = document.createElement('iframe');
+    document.body.appendChild(iframe);
+    iframe.style.display = 'none';
+    iframe.contentDocument.write(`
+      <html>
+        <head>
+          <title>Wholesale Invoice</title>
+          <style>
+            @media print {
+              @page { margin: 15mm; }
+              body { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+            }
+          </style>
+        </head>
+        <body>
+          ${printContent}
+          <script>
+            setTimeout(() => {
+              window.focus();
+              window.print();
+              setTimeout(() => {
+                if (window.frameElement && window.parent.document.body.contains(window.frameElement)) {
+                  window.parent.document.body.removeChild(window.frameElement);
+                }
+              }, 500);
+            }, 250);
+          </script>
+        </body>
+      </html>
+    `);
+    iframe.contentDocument.close();
   };
 
   return (
@@ -324,7 +432,7 @@ const AdvancedSalesTerminal = ({ onClose }) => {
             <button style={{ padding: '6px 12px', background: '#f8fafc', border: '1px solid #94a3b8', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 4, fontSize: 11, fontWeight: 'bold' }}>
               <Search size={14} color="#2563eb" /> F5 Search
             </button>
-            <button style={{ padding: '6px 12px', background: '#f8fafc', border: '1px solid #94a3b8', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 4, fontSize: 11, fontWeight: 'bold' }}>
+            <button onClick={handlePrint} style={{ padding: '6px 12px', background: '#f8fafc', border: '1px solid #94a3b8', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 4, fontSize: 11, fontWeight: 'bold' }}>
               <Printer size={14} color="#475569" /> F11 Print
             </button>
             
