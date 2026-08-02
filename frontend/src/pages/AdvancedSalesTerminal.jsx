@@ -1,9 +1,11 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { 
   Plus, Search, Printer, ArrowLeft, ArrowRight, Save, X, Settings, User, 
-  ChevronRight, ChevronLeft, CreditCard, Banknote, Calendar, BarChart2, Package
+  ChevronRight, ChevronLeft, CreditCard, Banknote, Calendar, BarChart2, Package,
+  WifiOff, Phone
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import Barcode from 'react-barcode';
 import { useNavigate } from 'react-router-dom';
 import { salesAPI, inventoryAPI, customerAPI } from '../api';
 
@@ -84,7 +86,16 @@ const AdvancedSalesTerminal = ({ onClose }) => {
 
   useEffect(() => {
     const handleGlobalKey = (e) => {
-      if (e.key === 'Escape') { e.preventDefault(); onClose(); }
+      if (e.key === 'Escape') { 
+        e.preventDefault(); 
+        if (receipt) {
+          setReceipt(null);
+          setGridItems([{ id: Date.now(), itemNo: '', desc: '', unit: 'PCS', qty: 1, price: 0, discountPercent: 0, discountAmt: 0, total: 0, includeTax: true, tax: 0, net: 0 }]);
+          setTotals({ sTotal: 0, totalQty: 0, additions: 0, totalTaxes: 0, netWithTaxes: 0, total: 0 });
+        } else {
+          onClose(); 
+        }
+      }
       if (e.key === 'F2') {
          e.preventDefault();
          setGridItems(prev => [...prev, { id: Date.now(), itemNo: '', desc: '', unit: 'PCS', qty: 1, price: 0, discountPercent: 0, discountAmt: 0, total: 0, includeTax: true, tax: 0, net: 0 }]);
@@ -101,7 +112,7 @@ const AdvancedSalesTerminal = ({ onClose }) => {
     };
     window.addEventListener('keydown', handleGlobalKey);
     return () => window.removeEventListener('keydown', handleGlobalKey);
-  }, [onClose, gridItems, totals, invoiceData, customerData]);
+  }, [onClose, gridItems, totals, invoiceData, customerData, receipt]);
 
   const handleGridChange = (index, field, value) => {
     const newItems = [...gridItems];
@@ -197,7 +208,19 @@ const AdvancedSalesTerminal = ({ onClose }) => {
          setInvoiceData(prev => ({ ...prev, invoiceNo: res.data.invoiceNumber || res.data._id.substring(res.data._id.length - 6) }));
       }
       
-      alert("Wholesale Checkout Successful! You can now press F11 to print the invoice.");
+      setReceipt({ 
+        ...saleData, 
+        id: res.data?._id || 'OFFLINE-' + Date.now(), 
+        createdAt: new Date().toISOString(), 
+        items: items.map(item => ({
+          name: products.find(p => p.id === item.productId || p._id === item.productId)?.name || 'Unknown',
+          quantity: item.quantity,
+          price: item.price
+        })), 
+        cashTendered: isCredit ? 0 : totals.netWithTaxes,
+        changeDue: 0,
+        offline: false
+      });
       
     } catch (err) {
       console.error(err);
@@ -208,79 +231,9 @@ const AdvancedSalesTerminal = ({ onClose }) => {
   };
 
   const handlePrint = () => {
-    let itemsHTML = '';
-    gridItems.forEach((item, index) => {
-      if (item.desc || item.itemNo) {
-        itemsHTML += `
-          <tr>
-            <td style="padding: 6px; border-bottom: 1px solid #e2e8f0;">${index + 1}</td>
-            <td style="padding: 6px; border-bottom: 1px solid #e2e8f0;">${item.itemNo}</td>
-            <td style="padding: 6px; border-bottom: 1px solid #e2e8f0;">${item.desc}</td>
-            <td style="padding: 6px; border-bottom: 1px solid #e2e8f0;">${item.unit}</td>
-            <td style="padding: 6px; border-bottom: 1px solid #e2e8f0; text-align: right;">${item.qty}</td>
-            <td style="padding: 6px; border-bottom: 1px solid #e2e8f0; text-align: right;">${Number(item.price).toFixed(2)}</td>
-            <td style="padding: 6px; border-bottom: 1px solid #e2e8f0; text-align: right;">${Number(item.discountAmt).toFixed(2)}</td>
-            <td style="padding: 6px; border-bottom: 1px solid #e2e8f0; text-align: right;">${Number(item.tax).toFixed(2)}</td>
-            <td style="padding: 6px; border-bottom: 1px solid #e2e8f0; text-align: right; font-weight: bold;">${Number(item.net).toFixed(2)}</td>
-          </tr>
-        `;
-      }
-    });
-
-    const printContent = `
-      <div style="font-family: Arial, sans-serif; max-width: 800px; margin: 0 auto; color: #0f172a;">
-        <div style="text-align: center; margin-bottom: 30px;">
-          <h1 style="color: #1e3a8a; margin: 0; font-size: 28px;">TAX INVOICE</h1>
-          <p style="margin: 4px 0; color: #64748b; font-weight: bold;">Wholesale Division</p>
-        </div>
-        
-        <div style="display: flex; justify-content: space-between; margin-bottom: 30px; border-bottom: 2px solid #cbd5e1; padding-bottom: 20px;">
-          <div style="line-height: 1.6;">
-            <strong>Invoice No:</strong> ${invoiceData.invoiceNo || 'DRAFT'}<br/>
-            <strong>Date:</strong> ${invoiceData.date}<br/>
-            <strong>Type:</strong> ${invoiceData.type}
-          </div>
-          <div style="line-height: 1.6; text-align: right;">
-            <strong>Customer:</strong> ${customerData.customer?.name || 'Walk-in'}<br/>
-            <strong>Phone:</strong> ${customerData.tel || '-'}<br/>
-            <strong>Tax No:</strong> ${customerData.taxNo || '-'}
-          </div>
-        </div>
-        
-        <table style="width: 100%; border-collapse: collapse; font-size: 13px; margin-bottom: 40px;">
-          <thead>
-            <tr style="background: #f1f5f9; border-bottom: 2px solid #94a3b8;">
-              <th style="padding: 10px 6px; text-align: left; color: #334155;">#</th>
-              <th style="padding: 10px 6px; text-align: left; color: #334155;">Item No</th>
-              <th style="padding: 10px 6px; text-align: left; color: #334155;">Description</th>
-              <th style="padding: 10px 6px; text-align: left; color: #334155;">Unit</th>
-              <th style="padding: 10px 6px; text-align: right; color: #334155;">Qty</th>
-              <th style="padding: 10px 6px; text-align: right; color: #334155;">Price</th>
-              <th style="padding: 10px 6px; text-align: right; color: #334155;">Disc</th>
-              <th style="padding: 10px 6px; text-align: right; color: #334155;">Tax</th>
-              <th style="padding: 10px 6px; text-align: right; color: #334155;">Net Total</th>
-            </tr>
-          </thead>
-          <tbody>
-            ${itemsHTML}
-          </tbody>
-        </table>
-
-        <div style="display: flex; justify-content: flex-end;">
-          <div style="width: 300px; border: 1px solid #cbd5e1; padding: 20px; border-radius: 8px; background: #f8fafc;">
-            <div style="display: flex; justify-content: space-between; margin-bottom: 12px; font-size: 14px; color: #475569;">
-              <span>Subtotal:</span> <strong>SAR ${totals.sTotal.toFixed(2)}</strong>
-            </div>
-            <div style="display: flex; justify-content: space-between; margin-bottom: 16px; font-size: 14px; color: #475569;">
-              <span>Taxes (VAT):</span> <strong>SAR ${totals.totalTaxes.toFixed(2)}</strong>
-            </div>
-            <div style="display: flex; justify-content: space-between; font-size: 18px; border-top: 2px solid #cbd5e1; padding-top: 16px; margin-top: 8px;">
-              <span style="color: #0f172a; font-weight: bold;">Net Total:</span> <strong style="color: #1e3a8a;">SAR ${totals.netWithTaxes.toFixed(2)}</strong>
-            </div>
-          </div>
-        </div>
-      </div>
-    `;
+    if (!document.getElementById('printable-invoice')) return;
+    const printContent = document.getElementById('printable-invoice').innerHTML;
+    
     const printContainer = document.createElement('div');
     printContainer.id = 'print-container';
     printContainer.innerHTML = printContent;
@@ -535,6 +488,137 @@ const AdvancedSalesTerminal = ({ onClose }) => {
         </div>
 
       </div>
+
+      {/* Receipt Modal */}
+      {receipt && (
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20 }}>
+          <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} 
+            style={{ background: 'var(--bg-panel)', width: '100%', maxWidth: 450, padding: 32, borderRadius: 32, maxHeight: '90vh', display: 'flex', flexDirection: 'column', position: 'relative' }}>
+            <button onClick={() => setReceipt(null)} style={{ position: 'absolute', top: 12, right: 12, background: 'transparent', border: 'none', cursor: 'pointer' }}>
+              <X size={20} color='var(--text-muted)' />
+            </button>
+            {receipt.offline && (
+              <div style={{ background: '#fef3c7', padding: 10, borderRadius: 10, marginBottom: 16, display: 'flex', alignItems: 'center', gap: 8, fontSize: 13, fontWeight: 700, color: '#92400e' }}>
+                <WifiOff size={14} /> Saved offline — will sync when connection restored
+              </div>
+            )}
+            <div id="printable-invoice" style={{ flex: 1, overflowY: 'auto', paddingRight: 8, direction: 'ltr' }}>
+              <div style={{ textAlign: 'center', marginBottom: 20 }}>
+                {/* Simulated BTG Logo */}
+                <div style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: 60, height: 60, borderRadius: '50%', background: '#0a84ff', color: '#fff', fontSize: 24, fontWeight: 900, letterSpacing: -1, marginBottom: 12 }}>BTG</div>
+                <h2 style={{ fontSize: 18, fontWeight: 900, margin: '0 0 4px', textTransform: 'uppercase' }}>Tax Invoice / فاتورة ضريبية</h2>
+                <div style={{ fontSize: 12, color: 'var(--text-muted)', lineHeight: 1.5, fontWeight: 600 }}>
+                  Txn: {receipt.id?.split('-')[0]?.toUpperCase()}<br/>
+                  Cashier: {receipt.cashierName || 'Staff'}<br/>
+                  Date: {new Date(receipt.createdAt).toLocaleString()}
+                </div>
+              </div>
+              
+              {(receipt.customerName || receipt.customerPhone || receipt.customerId) && (
+                <div style={{ marginBottom: 16, padding: '12px 16px', background: '#f8fafc', borderRadius: 12, border: '1px solid #e2e8f0', display: 'flex', flexDirection: 'column', gap: 4 }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <span style={{ fontSize: 11, fontWeight: 800, color: '#94a3b8', textTransform: 'uppercase' }}>Customer / العميل</span>
+                  </div>
+                  <div style={{ fontSize: 13, fontWeight: 800, color: 'var(--text-main)', display: 'flex', alignItems: 'center', gap: 6 }}><User size={14} /> {receipt.customerName || 'Customer'}</div>
+                  {receipt.customerPhone && <div style={{ fontSize: 12, color: 'var(--text-muted)', fontWeight: 600, display: 'flex', alignItems: 'center', gap: 6 }}><Phone size={12} /> {receipt.customerPhone}</div>}
+                </div>
+              )}
+
+              <div style={{ borderTop: '2px dashed #cbd5e1', borderBottom: '2px dashed #cbd5e1', padding: '16px 0', margin: '16px 0' }}>
+                <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1fr', gap: 10, fontSize: 11, fontWeight: 900, color: '#64748b', textTransform: 'uppercase', paddingBottom: 8, borderBottom: '1px solid #e2e8f0', marginBottom: 8 }}>
+                  <span>Item / الصنف</span>
+                  <span style={{ textAlign: 'center' }}>Qty / الكمية</span>
+                  <span style={{ textAlign: 'right' }}>Total / المجموع</span>
+                </div>
+                {receipt.items?.map((item, idx) => (
+                  <div key={idx} style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1fr', gap: 10, fontSize: 13, paddingBottom: 8, paddingTop: 8, borderBottom: '1px dashed #f1f5f9' }}>
+                    <div>
+                      <div style={{ fontWeight: 800, color: 'var(--text-main)' }}>{item.name}</div>
+                      {item.nameAr && <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--text-muted)', direction: 'rtl' }}>{item.nameAr}</div>}
+                    </div>
+                    <div style={{ textAlign: 'center', fontWeight: 700 }}>{item.quantity}</div>
+                    <div style={{ textAlign: 'right', fontWeight: 800 }}>SAR {(item.price * item.quantity).toFixed(2)}</div>
+                  </div>
+                ))}
+                
+                <div style={{ marginTop: 24, display: 'flex', justifyContent: 'center' }}>
+                  <Barcode value={receipt.id} width={1.5} height={40} fontSize={12} background="transparent" />
+                </div>
+              </div>
+
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginBottom: 24, padding: '0 8px' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 14, color: 'var(--text-muted)', fontWeight: 700 }}>
+                  <span>Subtotal <span style={{ fontSize: 11, opacity: 0.7, marginLeft: 4 }}>المجموع الفرعي</span></span><span>SAR {parseFloat(receipt.totalAmount || 0).toFixed(2)}</span>
+                </div>
+                {parseFloat(receipt.discount) > 0 && (
+                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 14, color: '#ef4444', fontWeight: 800 }}>
+                    <span>Discount <span style={{ fontSize: 11, opacity: 0.7, marginLeft: 4 }}>الخصم</span></span><span>-SAR {parseFloat(receipt.discount).toFixed(2)}</span>
+                  </div>
+                )}
+                {parseFloat(receipt.extraCharges) > 0 && (
+                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 14, color: '#0a84ff', fontWeight: 800 }}>
+                    <span>Extra <span style={{ fontSize: 11, opacity: 0.7, marginLeft: 4 }}>إضافي</span></span><span>+SAR {parseFloat(receipt.extraCharges).toFixed(2)}</span>
+                  </div>
+                )}
+                {parseFloat(receipt.tax) > 0 && (
+                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 14, color: 'var(--text-muted)', fontWeight: 700 }}>
+                    <span>VAT 15% <span style={{ fontSize: 11, opacity: 0.7, marginLeft: 4 }}>ضريبة القيمة المضافة</span></span><span>+SAR {parseFloat(receipt.tax).toFixed(2)}</span>
+                  </div>
+                )}
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: 20, color: 'var(--text-main)', fontWeight: 900, marginTop: 12, paddingTop: 12, borderTop: '2px solid #e2e8f0' }}>
+                  <div style={{ display: 'flex', flexDirection: 'column' }}>
+                    <span>Grand Total</span>
+                    <span style={{ fontSize: 13, color: 'var(--text-muted)', direction: 'rtl' }}>الإجمالي النهائي</span>
+                  </div>
+                  <span>SAR {parseFloat(receipt.grandTotal || 0).toFixed(2)}</span>
+                </div>
+              </div>
+
+              <div style={{ background: '#f8fafc', border: '1px solid #e2e8f0', padding: 16, borderRadius: 16, fontSize: 13 }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8, fontWeight: 700 }}>
+                  <span style={{ color: 'var(--text-muted)' }}>Payment Method <span style={{ fontSize: 11, marginLeft: 4 }}>طريقة الدفع</span></span>
+                  <span style={{ textTransform: 'capitalize', color: 'var(--text-main)', fontWeight: 900 }}>{receipt.paymentMethod === 'credit' ? 'Credit / أجل' : (receipt.paymentMethod === 'card' ? 'Card / بطاقة' : 'Cash / نقداً')}</span>
+                </div>
+                {receipt.creditReason && (
+                  <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 4, fontWeight: 600, fontSize: 12 }}>
+                    <span style={{ color: 'var(--text-muted)' }}>Credit Reason</span>
+                    <span style={{ color: '#d97706' }}>{receipt.creditReason}</span>
+                  </div>
+                )}
+                {receipt.paymentMethod === 'cash' && (
+                  <>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 6, fontWeight: 700 }}>
+                      <span style={{ color: 'var(--text-muted)' }}>Tendered <span style={{ fontSize: 11, marginLeft: 4 }}>المدفوع</span></span>
+                      <span style={{ color: 'var(--text-main)' }}>SAR {parseFloat(receipt.cashTendered || 0).toFixed(2)}</span>
+                    </div>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', fontWeight: 900, fontSize: 14 }}>
+                      <span style={{ color: 'var(--text-muted)' }}>Change <span style={{ fontSize: 11, marginLeft: 4 }}>الباقي</span></span>
+                      <span style={{ color: '#16a34a' }}>SAR {parseFloat(receipt.changeDue || 0).toFixed(2)}</span>
+                    </div>
+                  </>
+                )}
+              </div>
+              <div style={{ textAlign: 'center', marginTop: 32, paddingBottom: 16 }}>
+                <div style={{ fontWeight: 800, color: 'var(--text-main)', fontSize: 14, marginBottom: 4 }}>Thank you for your business!</div>
+                <div style={{ fontWeight: 700, color: 'var(--text-muted)', fontSize: 13, direction: 'rtl' }}>شكراً لتعاملكم معنا!</div>
+              </div>
+            </div>
+
+            <div style={{ display: 'flex', gap: 12, marginTop: 20 }}>
+              <button onClick={handlePrint} style={{ flex: 1, padding: 14, borderRadius: 16, background: '#f1f5f9', border: 'none', fontWeight: 800, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
+                <Printer size={18} /> Print Invoice (F11)
+              </button>
+              <button onClick={() => {
+                setReceipt(null);
+                setGridItems([{ id: Date.now(), itemNo: '', desc: '', unit: 'PCS', qty: 1, price: 0, discountPercent: 0, discountAmt: 0, total: 0, includeTax: true, tax: 0, net: 0 }]);
+                setTotals({ sTotal: 0, totalQty: 0, additions: 0, totalTaxes: 0, netWithTaxes: 0, total: 0 });
+              }} style={{ flex: 1, padding: 14, borderRadius: 16, background: '#0a84ff', color: 'var(--bg-panel)', border: 'none', fontWeight: 800, cursor: 'pointer' }}>
+                New Sale (Esc)
+              </button>
+            </div>
+          </motion.div>
+        </div>
+      )}
 
     </div>
   );
