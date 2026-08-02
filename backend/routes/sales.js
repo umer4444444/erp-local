@@ -329,8 +329,11 @@ router.get('/eod', auth, async (req, res) => {
       acc.total += parseFloat(s.grandTotal);
       acc.cash += parseFloat(s.cashAmount);
       acc.card += parseFloat(s.cardAmount);
+      if (s.paymentMethod === 'credit') {
+        acc.credit += parseFloat(s.grandTotal);
+      }
       return acc;
-    }, { total: 0, cash: 0, card: 0 });
+    }, { total: 0, cash: 0, card: 0, credit: 0 });
     res.json(summary);
   } catch (err) {
     res.status(500).json({ message: err.message });
