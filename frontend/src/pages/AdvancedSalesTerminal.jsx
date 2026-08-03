@@ -249,7 +249,7 @@ const AdvancedSalesTerminal = ({ isActive = true, onClose, tabs = [], activeTabI
   };
 
   return (
-    <div style={{ position: 'relative', height: '100%', flex: 1, zIndex: 100, background: '#e2e8f0', display: 'flex', flexDirection: 'column', fontFamily: 'Arial, sans-serif', overflow: 'hidden' }}>
+    <div style={{ position: 'fixed', inset: 0, zIndex: 10000, background: '#e2e8f0', display: 'flex', flexDirection: 'column', fontFamily: 'Arial, sans-serif' }}>
       
       {/* HEADER SECTION */}
       <div style={{ background: '#cbd5e1', padding: '4px', borderBottom: '2px solid #94a3b8', display: 'flex', gap: 4, alignItems: 'center' }}>

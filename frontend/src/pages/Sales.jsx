@@ -541,7 +541,7 @@ const Sales = ({ isActive = true, tabs = [], activeTabId, onTabClick, onCloseTab
   }
 
   return (
-    <div style={{ position: 'relative', display: 'grid', gridTemplateColumns: `${leftPanelWidth}px 6px 1fr`, height: '100%', background: '#f1f5f9', overflow: 'hidden', flex: 1 }}>
+    <div style={{ position: 'fixed', inset: 0, zIndex: 9999, display: 'grid', gridTemplateColumns: `${leftPanelWidth}px 6px 1fr`, height: '100vh', background: '#f1f5f9', overflow: 'hidden' }}>
       {/* Left Side: Cart & Checkout (Centered & Larger) */}
       <div style={{ background: 'var(--bg-panel)', borderRight: '1px solid #e2e8f0', display: 'flex', flexDirection: 'column', overflowY: 'auto' }}>
         <div style={{ padding: '24px 28px', borderBottom: '1px solid #f1f5f9' }}>
