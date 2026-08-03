@@ -1076,6 +1076,18 @@ const Sales = ({ isActive = true, tabs = [], activeTabId, onTabClick, onCloseTab
                 <span style={{ fontWeight: 900, color: '#0a84ff', background: '#eff6ff', padding: '4px 10px', borderRadius: 8 }}>F4</span>
               </div>
               <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid #f1f5f9', paddingBottom: 10 }}>
+                <span style={{ fontWeight: 700, color: 'var(--text-main)' }}>Next Sale Tab</span>
+                <span style={{ fontWeight: 900, color: '#10b981', background: '#d1fae5', padding: '4px 10px', borderRadius: 8 }}>F6</span>
+              </div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid #f1f5f9', paddingBottom: 10 }}>
+                <span style={{ fontWeight: 700, color: 'var(--text-main)' }}>New Sale Tab</span>
+                <span style={{ fontWeight: 900, color: '#10b981', background: '#d1fae5', padding: '4px 10px', borderRadius: 8 }}>F7</span>
+              </div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid #f1f5f9', paddingBottom: 10 }}>
+                <span style={{ fontWeight: 700, color: 'var(--text-main)' }}>Jump to Sale Tab (1-9)</span>
+                <span style={{ fontWeight: 900, color: '#10b981', background: '#d1fae5', padding: '4px 10px', borderRadius: 8 }}>Alt + 1..9</span>
+              </div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid #f1f5f9', paddingBottom: 10 }}>
                 <span style={{ fontWeight: 700, color: 'var(--text-main)' }}>Complete Payment</span>
                 <span style={{ fontWeight: 900, color: '#0a84ff', background: '#eff6ff', padding: '4px 10px', borderRadius: 8 }}>F8</span>
               </div>

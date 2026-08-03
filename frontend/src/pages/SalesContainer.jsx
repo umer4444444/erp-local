@@ -8,25 +8,63 @@ const SalesContainer = () => {
   const [tabCounter, setTabCounter] = useState(1);
 
   const handleAddTab = () => {
-    const newId = tabCounter + 1;
-    setTabCounter(newId);
-    setTabs([...tabs, { id: newId, title: `Sale ${newId}` }]);
-    setActiveTabId(newId);
+    setTabCounter(prev => {
+      const newId = prev + 1;
+      setTabs(currentTabs => [...currentTabs, { id: newId, title: `Sale ${newId}` }]);
+      setActiveTabId(newId);
+      return newId;
+    });
   };
 
   const handleCloseTab = (idToClose, e) => {
     e.stopPropagation();
-    if (tabs.length === 1) return; // Don't close the last tab
-    
-    // Check if the user wants to discard a tab (could add confirmation here later)
-    
-    const newTabs = tabs.filter(t => t.id !== idToClose);
-    setTabs(newTabs);
-    
-    if (activeTabId === idToClose) {
-      setActiveTabId(newTabs[newTabs.length - 1].id);
-    }
+    setTabs(currentTabs => {
+      if (currentTabs.length === 1) return currentTabs;
+      const newTabs = currentTabs.filter(t => t.id !== idToClose);
+      if (activeTabId === idToClose) {
+        setActiveTabId(newTabs[newTabs.length - 1].id);
+      }
+      return newTabs;
+    });
   };
+
+  React.useEffect(() => {
+    const handleGlobalKey = (e) => {
+      // Direct jump with Alt + 1, 2, 3...
+      if (e.altKey && e.key >= '1' && e.key <= '9') {
+        e.preventDefault();
+        const index = parseInt(e.key) - 1;
+        setTabs(currentTabs => {
+          if (index < currentTabs.length) {
+            setActiveTabId(currentTabs[index].id);
+          }
+          return currentTabs;
+        });
+      }
+      
+      // Cycle tabs with F6
+      if (e.key === 'F6') {
+        e.preventDefault();
+        setTabs(currentTabs => {
+          const currentIndex = currentTabs.findIndex(t => t.id === activeTabId);
+          if (currentIndex >= 0 && currentTabs.length > 1) {
+            const nextIndex = (currentIndex + 1) % currentTabs.length;
+            setActiveTabId(currentTabs[nextIndex].id);
+          }
+          return currentTabs;
+        });
+      }
+
+      // Add new tab with F7
+      if (e.key === 'F7') {
+        e.preventDefault();
+        handleAddTab();
+      }
+    };
+
+    window.addEventListener('keydown', handleGlobalKey);
+    return () => window.removeEventListener('keydown', handleGlobalKey);
+  }, [activeTabId]); // Re-bind when activeTabId changes so F6 knows current tab
 
   return (
     <div style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
