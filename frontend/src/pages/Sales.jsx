@@ -86,7 +86,7 @@ const ProductCard = React.memo(({ product, onAdd }) => (
   </motion.div>
 ));
 
-const Sales = () => {
+const Sales = ({ isActive = true }) => {
   const navigate = useNavigate();
   const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
   const [products, setProducts] = useState([]);
@@ -129,22 +129,32 @@ const Sales = () => {
   const cartRef = useRef(cart);
   const productsRef = useRef(products);
   const [selectedCartIndex, setSelectedCartIndex] = useState(-1);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => { cartRef.current = cart; }, [cart]);
   useEffect(() => { productsRef.current = products; }, [products]);
+  useEffect(() => { setTimeout(() => { setLoading(false); }, 1500); }, []);
+
+  useEffect(() => {
+    if (isActive && !loading && !receipt) {
+      setTimeout(() => searchRef.current?.focus(), 100);
+    }
+  }, [isActive, loading, receipt]);
 
   const handleMouseMove = useCallback((e) => {
+    if (!isActive) return;
     if (!isDragging.current) return;
     let newWidth = e.clientX;
     if (newWidth < 350) newWidth = 350;
     if (newWidth > window.innerWidth * 0.7) newWidth = window.innerWidth * 0.7;
     setLeftPanelWidth(newWidth);
-  }, []);
+  }, [isActive]);
 
   const handleMouseUp = useCallback(() => {
+    if (!isActive) return;
     isDragging.current = false;
     document.body.style.cursor = 'default';
-  }, []);
+  }, [isActive]);
 
   useEffect(() => {
     window.addEventListener('mousemove', handleMouseMove);
@@ -380,7 +390,8 @@ const Sales = () => {
 
   useEffect(() => {
     const handleGlobalKey = (e) => {
-      if (pricingMode === 'wholesale') return; // Let AdvancedSalesTerminal handle its own hotkeys
+      if (!isActive) return;
+      if (pricingMode === 'wholesale') return; 
       
       const isInput = e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || e.target.tagName === 'SELECT';
 
@@ -467,7 +478,7 @@ const Sales = () => {
     
     window.addEventListener('keydown', handleGlobalKey);
     return () => window.removeEventListener('keydown', handleGlobalKey);
-  }, [selectedCartIndex, receipt, showKeyboardShortcuts, unknownBarcode, addToCart, removeFromCart, updateQty, handleCheckout, pricingMode]);
+  }, [isActive, selectedCartIndex, receipt, showKeyboardShortcuts, unknownBarcode, addToCart, removeFromCart, updateQty, handleCheckout, pricingMode]);
 
   const handleQuickAddProduct = async () => {
     if (!newProductName || !newProductPrice) return;
@@ -518,7 +529,7 @@ const Sales = () => {
   };
 
   if (pricingMode === 'wholesale') {
-    return <AdvancedSalesTerminal onClose={() => setPricingMode('retail')} />;
+    return <AdvancedSalesTerminal isActive={isActive} onClose={() => setPricingMode('retail')} />;
   }
 
   return (

@@ -6,7 +6,7 @@ import { AnimatePresence, motion } from 'framer-motion';
 import Sidebar from './components/Sidebar';
 import Dashboard from './pages/Dashboard';
 import Inventory from './pages/Inventory';
-import Sales from './pages/Sales';
+import SalesContainer from './pages/SalesContainer';
 import SalesHistory from './pages/SalesHistory';
 import HR from './pages/HR';
 import Employees from './pages/Employees';
@@ -132,7 +132,7 @@ function AppContent() {
               <Route path="/" element={<PrivateRoute roles={['admin', 'superadmin', 'owner', 'company_admin']}><PageTransition><Dashboard user={user} /></PageTransition></PrivateRoute>} />
               <Route path="/manager" element={<PrivateRoute roles={['admin', 'manager']}><PageTransition><Manager /></PageTransition></PrivateRoute>} />
               <Route path="/inventory" element={<PrivateRoute roles={['admin', 'inventory', 'manager']}><PageTransition><Inventory user={user} /></PageTransition></PrivateRoute>} />
-              <Route path="/sales" element={<PrivateRoute roles={['admin', 'cashier', 'manager']}><PageTransition><Sales /></PageTransition></PrivateRoute>} />
+              <Route path="/sales" element={<PrivateRoute roles={['admin', 'manager', 'sales', 'cashier']}><PageTransition><SalesContainer /></PageTransition></PrivateRoute>} />
               <Route path="/sales/history" element={<PrivateRoute roles={['admin', 'cashier', 'manager']}><PageTransition><SalesHistory /></PageTransition></PrivateRoute>} />
               <Route path="/revenue" element={<PrivateRoute roles={['admin', 'manager', 'finance']}><PageTransition><Revenue /></PageTransition></PrivateRoute>} />
               <Route path="/hr" element={<PrivateRoute roles={['admin', 'hr']}><PageTransition><HR /></PageTransition></PrivateRoute>} />

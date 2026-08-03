@@ -9,7 +9,7 @@ import Barcode from 'react-barcode';
 import { useNavigate } from 'react-router-dom';
 import { salesAPI, inventoryAPI, customerAPI } from '../api';
 
-const AdvancedSalesTerminal = ({ onClose }) => {
+const AdvancedSalesTerminal = ({ onClose, isActive = true }) => {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('Invoice Details');
   const [activeCustomerTab, setActiveCustomerTab] = useState('Customer Data');
@@ -86,6 +86,7 @@ const AdvancedSalesTerminal = ({ onClose }) => {
 
   useEffect(() => {
     const handleGlobalKey = (e) => {
+      if (!isActive) return;
       if (e.key === 'Escape') { 
         e.preventDefault(); 
         if (receipt) {
@@ -112,7 +113,7 @@ const AdvancedSalesTerminal = ({ onClose }) => {
     };
     window.addEventListener('keydown', handleGlobalKey);
     return () => window.removeEventListener('keydown', handleGlobalKey);
-  }, [onClose, gridItems, totals, invoiceData, customerData, receipt]);
+  }, [isActive, onClose, gridItems, totals, invoiceData, customerData, receipt]);
 
   const handleGridChange = (index, field, value) => {
     const newItems = [...gridItems];
