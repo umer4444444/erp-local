@@ -128,7 +128,10 @@ const SalesContainer = () => {
               width: '100%'
             }}
           >
-            <Sales isActive={tab.id === activeTabId} />
+            <Sales 
+              isActive={tab.id === activeTabId} 
+              onAddTab={handleAddTab}
+            />
           </div>
         ))}
       </div>
