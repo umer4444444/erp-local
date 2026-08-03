@@ -39,7 +39,10 @@ const SalesContainer = () => {
         padding: '8px 16px',
         gap: '8px',
         overflowX: 'auto',
-        flexShrink: 0
+        flexShrink: 0,
+        position: 'sticky',
+        top: 0,
+        zIndex: 100
       }}>
         {tabs.map((tab) => {
           const isActive = tab.id === activeTabId;
