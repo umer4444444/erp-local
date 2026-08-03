@@ -96,17 +96,21 @@ const SalesContainer = () => {
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            padding: '8px',
+            padding: '8px 16px',
             borderRadius: '8px',
-            background: 'transparent',
-            border: '1px dashed var(--text-muted)',
-            color: 'var(--text-muted)',
+            background: '#10b981', // green color to stand out
+            border: 'none',
+            color: '#ffffff',
+            fontWeight: 800,
+            fontSize: '14px',
             cursor: 'pointer',
-            marginLeft: '8px'
+            marginLeft: '8px',
+            gap: '6px'
           }}
           title="New Tab"
         >
-          <Plus size={20} />
+          <Plus size={18} strokeWidth={3} />
+          Add Cart
         </button>
       </div>
 
