@@ -30,94 +30,6 @@ const SalesContainer = () => {
 
   return (
     <div style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
-      {/* Tab Bar */}
-      <div style={{ 
-        display: 'flex', 
-        alignItems: 'center', 
-        background: 'var(--bg-panel)', 
-        borderBottom: '1px solid var(--border-color)', 
-        padding: '8px 16px',
-        gap: '8px',
-        overflowX: 'auto',
-        flexShrink: 0,
-        position: 'sticky',
-        top: 0,
-        zIndex: 100
-      }}>
-        {tabs.map((tab) => {
-          const isActive = tab.id === activeTabId;
-          return (
-            <div 
-              key={tab.id}
-              onClick={() => setActiveTabId(tab.id)}
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '8px',
-                padding: '8px 16px',
-                background: isActive ? '#0a84ff' : 'var(--bg-main)',
-                color: isActive ? '#ffffff' : 'var(--text-main)',
-                borderRadius: '8px',
-                cursor: 'pointer',
-                fontWeight: isActive ? 800 : 600,
-                fontSize: '14px',
-                transition: 'all 0.2s',
-                minWidth: '120px',
-                justifyContent: 'space-between',
-                border: isActive ? 'none' : '1px solid var(--border-color)'
-              }}
-            >
-              <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                <ShoppingCart size={16} />
-                <span>{tab.title}</span>
-              </div>
-              {tabs.length > 1 && (
-                <div 
-                  onClick={(e) => handleCloseTab(tab.id, e)}
-                  style={{ 
-                    padding: '2px', 
-                    borderRadius: '50%', 
-                    display: 'flex', 
-                    alignItems: 'center', 
-                    justifyContent: 'center',
-                    background: isActive ? 'rgba(255,255,255,0.2)' : 'transparent',
-                    color: isActive ? '#fff' : 'var(--text-muted)',
-                  }}
-                  onMouseEnter={e => e.currentTarget.style.background = isActive ? 'rgba(255,255,255,0.4)' : '#e2e8f0'}
-                  onMouseLeave={e => e.currentTarget.style.background = isActive ? 'rgba(255,255,255,0.2)' : 'transparent'}
-                >
-                  <X size={14} />
-                </div>
-              )}
-            </div>
-          );
-        })}
-        
-        <button 
-          onClick={handleAddTab}
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            padding: '8px 16px',
-            borderRadius: '8px',
-            background: '#10b981', // green color to stand out
-            border: 'none',
-            color: '#ffffff',
-            fontWeight: 800,
-            fontSize: '14px',
-            cursor: 'pointer',
-            marginLeft: '8px',
-            gap: '6px'
-          }}
-          title="New Tab"
-        >
-          <Plus size={18} strokeWidth={3} />
-          Add Cart
-        </button>
-      </div>
-
-      {/* Render all tabs, but hide inactive ones */}
       <div style={{ flex: 1, position: 'relative' }}>
         {tabs.map(tab => (
           <div 
@@ -130,6 +42,10 @@ const SalesContainer = () => {
           >
             <Sales 
               isActive={tab.id === activeTabId} 
+              tabs={tabs}
+              activeTabId={activeTabId}
+              onTabClick={setActiveTabId}
+              onCloseTab={handleCloseTab}
               onAddTab={handleAddTab}
             />
           </div>

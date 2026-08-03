@@ -86,7 +86,7 @@ const ProductCard = React.memo(({ product, onAdd }) => (
   </motion.div>
 ));
 
-const Sales = ({ isActive = true }) => {
+const Sales = ({ isActive = true, tabs = [], activeTabId, onTabClick, onCloseTab, onAddTab }) => {
   const navigate = useNavigate();
   const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
   const [products, setProducts] = useState([]);
@@ -529,7 +529,15 @@ const Sales = ({ isActive = true }) => {
   };
 
   if (pricingMode === 'wholesale') {
-    return <AdvancedSalesTerminal isActive={isActive} onClose={() => setPricingMode('retail')} />;
+    return <AdvancedSalesTerminal 
+      isActive={isActive} 
+      onClose={() => setPricingMode('retail')} 
+      tabs={tabs}
+      activeTabId={activeTabId}
+      onTabClick={onTabClick}
+      onCloseTab={onCloseTab}
+      onAddTab={onAddTab}
+    />;
   }
 
   return (
@@ -859,6 +867,29 @@ const Sales = ({ isActive = true }) => {
             <p style={{ color: 'var(--text-muted)', fontWeight: 600 }}>Process orders and manage transactions.</p>
           </div>
           <div style={{ display: 'flex', gap: 12 }}>
+            {tabs && tabs.length > 0 && (
+              <div style={{ display: 'flex', gap: 8, background: 'var(--bg-panel)', padding: 4, borderRadius: 16, border: '1px solid #e2e8f0' }}>
+                {tabs.map(tab => (
+                  <button 
+                    key={tab.id}
+                    onClick={() => onTabClick && onTabClick(tab.id)}
+                    style={{ padding: '8px 16px', borderRadius: 12, border: 'none', background: tab.id === activeTabId ? '#0a84ff' : 'transparent', color: tab.id === activeTabId ? '#fff' : 'var(--text-main)', fontWeight: 800, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 6 }}
+                  >
+                    Sale {tab.id}
+                    {tabs.length > 1 && (
+                      <X size={14} onClick={(e) => { e.stopPropagation(); onCloseTab && onCloseTab(tab.id, e); }} style={{ color: tab.id === activeTabId ? '#fff' : 'var(--text-muted)' }} />
+                    )}
+                  </button>
+                ))}
+                <button 
+                  onClick={onAddTab}
+                  style={{ padding: '8px 16px', borderRadius: 12, border: 'none', background: '#10b981', color: '#fff', fontWeight: 800, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 4 }}
+                >
+                  <Plus size={16} strokeWidth={3} /> Add Cart
+                </button>
+              </div>
+            )}
+            
             <button onClick={() => setShowKeyboardShortcuts(true)} style={{ padding: '12px 20px', borderRadius: 14, border: '1px solid #e2e8f0', background: 'var(--bg-panel)', fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 8 }}>
               Shortcuts
             </button>

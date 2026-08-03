@@ -9,7 +9,7 @@ import Barcode from 'react-barcode';
 import { useNavigate } from 'react-router-dom';
 import { salesAPI, inventoryAPI, customerAPI } from '../api';
 
-const AdvancedSalesTerminal = ({ onClose, isActive = true }) => {
+const AdvancedSalesTerminal = ({ isActive = true, onClose, tabs = [], activeTabId, onTabClick, onCloseTab, onAddTab }) => {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('Invoice Details');
   const [activeCustomerTab, setActiveCustomerTab] = useState('Customer Data');
@@ -252,9 +252,32 @@ const AdvancedSalesTerminal = ({ onClose, isActive = true }) => {
     <div style={{ position: 'relative', height: '100%', flex: 1, zIndex: 100, background: '#e2e8f0', display: 'flex', flexDirection: 'column', fontFamily: 'Arial, sans-serif', overflow: 'hidden' }}>
       
       {/* HEADER SECTION */}
-      <div style={{ background: '#cbd5e1', padding: '4px', borderBottom: '2px solid #94a3b8', display: 'flex', gap: 4 }}>
+      <div style={{ background: '#cbd5e1', padding: '4px', borderBottom: '2px solid #94a3b8', display: 'flex', gap: 4, alignItems: 'center' }}>
         <button onClick={onClose} style={{ background: '#ef4444', color: 'white', border: '1px solid #b91c1c', padding: '4px 12px', fontWeight: 'bold', cursor: 'pointer', borderRadius: 4 }}>Close (Esc)</button>
         <span style={{ fontSize: 14, fontWeight: 'bold', padding: '4px 8px', color: '#1e293b' }}>Invoice Sales - Pro Mode</span>
+        
+        {tabs && tabs.length > 0 && (
+          <div style={{ display: 'flex', gap: 4, marginLeft: 'auto', background: '#94a3b8', padding: 2, borderRadius: 6 }}>
+            {tabs.map(tab => (
+              <button 
+                key={tab.id}
+                onClick={() => onTabClick && onTabClick(tab.id)}
+                style={{ padding: '2px 8px', borderRadius: 4, border: '1px solid #64748b', background: tab.id === activeTabId ? '#3b82f6' : '#e2e8f0', color: tab.id === activeTabId ? '#fff' : '#1e293b', fontWeight: 'bold', fontSize: 12, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 6 }}
+              >
+                Sale {tab.id}
+                {tabs.length > 1 && (
+                  <span onClick={(e) => { e.stopPropagation(); onCloseTab && onCloseTab(tab.id, e); }} style={{ color: tab.id === activeTabId ? '#fff' : '#ef4444', marginLeft: 4 }}>×</span>
+                )}
+              </button>
+            ))}
+            <button 
+              onClick={onAddTab}
+              style={{ padding: '2px 8px', borderRadius: 4, border: '1px solid #059669', background: '#10b981', color: '#fff', fontWeight: 'bold', fontSize: 12, cursor: 'pointer' }}
+            >
+              + Add Cart
+            </button>
+          </div>
+        )}
       </div>
 
       <div style={{ padding: '8px', display: 'flex', gap: 8, flexShrink: 0, background: '#f8fafc' }}>
