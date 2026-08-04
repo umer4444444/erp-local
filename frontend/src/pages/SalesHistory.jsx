@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Search, Filter, Printer, Eye, X, Calendar, User } from 'lucide-react';
+import { Search, Filter, Printer, Eye, X, Calendar, User, Upload } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { salesAPI } from '../api';
 
@@ -35,6 +35,91 @@ const SalesHistory = () => {
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleCSVImport = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    const inputEl = e.target;
+    const reader = new FileReader();
+    
+    reader.onload = async (event) => {
+      try {
+        const text = event.target.result;
+        const lines = text.split(/\r?\n/);
+        if (lines.length < 2) {
+          alert('CSV file is empty or invalid.');
+          inputEl.value = '';
+          return;
+        }
+
+        const parseCSVRow = (row) => {
+          const result = [];
+          let current = '';
+          let inQuotes = false;
+          for (let i = 0; i < row.length; i++) {
+            const ch = row[i];
+            if (ch === '"' || ch === "'") {
+              inQuotes = !inQuotes;
+            } else if (ch === ',' && !inQuotes) {
+              result.push(current.trim());
+              current = '';
+            } else {
+              current += ch;
+            }
+          }
+          result.push(current.trim());
+          return result;
+        };
+
+        const headers = parseCSVRow(lines[0]).map(h => h.toLowerCase().trim());
+        const importedSales = [];
+
+        for (let i = 1; i < lines.length; i++) {
+          const line = lines[i].trim();
+          if (!line) continue;
+          const values = parseCSVRow(line);
+          const rowData = {};
+          headers.forEach((h, index) => {
+            rowData[h] = (values[index] || '').trim();
+          });
+          
+          if (rowData.total || rowData.amount || rowData.grandtotal || rowData['grand total']) {
+            importedSales.push({
+              date: rowData.date || rowData.createdat || '',
+              customer: rowData.customer || rowData.customername || rowData['customer name'] || '',
+              total: rowData.total || rowData.amount || rowData.grandtotal || rowData['grand total'] || 0,
+              discount: rowData.discount || 0,
+              tax: rowData.tax || 0,
+              paymentMethod: rowData.paymentmethod || rowData['payment method'] || rowData.payment || 'cash',
+              notes: rowData.notes || 'Imported from CSV'
+            });
+          }
+        }
+
+        if (importedSales.length === 0) {
+          alert('No valid sales found. Please ensure your CSV has a "total" or "amount" column.');
+          inputEl.value = '';
+          return;
+        }
+
+        setLoading(true);
+        const res = await salesAPI.importCSV({ sales: importedSales });
+        alert(res.data.message || `Successfully imported ${importedSales.length} sales!`);
+        fetchHistory();
+      } catch (err) {
+        alert(err.response?.data?.message || 'Failed to import CSV. Check file format and try again.');
+      } finally {
+        setLoading(false);
+        inputEl.value = '';
+      }
+    };
+    
+    reader.onerror = () => {
+      alert('Failed to read the file. Please try again.');
+    };
+    reader.readAsText(file);
   };
 
   // Re-fetch when filters change (except search which is on Enter)
@@ -203,18 +288,20 @@ const SalesHistory = () => {
             </button>
             
             {showFilters && (
-              <div style={{ position: 'absolute', top: '100%', right: 0, marginTop: 8, background: 'var(--bg-panel)', borderRadius: 16, padding: 20, width: 300, boxShadow: '0 10px 40px var(--shadow-strong-rgb)', border: '1px solid #e2e8f0', zIndex: 100 }}>
-                <div style={{ marginBottom: 16 }}>
-                  <label style={{ display: 'block', fontSize: 12, fontWeight: 700, color: 'var(--text-muted)', marginBottom: 6 }}>Start Date</label>
-                  <input type="date" value={startDate} onChange={e => setStartDate(e.target.value)} style={{ width: '100%', padding: 10, borderRadius: 8, border: '1px solid #e2e8f0', fontFamily: 'inherit' }} />
+              <motion.div 
+                initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}
+                style={{ position: 'absolute', top: '100%', right: 0, marginTop: 12, background: 'var(--bg-panel)', padding: 24, borderRadius: 16, border: '1px solid #e2e8f0', boxShadow: '0 10px 25px rgba(0,0,0,0.05)', zIndex: 100, width: 320, display: 'flex', flexDirection: 'column', gap: 16 }}
+              >
+                <div>
+                  <label style={{ display: 'block', fontSize: 13, fontWeight: 700, color: 'var(--text-muted)', marginBottom: 8 }}>Date Range</label>
+                  <div style={{ display: 'flex', gap: 8 }}>
+                    <input type="date" value={startDate} onChange={e => setStartDate(e.target.value)} style={{ flex: 1, padding: 8, borderRadius: 8, border: '1px solid #e2e8f0' }} />
+                    <input type="date" value={endDate} onChange={e => setEndDate(e.target.value)} style={{ flex: 1, padding: 8, borderRadius: 8, border: '1px solid #e2e8f0' }} />
+                  </div>
                 </div>
-                <div style={{ marginBottom: 16 }}>
-                  <label style={{ display: 'block', fontSize: 12, fontWeight: 700, color: 'var(--text-muted)', marginBottom: 6 }}>End Date</label>
-                  <input type="date" value={endDate} onChange={e => setEndDate(e.target.value)} style={{ width: '100%', padding: 10, borderRadius: 8, border: '1px solid #e2e8f0', fontFamily: 'inherit' }} />
-                </div>
-                <div style={{ marginBottom: 16 }}>
-                  <label style={{ display: 'block', fontSize: 12, fontWeight: 700, color: 'var(--text-muted)', marginBottom: 6 }}>Status</label>
-                  <select value={statusFilter} onChange={e => setStatusFilter(e.target.value)} style={{ width: '100%', padding: 10, borderRadius: 8, border: '1px solid #e2e8f0', fontFamily: 'inherit' }}>
+                <div>
+                  <label style={{ display: 'block', fontSize: 13, fontWeight: 700, color: 'var(--text-muted)', marginBottom: 8 }}>Status</label>
+                  <select value={statusFilter} onChange={e => setStatusFilter(e.target.value)} style={{ width: '100%', padding: 8, borderRadius: 8, border: '1px solid #e2e8f0' }}>
                     <option value="">All Statuses</option>
                     <option value="active">Active</option>
                     <option value="voided">Voided</option>
@@ -222,15 +309,25 @@ const SalesHistory = () => {
                     <option value="held">Held</option>
                   </select>
                 </div>
-                <button 
-                  onClick={() => { setStartDate(''); setEndDate(''); setStatusFilter(''); setSearch(''); fetchHistory(); }}
-                  style={{ width: '100%', padding: 10, borderRadius: 8, background: '#f1f5f9', border: 'none', color: 'var(--text-muted)', fontWeight: 700, cursor: 'pointer' }}
-                >
+                <button onClick={() => { setStartDate(''); setEndDate(''); setStatusFilter(''); setSearch(''); fetchHistory(); }} style={{ padding: 10, borderRadius: 8, background: '#f1f5f9', border: 'none', fontWeight: 700, cursor: 'pointer', marginTop: 8 }}>
                   Clear Filters
                 </button>
-              </div>
+              </motion.div>
             )}
           </div>
+          <button 
+            onClick={() => document.getElementById('csv-upload').click()}
+            style={{ padding: '12px 24px', borderRadius: 14, background: '#10b981', color: 'white', border: 'none', fontWeight: 800, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 8 }}
+          >
+            <Upload size={18} /> Import CSV
+          </button>
+          <input 
+            id="csv-upload" 
+            type="file" 
+            accept=".csv" 
+            onChange={handleCSVImport} 
+            style={{ display: 'none' }} 
+          />
         </div>
       </header>
 

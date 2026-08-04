@@ -45,6 +45,7 @@ export const salesAPI = {
   applyPromo: (code) => API.post('/sales/discount', { code }),
   getEOD: () => API.get('/sales/eod'),
   closeEOD: (data) => API.post('/sales/eod/close', data),
+  importCSV: (data) => API.post('/sales/import', data),
 };
 
 export const customerAPI = {
